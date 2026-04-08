@@ -29,7 +29,7 @@ export default function Hero() {
   return (
     <section
       style={{ background: "linear-gradient(90deg, #6035b8 0%, #7c5cbf 100%)" }}
-      className="w-full min-h-[70vh] md:min-h-[80vh] lg:min-h-screen pb-16 md:pb-20 lg:pb-24"
+      className="w-full min-h-[50vh] md:min-h-[60vh] lg:min-h-screen pb-16 md:pb-20 lg:pb-24"
     >
       <div className="flex flex-col lg:flex-row items-center px-6 md:px-10 lg:px-16 pt-10 md:pt-14 lg:pt-16 gap-12">
 
@@ -66,7 +66,7 @@ export default function Hero() {
             <motion.div
               animate={{ y: [0, -8, 0] }}
               transition={{ repeat: Infinity, duration: 4 }}
-              className="bg-white rounded-2xl p-6 shadow-2xl"
+              className="bg-white rounded-2xl p-7 mt-10 shadow-2xl"
             >
 
               {/* FIELD ROW */}
@@ -80,25 +80,25 @@ export default function Hero() {
 
                     <button
                       onClick={() => setPeople(Math.max(1, people - 1))}
-                      className="px-2 bg-gray-200 rounded"
+                      className="px-2 bg-gray-400 rounded"
                     >-</button>
 
                     <span className="text-sm font-bold text-gray-900">{people}</span>
 
                     <button
                       onClick={() => setPeople(people + 1)}
-                      className="px-2 bg-gray-200 rounded"
+                      className="px-2 bg-gray-400 rounded"
                     >+</button>
                   </div>
 
                   {/* DATE */}
                   <div className="flex items-center gap-2 sm:border-r px-4 border-gray-300">
-                    <span className="text-xs font-semibold text-gray-700">Date:</span>
+                    <span className="text-xs font-semibold text-gray-500">Date:</span>
                     <input
                       type="date"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
-                      className="text-sm outline-none"
+                      className="text-sm outline-none text-black font-bold"
                     />
                   </div>
 
@@ -128,7 +128,7 @@ export default function Hero() {
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="absolute top-8 left-0 bg-white shadow-lg rounded-md w-28 z-30 border"
+                        className="absolute top-8 left-0 bg-white  text-black font-bold shadow-lg rounded-md w-28 z-30 border"
                       >
                         {options.map((item, i) => (
                           <div
@@ -154,7 +154,7 @@ export default function Hero() {
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg transition"
+                className="w-full bg-green-600 hover:bg-green-600 mt-5 text-white font-bold py-3 rounded-lg transition"
               >
                 {data.hero.button}
               </motion.button>
@@ -162,7 +162,7 @@ export default function Hero() {
             </motion.div>
 
             {/* NOTE */}
-            <p className="text-xs text-white/80 mt-3">
+            <p className="text-sm text-white/80 mt-4">
               {data.hero.note}
             </p>
 
@@ -177,7 +177,7 @@ export default function Hero() {
           className="flex-shrink-0"
         >
           <Image
-            src="/img/hero.jpeg"
+            src="/Image/hero.jpg"
             width={600}
             height={400}
             alt="food meeting"
@@ -193,3 +193,5 @@ export default function Hero() {
     </section>
   );
 }
+
+

@@ -1,29 +1,62 @@
-"use client";   
+"use client";
 import { Leaf, Gift, Shield } from "lucide-react";
 
 export default function Sustainability() {
   return (
-    <section className="bg-[#f6f4fb] px-16 py-6">
+    <section className="relative bg-gradient-to-br from-[#f6f4fb] via-[#f3f0ff] to-[#eef2ff] px-4 sm:px-6 md:px-10 lg:px-16 py-10 md:py-14 overflow-hidden">
 
-      <h2 className="text-lg font-semibold text-purple-900 mb-6">
-        Sustainable & Fair:
+      {/* Glow Background Effect */}
+      <div className="absolute top-0 left-0 w-72 h-72 bg-purple-200 rounded-full blur-3xl opacity-30"></div>
+      <div className="absolute bottom-0 right-0 w-72 h-72 bg-indigo-200 rounded-full blur-3xl opacity-30"></div>
+
+      {/* Heading */}
+      <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-purple-900 mb-8 relative z-10">
+        Sustainable & Fair
       </h2>
 
-      <div className="bg-white rounded-lg p-6 flex justify-between shadow-sm">
+      {/* Card */}
+      <div className="relative z-10 backdrop-blur-lg bg-white/80 border border-white/40 rounded-2xl p-6 sm:p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-8 shadow-lg hover:shadow-xl transition-all duration-300">
 
-        <div className="flex items-center gap-3 text-gray-600">
-          <Leaf className="text-purple-700" />
-          <p>Reusable instead of disposable</p>
+        {/* Item */}
+        <div className="group flex items-center gap-4 w-full md:w-auto transition-all duration-300 hover:scale-105">
+          
+          <div className="bg-purple-100 text-purple-700 p-3 rounded-full group-hover:bg-purple-700 group-hover:text-white transition-all duration-300">
+            <Leaf className="w-5 h-5 sm:w-6 sm:h-6" />
+          </div>
+
+          <p className="text-sm sm:text-base text-gray-700 font-medium">
+            Reusable instead of disposable
+          </p>
         </div>
 
-        <div className="flex items-center gap-3 text-gray-600">
-          <Gift className="text-purple-700" />
-          <p>2.5× for education projects</p>
+        {/* Divider */}
+        <div className="hidden md:block h-12 w-px bg-gradient-to-b from-transparent via-gray-300 to-transparent"></div>
+
+        {/* Item */}
+        <div className="group flex items-center gap-4 w-full md:w-auto transition-all duration-300 hover:scale-105">
+          
+          <div className="bg-purple-100 text-purple-700 p-3 rounded-full group-hover:bg-purple-700 group-hover:text-white transition-all duration-300">
+            <Gift className="w-5 h-5 sm:w-6 sm:h-6" />
+          </div>
+
+          <p className="text-sm sm:text-base text-gray-700 font-medium">
+            2.5× for education projects
+          </p>
         </div>
 
-        <div className="flex items-center gap-3 text-gray-600">
-          <Shield className="text-purple-700" />
-          <p>Already saved <b>12.4 tons</b> of waste!</p>
+        {/* Divider */}
+        <div className="hidden md:block h-12 w-px bg-gradient-to-b from-transparent via-gray-300 to-transparent"></div>
+
+        {/* Item */}
+        <div className="group flex items-center gap-4 w-full md:w-auto transition-all duration-300 hover:scale-105">
+          
+          <div className="bg-purple-100 text-purple-700 p-3 rounded-full group-hover:bg-purple-700 group-hover:text-white transition-all duration-300">
+            <Shield className="w-5 h-5 sm:w-6 sm:h-6" />
+          </div>
+
+          <p className="text-sm sm:text-base text-gray-700 font-medium">
+            Already saved <span className="text-purple-800 font-semibold">12.4 tons</span> of waste!
+          </p>
         </div>
 
       </div>
