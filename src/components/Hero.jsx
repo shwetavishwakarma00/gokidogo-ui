@@ -1,13 +1,10 @@
 "use client";
 import Image from "next/image";
 import  data  from "@/data/home.json";
+import Link  from "next/link";
 
 export default function Hero() {
 
-    // "title": "Meeting Catering in Frankfurt – No waste, no stress.",
-    // "subtitle": "Local restaurants. Reusable packaging. Delivery & pickup included.",
-    // "note": "Ready in 2 minutes – From €9.90 per person",
-    // "button": "Suggest Menu"
   return (
      <section className="bg-gradient-to-r from-[#5c3ab5] to-[#6b46c1] pb-24">
 
@@ -46,10 +43,11 @@ export default function Hero() {
 
             </div>
 
+            <Link href="/restaurant">
             <button className="w-full mt-6 bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition">
               {data.hero.button}
             </button>
-
+            </Link>
           </div>
 
           <p className="text-sm opacity-80 mt-3">
