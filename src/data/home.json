@@ -1,0 +1,24 @@
+{
+  "hero": {
+    "title": "Meeting Catering in Frankfurt – No waste, no stress.",
+    "subtitle": "Local restaurants. Reusable packaging. Delivery & pickup included.",
+    "note": "Ready in 2 minutes – From €9.90 per person",
+    "button": "Suggest Menu"
+  },
+  "steps": [
+    { "title": "Plan Event", "desc": "Enter details" },
+    { "title": "Choose Menu", "desc": "Customize food" },
+    { "title": "Zero Waste Delivery", "desc": "Delivery & Pickup" }
+  ],
+  "events": [
+    { "title": "Teammeeting", "price": "from €9.90 p.p.", "img": "/img/team-meeting.jpg" },
+    { "title": "Hackathon", "price": "from €8.90 p.p.", "img": "/img/hackhthon.jpg" },
+    { "title": "Workshop", "price": "from €10.90 p.p.", "img": "/img/workshop.jpg" },
+    { "title": "Office Lunch", "price": "from €9.90 p.p.", "img": "/img/office-lunch.jpg" }
+  ],
+  "partners": [
+    { "name": "PastaCultura", "img": "/img/PastaCultura.jpg" },
+    { "name": "GreenGarden", "img": "/img/GreenGarden.jpg" },
+    { "name": "Tavola Rustica", "img": "/img/TavolaRustica.jpg" }
+  ]
+}
