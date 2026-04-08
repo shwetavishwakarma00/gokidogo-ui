@@ -11,14 +11,14 @@
     { "title": "Zero Waste Delivery", "desc": "Delivery & Pickup" }
   ],
   "events": [
-    { "title": "Teammeeting", "price": "from ₹9.90 p.p.", "img": "/img/team-meeting.jpg" },
-    { "title": "Hackathon", "price": "from ₹8.90 p.p.", "img": "/img/hackhthon.jpeg" },
-    { "title": "Workshop", "price": "from ₹10.90 p.p.", "img": "/img/workshop.jpeg" },
-    { "title": "Office Lunch", "price": "from ₹9.90 p.p.", "img": "/img/office-lunch.jpeg" }
+    { "title": "Teammeeting", "price": "from ₹9.90 p.p.", "Image": "/Image/team-meeting.jpg" },
+    { "title": "Hackathon", "price": "from ₹8.90 p.p.", "Image": "/Image/hackhthon.jpg" },
+    { "title": "Workshop", "price": "from ₹10.90 p.p.", "Image": "/Image/workshop.jpg" },
+    { "title": "Office Lunch", "price": "from ₹9.90 p.p.", "Image": "/Image/office-lunch.jpg" }
   ],
   "partners": [
-    { "name": "PastaCultura", "img": "/img/PastaCultura.jpg" },
-    { "name": "GreenGarden", "img": "/img/GreenGarden.jpg" },
-    { "name": "Tavola Rustica", "img": "/img/TavolaRustica.jpeg" }
+    { "name": "PastaCultura", "Image": "/Image/PastaCultura.jpg" },
+    { "name": "GreenGarden", "Image": "/Image/GreenGarden.jpg" },
+    { "name": "Tavola Rustica", "Image": "/Image/TavolaRustica.jpg" }
   ]
 }

@@ -7,46 +7,61 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <nav className="sticky top-0 z-50 bg-gradient-to-r from-[#5a30c5] to-[#7c5bc9] text-white">
-      
-      <div className="flex items-center justify-between px-4 md:px-8 lg:px-16 py-4 md:py-6">
+    <nav className="sticky top-0 z-50 
+    bg-gradient-to-r from-[#69529d] to-[#7c5bc9] text-white shadow-md">
 
-        {/* Logo */}
-        <Link href='/'>
-        <div className="flex items-center gap-2 text-lg md:text-xl font-semibold">
-          <span>gokidogo</span>
-          <span className="text-xs md:text-sm opacity-80">EVENTS</span>
-        </div>
+      <div className="flex items-center justify-between 
+      px-4 sm:px-6 md:px-10 lg:px-16 
+      py-3 md:py-4">
+
+        {/* LOGO */}
+        <Link href="/">
+          <div className="flex items-center gap-1 cursor-pointer">
+            <span className="text-lg md:text-xl font-bold tracking-wide">
+              gokidogo
+            </span>
+            <span className="text-xs md:text-sm opacity-80 tracking-wider">
+              EVENTS
+            </span>
+          </div>
         </Link>
-        
 
-        {/* Desktop Menu */}
-        <div className="hidden md:flex gap-6 lg:gap-10 text-sm">
-          <a href="#">How it works</a>
-          <a href="#">For Businesses</a>
-          <a href="#">Sustainability</a>
-          <a href="/login">Login</a>
+        {/* DESKTOP MENU */}
+        <div className="hidden md:flex items-center gap-6 lg:gap-10 
+        text-sm font-medium tracking-wide">
+
+          <a href="#" className="hover:opacity-80 transition">How it works</a>
+          <a href="#" className="hover:opacity-80 transition">For Businesses</a>
+          <a href="#" className="hover:opacity-80 transition">Sustainability</a>
+
+          <Link href="/login">
+            <span className="bg-white text-purple-700 px-4 py-1.5 
+            rounded-lg font-semibold hover:bg-gray-100 transition">
+              Login
+            </span>
+          </Link>
         </div>
 
-        {/* Mobile Menu Button */}
+        {/* MOBILE BUTTON */}
         <button 
-          className="md:hidden text-white"
+          className="md:hidden text-xl"
           onClick={() => setOpen(!open)}
         >
           ☰
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* MOBILE MENU */}
       {open && (
-        <div className="md:hidden flex flex-col gap-4 px-4 pb-4 text-sm bg-[#6b46c1]">
+        <div className="md:hidden flex flex-col gap-4 
+        px-4 pb-4 text-sm bg-[#6b46c1] font-medium">
+
           <a href="#">How it works</a>
           <a href="#">For Businesses</a>
           <a href="#">Sustainability</a>
-          <a href="#">Login</a>
+          <Link href="/login">Login</Link>
         </div>
       )}
-
     </nav>
   );
 }

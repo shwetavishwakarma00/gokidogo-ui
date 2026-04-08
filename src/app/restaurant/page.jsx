@@ -81,7 +81,7 @@ export default function RestaurantMenu() {
 
           {/* Right: hero image */}
           <div className="flex-shrink-0 w-full md:w-[380px] h-[240px] rounded-2xl overflow-hidden shadow-2xl ring-4 ring-white/20">
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80"
               alt="Food"
               className="w-full h-full object-cover"
@@ -150,7 +150,7 @@ export default function RestaurantMenu() {
               >
                 {/* Image */}
                 <div className="relative h-44 overflow-hidden">
-                  <img
+                  <Image
                     src={imageUrl}
                     alt={item.name}
                     onError={(e) => { e.target.src = "/food.jpg"; }}
