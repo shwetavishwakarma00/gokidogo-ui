@@ -1,12 +1,13 @@
 "use client";
 import data from "@/data/home.json";
 import { Calendar, Utensils, Truck } from "lucide-react";
+
 export default function Steps() {
   return (
-   <section className="bg-[#f6f4fb] py-16 px-16">
+    <section className="bg-[#f6f4fb] py-16 px-16">
 
       <h2 className="text-xl font-semibold text-purple-900 mb-10">
-        So einfach geht’s:
+        It&apos;s that simple:
       </h2>
 
       <div className="grid grid-cols-3 gap-6 items-center">
@@ -59,5 +60,3 @@ export default function Steps() {
     </section>
   );
 }
-
-

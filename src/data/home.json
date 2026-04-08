@@ -2,7 +2,7 @@
   "hero": {
     "title": "Meeting Catering in Frankfurt – No waste, no stress.",
     "subtitle": "Local restaurants. Reusable packaging. Delivery & pickup included.",
-    "note": "Ready in 2 minutes – From €9.90 per person",
+    "note": "Ready in 2 minutes – From ₹9.90 per person",
     "button": "Suggest Menu"
   },
   "steps": [
@@ -11,14 +11,14 @@
     { "title": "Zero Waste Delivery", "desc": "Delivery & Pickup" }
   ],
   "events": [
-    { "title": "Teammeeting", "price": "from €9.90 p.p.", "img": "/img/team-meeting.jpg" },
-    { "title": "Hackathon", "price": "from €8.90 p.p.", "img": "/img/hackhthon.jpg" },
-    { "title": "Workshop", "price": "from €10.90 p.p.", "img": "/img/workshop.jpg" },
-    { "title": "Office Lunch", "price": "from €9.90 p.p.", "img": "/img/office-lunch.jpg" }
+    { "title": "Teammeeting", "price": "from ₹9.90 p.p.", "img": "/img/team-meeting.jpg" },
+    { "title": "Hackathon", "price": "from ₹8.90 p.p.", "img": "/img/hackhthon.jpeg" },
+    { "title": "Workshop", "price": "from ₹10.90 p.p.", "img": "/img/workshop.jpeg" },
+    { "title": "Office Lunch", "price": "from ₹9.90 p.p.", "img": "/img/office-lunch.jpeg" }
   ],
   "partners": [
     { "name": "PastaCultura", "img": "/img/PastaCultura.jpg" },
     { "name": "GreenGarden", "img": "/img/GreenGarden.jpg" },
-    { "name": "Tavola Rustica", "img": "/img/TavolaRustica.jpg" }
+    { "name": "Tavola Rustica", "img": "/img/TavolaRustica.jpeg" }
   ]
 }
