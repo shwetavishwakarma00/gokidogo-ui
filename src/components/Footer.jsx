@@ -1,11 +1,7 @@
 "use client";
 export default function Footer() {
   return (
-<<<<<<< HEAD
-     <footer className="bg-gradient-to-br from-[#5b3fa0] via-[#6b47b8] to-[#7c5dc9] text-center py-14 text-white">
-=======
     <footer className="bg-gradient-to-r from-[#5329c0] to-[#7352c2] text-center py-6 px-4 sm:px-6 md:px-10 text-white">
->>>>>>> 7e5fcac539277226f39477a734a0772f6b24990f
 
       <button className="bg-green-600 hover:bg-orange-700 px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold shadow text-sm sm:text-base">
         Plan Event Now

@@ -1,13 +1,9 @@
 "use client";
 import Image from "next/image";
-<<<<<<< HEAD
-import  data  from "@/data/home.json";
-import Link  from "next/link";
-=======
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import data from "@/data/home.json";
->>>>>>> 7e5fcac539277226f39477a734a0772f6b24990f
+import Link from "next/link";
 
 export default function Hero() {
   const [open, setOpen] = useState(false);
@@ -154,6 +150,7 @@ export default function Hero() {
               </div>
 
               {/* CTA */}
+              <Link href='/restaurant'>
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
@@ -161,32 +158,13 @@ export default function Hero() {
               >
                 {data.hero.button}
               </motion.button>
+              </Link>
             </motion.div>
 
-<<<<<<< HEAD
-              <div>
-                <p className="text-gray-400">Budget pro Person</p>
-                <p className="font-semibold">12€</p>
-              </div>
-
-            </div>
-
-            <Link href="/restaurant">
-            <button className="w-full mt-6 bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition">
-              {data.hero.button}
-            </button>
-            </Link>
-          </div>
-
-          <p className="text-sm opacity-80 mt-3">
-            {data.hero.note}
-          </p>
-=======
             {/* NOTE */}
             <p className="text-xs text-white/80 mt-3">
               {data.hero.note}
             </p>
->>>>>>> 7e5fcac539277226f39477a734a0772f6b24990f
 
           </motion.div>
         </div>
