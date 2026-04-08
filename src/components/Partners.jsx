@@ -7,7 +7,7 @@ export default function Partners() {
     <section className="bg-[#f6f4fb] px-16 py-14">
 
       <h2 className="text-lg font-semibold text-purple-900 mb-8">
-        Unser Frankfurter Genuss-Partner:
+        Our Frankfurt Gourmet Partners:
       </h2>
 
       <div className="grid grid-cols-3 gap-6">
