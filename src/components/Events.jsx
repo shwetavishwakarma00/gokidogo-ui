@@ -1,12 +1,13 @@
 "use client";
 import Image from "next/image";
 import data from "@/data/home.json";
+
 export default function Events() {
   return (
-      <section className="px-16 py-14 bg-[#f6f4fb]">
-
+    <section className="px-16 py-14 bg-[#f6f4fb]">
+      
       <h2 className="text-xl font-semibold text-purple-900 mb-8">
-        Perfekt für eure Events:
+        Perfect for your events:
       </h2>
 
       <div className="grid grid-cols-4 gap-6">

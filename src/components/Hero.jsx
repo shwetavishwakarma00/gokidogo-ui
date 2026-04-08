@@ -1,41 +1,169 @@
 "use client";
 import Image from "next/image";
+<<<<<<< HEAD
 import  data  from "@/data/home.json";
 import Link  from "next/link";
+=======
+import { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
+import data from "@/data/home.json";
+>>>>>>> 7e5fcac539277226f39477a734a0772f6b24990f
 
 export default function Hero() {
+  const [open, setOpen] = useState(false);
+  const [budget, setBudget] = useState("₹12");
+  const [people, setPeople] = useState(12);
+  const [date, setDate] = useState("2024-07-17");
+
+  const dropdownRef = useRef(null);
+
+  const options = ["₹12", "₹25", "₹50", "₹100"];
+
+  // ✅ Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
-     <section className="bg-gradient-to-r from-[#5c3ab5] to-[#6b46c1] pb-24">
+    <section
+      style={{ background: "linear-gradient(90deg, #6035b8 0%, #7c5cbf 100%)" }}
+      className="w-full min-h-[70vh] md:min-h-[80vh] lg:min-h-screen pb-16 md:pb-20 lg:pb-24"
+    >
+      <div className="flex flex-col lg:flex-row items-center px-6 md:px-10 lg:px-16 pt-10 md:pt-14 lg:pt-16 gap-12">
 
-      <div className="grid grid-cols-2 items-center px-16 pt-16">
+        {/* LEFT */}
+        <div className="flex-1 text-white relative">
 
-        {/* Left Content */}
-        <div className="text-white">
-
-          <h1 className="text-5xl font-bold leading-tight">
+          <motion.h2
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-3xl sm:text-4xl lg:text-5xl font-extrabold"
+          >
             {data.hero.title}
-          </h1>
+          </motion.h2>
 
-          <p className="mt-6 text-lg opacity-80">
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mt-4 text-sm md:text-base opacity-90 max-w-md"
+          >
             {data.hero.subtitle}
-          </p>
+          </motion.p>
 
-          {/* Booking Box */}
-          <div className="bg-white rounded-xl p-6 mt-10 w-[520px] shadow-lg">
+          {/* BOOKING + NOTE */}
+          <motion.div
+            initial={{ opacity: 0, y: 60 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mt-10 w-full max-w-[560px] lg:absolute lg:top-[65%] lg:right-[-60px] z-20"
+          >
 
-            <div className="flex justify-between text-sm text-gray-600">
+            {/* FLOATING BOX */}
+            <motion.div
+              animate={{ y: [0, -8, 0] }}
+              transition={{ repeat: Infinity, duration: 4 }}
+              className="bg-white rounded-2xl p-6 shadow-2xl"
+            >
 
-              <div>
-                <p className="text-gray-400">Personen</p>
-                <p className="font-semibold">12</p>
+              {/* FIELD ROW */}
+              <div className="bg-gray-100 rounded-lg px-4 py-3 mb-4">
+
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+
+                  {/* PEOPLE */}
+                  <div className="flex items-center gap-2 sm:border-r pr-4 border-gray-300">
+                    <span className="text-xs font-semibold text-gray-700">People:</span>
+
+                    <button
+                      onClick={() => setPeople(Math.max(1, people - 1))}
+                      className="px-2 bg-gray-200 rounded"
+                    >-</button>
+
+                    <span className="text-sm font-bold text-gray-900">{people}</span>
+
+                    <button
+                      onClick={() => setPeople(people + 1)}
+                      className="px-2 bg-gray-200 rounded"
+                    >+</button>
+                  </div>
+
+                  {/* DATE */}
+                  <div className="flex items-center gap-2 sm:border-r px-4 border-gray-300">
+                    <span className="text-xs font-semibold text-gray-700">Date:</span>
+                    <input
+                      type="date"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                      className="text-sm outline-none"
+                    />
+                  </div>
+
+                  {/* BUDGET */}
+                  <div ref={dropdownRef} className="relative flex items-center gap-2 flex-1">
+                    <span className="text-xs font-semibold text-gray-700">Budget:</span>
+
+                    <button
+                      onClick={() => setOpen(!open)}
+                      className="flex items-center gap-1 text-sm font-bold text-gray-900"
+                    >
+                      {budget}
+                      <svg
+                        className={`ml-1 transition-transform duration-300 ${open ? "rotate-180" : ""}`}
+                        width="14"
+                        height="14"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+
+                    {/* DROPDOWN */}
+                    {open && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="absolute top-8 left-0 bg-white shadow-lg rounded-md w-28 z-30 border"
+                      >
+                        {options.map((item, i) => (
+                          <div
+                            key={i}
+                            onClick={() => {
+                              setBudget(item);
+                              setOpen(false);
+                            }}
+                            className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                          >
+                            {item}
+                          </div>
+                        ))}
+                      </motion.div>
+                    )}
+                  </div>
+
+                </div>
               </div>
 
-              <div>
-                <p className="text-gray-400">Datum</p>
-                <p className="font-semibold">17.07.2024</p>
-              </div>
+              {/* CTA */}
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg transition"
+              >
+                {data.hero.button}
+              </motion.button>
+            </motion.div>
 
+<<<<<<< HEAD
               <div>
                 <p className="text-gray-400">Budget pro Person</p>
                 <p className="font-semibold">12€</p>
@@ -53,22 +181,37 @@ export default function Hero() {
           <p className="text-sm opacity-80 mt-3">
             {data.hero.note}
           </p>
+=======
+            {/* NOTE */}
+            <p className="text-xs text-white/80 mt-3">
+              {data.hero.note}
+            </p>
+>>>>>>> 7e5fcac539277226f39477a734a0772f6b24990f
 
+          </motion.div>
         </div>
 
-        {/* Right Image */}
-        <div className="flex justify-center">
+        {/* RIGHT IMAGE */}
+        <motion.div
+          initial={{ opacity: 0, x: 60 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3 }}
+          className="flex-shrink-0"
+        >
           <Image
-            src="/img/hero-img.jpg"
-            width={450}
-            height={350}
+            src="/img/hero.jpeg"
+            width={600}
+            height={400}
             alt="food meeting"
-            className="rounded-xl shadow-xl"
+            className="
+              object-cover rounded-xl shadow-xl
+              w-[280px] sm:w-[360px] md:w-[440px] lg:w-[560px]
+              h-[180px] sm:h-[240px] md:h-[300px] lg:h-[360px]
+            "
           />
-        </div>
+        </motion.div>
 
       </div>
-
     </section>
   );
 }
