@@ -17,3 +17,9 @@ export const customerSignup = async (data) => {
   const res = await api.post("/auth/signup", data);
   return res.data;
 };
+
+// LOGIN
+export const customerLogin = async (data) => {
+  const res = await api.post("/auth/login", data);
+  return res.data;
+};

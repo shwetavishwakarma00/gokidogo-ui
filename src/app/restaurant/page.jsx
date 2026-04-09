@@ -199,7 +199,7 @@ export default function RestaurantMenu() {
       </div>
 
       {/* ── DELIVERY HOURS ── */}
-      {deliveryHours?.length > 0 && (
+      {/* {deliveryHours?.length > 0 && (
         <div id="hours" className="bg-white border-t border-purple-100 py-14 px-6">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-center gap-3 mb-8">
@@ -223,10 +223,10 @@ export default function RestaurantMenu() {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* ── DELIVERY AREAS ── */}
-      {zipcodes?.length > 0 && (
+      {/* {zipcodes?.length > 0 && (
         <div id="areas" className="bg-[#f4f4f8] border-t border-purple-100 py-14 px-6">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-center gap-3 mb-8">
@@ -264,7 +264,7 @@ export default function RestaurantMenu() {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
 
       <style>{`

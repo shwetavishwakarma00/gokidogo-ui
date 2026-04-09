@@ -1,6 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { sendOtpEmail, verifyOtpEmail, customerSignup } from "@/app/apis/authApi";
-
+import {
+  sendOtpEmail,
+  verifyOtpEmail,
+  customerSignup,
+  customerLogin,
+} from "@/app/apis/authApi";
 
 // ================= SEND OTP =================
 export const sendOtpThunk = createAsyncThunk(
@@ -15,7 +19,6 @@ export const sendOtpThunk = createAsyncThunk(
   }
 );
 
-
 // ================= VERIFY OTP =================
 export const verifyOtpThunk = createAsyncThunk(
   "auth/verifyOtp",
@@ -28,7 +31,6 @@ export const verifyOtpThunk = createAsyncThunk(
     }
   }
 );
-
 
 // ================= SIGNUP =================
 export const signupThunk = createAsyncThunk(
@@ -43,22 +45,46 @@ export const signupThunk = createAsyncThunk(
   }
 );
 
+// ================= LOGIN =================
+export const loginThunk = createAsyncThunk(
+  "auth/login",
+  async (loginData, { rejectWithValue }) => {
+    try {
+      const response = await customerLogin(loginData);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data || error.message);
+    }
+  }
+);
+
+const initialState = {
+  loading: false,         // general loading
+  otpSent: false,
+  otpVerified: false,
+  signupData: null,
+  status: "idle",         // login status: idle | loading | succeeded | failed
+  user: null,
+  apikey: null,
+  error: null,
+};
 
 const authSlice = createSlice({
   name: "auth",
-
-  initialState: {
-    loading: false,
-    signupData: null,
-    otpSent: false,
-    otpVerified: false,
-    error: null,
+  initialState,
+  reducers: {
+    logout: (state) => {
+      state.user = null;
+      state.apikey = null;
+      state.status = "idle";
+      state.error = null;
+      state.otpSent = false;
+      state.otpVerified = false;
+      state.signupData = null;
+      state.loading = false;
+    },
   },
-
-  reducers: {},
-
   extraReducers: (builder) => {
-
     // ===== SEND OTP =====
     builder
       .addCase(sendOtpThunk.pending, (state) => {
@@ -72,10 +98,10 @@ const authSlice = createSlice({
       .addCase(sendOtpThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      })
+      });
 
-
-      // ===== VERIFY OTP =====
+    // ===== VERIFY OTP =====
+    builder
       .addCase(verifyOtpThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -87,10 +113,10 @@ const authSlice = createSlice({
       .addCase(verifyOtpThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      })
+      });
 
-
-      // ===== SIGNUP =====
+    // ===== SIGNUP =====
+    builder
       .addCase(signupThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -104,7 +130,24 @@ const authSlice = createSlice({
         state.error = action.payload;
       });
 
+    // ===== LOGIN =====
+    builder
+      .addCase(loginThunk.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(loginThunk.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        const dataValue = action.payload[0]?.DataValue?.[0];
+        state.user = dataValue || null;
+        state.apikey = dataValue?.apikey || null;
+      })
+      .addCase(loginThunk.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload || "Login failed";
+      });
   },
 });
 
+export const { logout } = authSlice.actions;
 export default authSlice.reducer;
