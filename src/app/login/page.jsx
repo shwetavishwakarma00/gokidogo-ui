@@ -1,8 +1,9 @@
+
 "use client";
 
 import { useState, useRef, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { sendOtpThunk, verifyOtpThunk, signupThunk } from "@/app/redux/features/authSlice";
+import { sendOtpThunk, verifyOtpThunk, signupThunk, loginThunk } from "@/app/redux/features/authSlice";
 import { motion } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -14,7 +15,7 @@ export default function AuthPage() {
 
   const otpRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
 
-  const [screen, setScreen] = useState("signup");
+  const [screen, setScreen] = useState("signup"); // signup | otp | login | success
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -32,7 +33,13 @@ export default function AuthPage() {
     confirmPassword: "",
   });
 
+  const [loginForm, setLoginForm] = useState({
+    email: "",
+    password: "",
+  });
+
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleLoginChange = (e) => setLoginForm({ ...loginForm, [e.target.name]: e.target.value });
 
   /* ---------------- SEND OTP ---------------- */
   const sendOtp = async () => {
@@ -77,32 +84,60 @@ export default function AuthPage() {
     if (otpRefs[arr.length - 1]) otpRefs[arr.length - 1].current.focus();
   };
 
-  /* ---------------- VERIFY ---------------- */
+  /* ---------------- VERIFY OTP & SIGNUP ---------------- */
   const verifyOtp = async () => {
     const code = otp.join("");
     if (code.length < 6) return toast.error("Enter full OTP");
 
     try {
       setLoading(true);
-      await dispatch(verifyOtpThunk({ deviceId: "web123", email: form.email, otp: code })).unwrap();
-      await dispatch(signupThunk({
-        firstname: form.firstName,
-        lastname: form.lastName,
-        email: form.email,
-        mobile: form.phone,
-        passwd: form.password,
-        gender: "1",
-      })).unwrap();
 
-      if (typeof window !== 'undefined') {
-        localStorage.setItem("user", JSON.stringify({ name: form.firstName, email: form.email }));
-      }
+      // Verify OTP
+      await dispatch(verifyOtpThunk({ deviceId: "web123", email: form.email, otp: code })).unwrap();
+
+      // Signup
+      await dispatch(
+        signupThunk({
+          firstname: form.firstName,
+          lastname: form.lastName,
+          email: form.email,
+          mobile: form.phone,
+          passwd: form.password,
+          gender: "1",
+        })
+      ).unwrap();
 
       toast.success("Signup Successful 🎉");
+      setScreen("login"); // ✅ redirect to login screen
+    } catch (err) {
+      console.error(err);
+      toast.error("Verification/Signup failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* ---------------- LOGIN ---------------- */
+  const login = async () => {
+    if (!loginForm.email || !loginForm.password) return toast.error("Email & Password required");
+
+    try {
+      setLoading(true);
+      const response = await dispatch(
+        loginThunk({ usrid: loginForm.email, passwd: loginForm.password, deviceid: "web123" })
+      ).unwrap();
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem("user", JSON.stringify(response[0]?.DataValue?.[0]));
+      }
+
+      toast.success("Login Successful 🎉");
       setScreen("success");
+
       setTimeout(() => router.push("/"), 2000);
-    } catch {
-      toast.error("Verification failed");
+    } catch (err) {
+      console.error(err);
+      toast.error("Login failed");
     } finally {
       setLoading(false);
     }
@@ -144,10 +179,7 @@ export default function AuthPage() {
         {/* SIGNUP */}
         {screen === "signup" && (
           <div className="flex flex-col gap-5">
-            <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-800">
-              Create Account
-            </h2>
-
+            <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-800">Create Account</h2>
             <select
               name="title"
               value={form.title}
@@ -161,75 +193,28 @@ export default function AuthPage() {
             </select>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <input
-                name="firstName"
-                placeholder="First Name"
-                onChange={handleChange}
-                className="border p-3 rounded focus:ring-2 focus:ring-green-400 text-black"
-              />
-              <input
-                name="lastName"
-                placeholder="Last Name"
-                onChange={handleChange}
-                className="border p-3 rounded focus:ring-2 focus:ring-green-400 text-black"
-              />
+              <input name="firstName" placeholder="First Name" onChange={handleChange} className="border p-3 rounded focus:ring-2 focus:ring-green-400 text-black" />
+              <input name="lastName" placeholder="Last Name" onChange={handleChange} className="border p-3 rounded focus:ring-2 focus:ring-green-400 text-black" />
             </div>
 
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              onChange={handleChange}
-              className="border p-3 rounded focus:ring-2 focus:ring-green-400 text-black"
-            />
-            <input
-              type="tel"
-              name="phone"
-              placeholder="Phone"
-              onChange={handleChange}
-              className="border p-3 rounded focus:ring-2 focus:ring-green-400 text-black"
-            />
+            <input type="email" name="email" placeholder="Email" onChange={handleChange} className="border p-3 rounded focus:ring-2 focus:ring-green-400 text-black" />
+            <input type="tel" name="phone" placeholder="Phone" onChange={handleChange} className="border p-3 rounded focus:ring-2 focus:ring-green-400 text-black" />
 
             <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="Password"
-                onChange={handleChange}
-                className="border p-3 rounded w-full focus:ring-2 focus:ring-green-600 text-black"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-lg text-gray-700 hover:text-green-600 transition"
-              >
+              <input type={showPassword ? "text" : "password"} name="password" placeholder="Password" onChange={handleChange} className="border p-3 rounded w-full focus:ring-2 focus:ring-green-600 text-black" />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-lg text-gray-700 hover:text-green-600 transition">
                 {showPassword ? <FiEye /> : <FiEyeOff />}
               </button>
             </div>
 
             <div className="relative">
-              <input
-                type={showConfirm ? "text" : "password"}
-                name="confirmPassword"
-                placeholder="Confirm Password"
-                onChange={handleChange}
-                className="border p-3 rounded w-full focus:ring-2 focus:ring-green-600 text-black"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirm(!showConfirm)}
-                className="absolute right-3 top-3 text-lg text-gray-700 hover:text-green-600 transition"
-              >
+              <input type={showConfirm ? "text" : "password"} name="confirmPassword" placeholder="Confirm Password" onChange={handleChange} className="border p-3 rounded w-full focus:ring-2 focus:ring-green-600 text-black" />
+              <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-3 text-lg text-gray-700 hover:text-green-600 transition">
                 {showConfirm ? <FiEye /> : <FiEyeOff />}
               </button>
             </div>
 
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={sendOtp}
-              disabled={loading}
-              className="bg-green-600 hover:bg-orange-600 text-white p-4 rounded-lg font-semibold text-lg sm:text-xl transition shadow-md"
-            >
+            <motion.button whileTap={{ scale: 0.95 }} onClick={sendOtp} disabled={loading} className="bg-green-600 hover:bg-orange-600 text-white p-4 rounded-lg font-semibold text-lg sm:text-xl transition shadow-md">
               {loading ? "Sending..." : "Signup"}
             </motion.button>
           </div>
@@ -238,9 +223,7 @@ export default function AuthPage() {
         {/* OTP */}
         {screen === "otp" && (
           <div className="flex flex-col gap-6 items-center">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center">
-              Enter OTP
-            </h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center">Enter OTP</h2>
 
             <div onPaste={handlePaste} className="flex justify-center gap-3 sm:gap-4">
               {otp.map((digit, i) => (
@@ -261,20 +244,13 @@ export default function AuthPage() {
               ))}
             </div>
 
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={verifyOtp}
-              disabled={loading}
-              className="bg-purple-600 hover:bg-purple-800 text-white p-4 rounded-lg font-semibold w-full text-lg sm:text-xl transition shadow-md"
-            >
+            <motion.button whileTap={{ scale: 0.95 }} onClick={verifyOtp} disabled={loading} className="bg-purple-600 hover:bg-purple-800 text-white p-4 rounded-lg font-semibold w-full text-lg sm:text-xl transition shadow-md">
               {loading ? "Verifying..." : "Verify OTP"}
             </motion.button>
 
             <div className="text-sm sm:text-base text-gray-600 text-center">
               {canResend ? (
-                <button onClick={resendOtp} className="text-red-600 hover:underline">
-                  Resend OTP
-                </button>
+                <button onClick={resendOtp} className="text-red-600 hover:underline">Resend OTP</button>
               ) : (
                 <p>Resend OTP in {timer}s</p>
               )}
@@ -282,23 +258,29 @@ export default function AuthPage() {
           </div>
         )}
 
+        {/* LOGIN */}
+        {screen === "login" && (
+          <div className="flex flex-col gap-5">
+            <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-800">Login</h2>
+            <input type="email" name="email" placeholder="Email" value={loginForm.email} onChange={handleLoginChange} className="border p-3 rounded w-full focus:ring-2 focus:ring-green-400 text-black" />
+            <div className="relative">
+              <input type={showPassword ? "text" : "password"} name="password" placeholder="Password" value={loginForm.password} onChange={handleLoginChange} className="border p-3 rounded w-full focus:ring-2 focus:ring-green-600 text-black" />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-lg text-gray-700 hover:text-green-600 transition">
+                {showPassword ? <FiEye /> : <FiEyeOff />}
+              </button>
+            </div>
+            <motion.button whileTap={{ scale: 0.95 }} onClick={login} disabled={loading} className="bg-blue-600 hover:bg-blue-800 text-white p-4 rounded-lg font-semibold w-full text-lg sm:text-xl transition shadow-md">
+              {loading ? "Logging in..." : "Login"}
+            </motion.button>
+          </div>
+        )}
+
         {/* SUCCESS */}
         {screen === "success" && (
           <div className="flex flex-col items-center justify-center gap-4 py-8">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 260, damping: 20 }}
-              className="text-6xl sm:text-7xl text-green-500"
-            >
-              🎉
-            </motion.div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-green-600 text-center">
-              Signup Successful
-            </h2>
-            <p className="text-gray-700 text-center max-w-xs sm:max-w-sm">
-              Welcome {form.firstName}! Redirecting to home page...
-            </p>
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 260, damping: 20 }} className="text-6xl sm:text-7xl text-green-500">🎉</motion.div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-green-600 text-center">Login Successful</h2>
+            <p className="text-gray-700 text-center max-w-xs sm:max-w-sm">Welcome! Redirecting to home page...</p>
           </div>
         )}
       </motion.div>
