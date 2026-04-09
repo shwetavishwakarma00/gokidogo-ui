@@ -1,378 +1,307 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { sendOtpThunk, verifyOtpThunk, signupThunk } from "@/app/redux/features/authSlice";
 import { motion } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 export default function AuthPage() {
+  const dispatch = useDispatch();
+  const router = useRouter();
 
-const dispatch = useDispatch();
+  const otpRefs = Array.from({ length: 6 }, () => useRef(null));
 
-const [screen,setScreen] = useState("signup");
-const [loading,setLoading] = useState(false);
-const [showPassword,setShowPassword] = useState(false);
-const [showConfirm,setShowConfirm] = useState(false);
+  const [screen, setScreen] = useState("signup");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [otp, setOtp] = useState(Array(6).fill(""));
+  const [timer, setTimer] = useState(30);
+  const [canResend, setCanResend] = useState(false);
 
-const router = useRouter();
+  const [form, setForm] = useState({
+    title: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+  });
 
-const [otp,setOtp] = useState(["","","","","",""]);
-const otpRefs = [
-useRef(),
-useRef(),
-useRef(),
-useRef()
-];
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-const [form,setForm] = useState({
-firstName:"",
-lastName:"",
-email:"",
-phone:"",
-password:"",
-confirmPassword:""
-});
+  /* ---------------- SEND OTP ---------------- */
+  const sendOtp = async () => {
+    if (!form.email) return toast.error("Email required");
+    if (form.password !== form.confirmPassword) return toast.error("Passwords don't match");
 
-const handleChange=(e)=>{
-setForm({...form,[e.target.name]:e.target.value});
-};
-
-/* ---------------- SEND OTP ---------------- */
-
-const sendOtp = async ()=>{
-
-if(!form.email) return toast.error("Email required");
-
-try{
-
-setLoading(true);
-
-await dispatch(
-sendOtpThunk({
-deviceId:"web123",
-email:form.email
-})
-).unwrap();
-
-toast.success("OTP sent to email");
-
-setScreen("otp");
-
-}
-catch(err){
-
-toast.error("OTP send failed");
-
-}
-finally{
-
-setLoading(false);
-
-}
-
-};
-
-/* ---------------- OTP INPUT ---------------- */
-
-const handleOtpChange=(value,index)=>{
-
-if(!/^[0-9]?$/.test(value)) return;
-
-const newOtp=[...otp];
-newOtp[index]=value;
-setOtp(newOtp);
-
-if(value && index<3){
-otpRefs[index+1].current.focus();
-}
-
-};
-
-/* ---------------- OTP PASTE ---------------- */
-
-const handlePaste=(e)=>{
-
-const paste=e.clipboardData.getData("text").slice(0,4);
-
-if(!/^[0-9]+$/.test(paste)) return;
-
-const arr=paste.split("");
-
-setOtp(arr);
-
-arr.forEach((num,i)=>{
-otpRefs[i].current.value=num;
-});
-
-};
-/* ---------------- VERIFY OTP ---------------- */
-
-const verifyOtp=async()=>{
-
-const code=otp.join("");
-
-if(code.length<4) return toast.error("Enter full OTP");
-
-try{
-
-setLoading(true);
-
-await dispatch(
-verifyOtpThunk({
-deviceId:"web123",
-email:form.email,
-otp:code
-})
-).unwrap();
-
-toast.success("OTP verified");
-
-await dispatch(
-signupThunk({
-firstname:form.firstName,
-lastname:form.lastName,
-email:form.email,
-mobile:form.phone,
-passwd:form.password,
-gender:"1"
-})
-).unwrap();
-
-// user save karo
-localStorage.setItem(
-  "user",
-  JSON.stringify({
-    name: form.firstName,
-    email: form.email
-  })
-);
-
-setScreen("success");
-
-// 2 sec baad redirect
-setTimeout(() => {
-  router.push("/");
-}, 2000);
-
-}
-catch(err){
-
-toast.error("OTP verification failed");
-
-}
-finally{
-
-setLoading(false);
-
-}
-
-};
-return(
-
-<div className="min-h-screen flex items-center justify-center bg-gray-100">
-
-<Toaster/>
-
-<motion.div
-initial={{opacity:0,scale:0.9}}
-animate={{opacity:1,scale:1}}
-className="bg-white p-8 rounded-xl shadow-xl w-[380px]"
->
-
-{/* ---------------- SIGNUP ---------------- */}
-
-{screen==="signup" && (
-
-<div className="flex flex-col gap-4">
-
-<h2 className="text-2xl font-bold text-center">
-Create Account
-</h2>
-
-<div className="mb-4">
-  <label className="block text-sm font-medium mb-1">
-    Title
-  </label>
-
-  <select
-    value={form.title}
-    onChange={(e) =>
-      setForm({ ...form, title: e.target.value })
+    try {
+      setLoading(true);
+      await dispatch(sendOtpThunk({ deviceId: "web123", email: form.email })).unwrap();
+      toast.success("OTP sent 🚀");
+      setScreen("otp");
+      setTimer(30);
+      setCanResend(false);
+    } catch {
+      toast.error("OTP failed");
+    } finally {
+      setLoading(false);
     }
-    className="w-full border rounded-lg p-2"
-  >
-    <option value="">Select Title</option>
-    <option value="Mr">Mr</option>
-    <option value="Ms">Ms</option>
-    <option value="Mrs">Mrs</option>
-  </select>
-</div>
+  };
 
-<input
-name="firstName"
-placeholder="First Name"
-value={form.firstName}
-onChange={handleChange}
-className="border p-3 rounded"
-/>
+  /* ---------------- OTP ---------------- */
+  const handleOtpChange = (value, index) => {
+    if (!/^[0-9]?$/.test(value)) return;
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+    if (value && index < 5) otpRefs[index + 1].current.focus();
+  };
 
-<input
-name="lastName"
-placeholder="Last Name"
-value={form.lastName}
-onChange={handleChange}
-className="border p-3 rounded"
-/>
+  const handleKeyDown = (e, index) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) otpRefs[index - 1].current.focus();
+  };
 
-<input
-type="email"
-name="email"
-placeholder="Email"
-value={form.email}
-onChange={handleChange}
-className="border p-3 rounded"
-/>
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const paste = e.clipboardData.getData("text").trim();
+    if (!/^[0-9]+$/.test(paste)) return;
+    const arr = paste.slice(0, 6).split("");
+    const newOtp = [...otp];
+    arr.forEach((num, i) => (newOtp[i] = num));
+    setOtp(newOtp);
+    if (otpRefs[arr.length - 1]) otpRefs[arr.length - 1].current.focus();
+  };
 
-<input
-type="tel"
-name="phone"
-placeholder="Phone"
-value={form.phone}
-onChange={handleChange}
-className="border p-3 rounded"
-/>
+  /* ---------------- VERIFY ---------------- */
+  const verifyOtp = async () => {
+    const code = otp.join("");
+    if (code.length < 6) return toast.error("Enter full OTP");
 
+    try {
+      setLoading(true);
+      await dispatch(verifyOtpThunk({ deviceId: "web123", email: form.email, otp: code })).unwrap();
+      await dispatch(signupThunk({
+        firstname: form.firstName,
+        lastname: form.lastName,
+        email: form.email,
+        mobile: form.phone,
+        passwd: form.password,
+        gender: "1",
+      })).unwrap();
 
-{/* PASSWORD */}
+      if (typeof window !== 'undefined') {
+        localStorage.setItem("user", JSON.stringify({ name: form.firstName, email: form.email }));
+      }
 
-<div className="relative">
+      toast.success("Signup Successful 🎉");
+      setScreen("success");
+      setTimeout(() => router.push("/"), 2000);
+    } catch {
+      toast.error("Verification failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-<input
-type={showPassword?"text":"password"}
-name="password"
-placeholder="Password"
-value={form.password}
-onChange={handleChange}
-className="border p-3 rounded w-full"
-/>
+  /* ---------------- RESEND TIMER ---------------- */
+  useEffect(() => {
+    let interval;
+    if (screen === "otp" && timer > 0) {
+      interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
+    }
+    if (timer === 0) setCanResend(true);
+    return () => clearInterval(interval);
+  }, [screen, timer]);
 
-<button
-type="button"
-onClick={()=>setShowPassword(!showPassword)}
-className="absolute right-3 top-3 text-sm"
->
-{showPassword?"Hide":"Show"}
-</button>
+  const resendOtp = async () => {
+    try {
+      setLoading(true);
+      await dispatch(sendOtpThunk({ deviceId: "web123", email: form.email })).unwrap();
+      toast.success("OTP Resent 🚀");
+      setTimer(30);
+      setCanResend(false);
+      setOtp(Array(6).fill(""));
+    } catch {
+      toast.error("Failed to resend OTP");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-</div>
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-300 px-4 py-6">
+      <Toaster />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl p-6 sm:p-10 rounded-3xl shadow-2xl border border-gray-200 bg-white"
+      >
+        {/* SIGNUP */}
+        {screen === "signup" && (
+          <div className="flex flex-col gap-5">
+            <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-800">
+              Create Account
+            </h2>
 
+            <select
+              name="title"
+              value={form.title}
+              onChange={handleChange}
+              className="border p-3 rounded-lg cursor-pointer text-black focus:ring-2 focus:ring-green-400"
+            >
+              <option value="">Select Title</option>
+              <option>Mr</option>
+              <option>Ms</option>
+              <option>Mrs</option>
+            </select>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <input
+                name="firstName"
+                placeholder="First Name"
+                onChange={handleChange}
+                className="border p-3 rounded focus:ring-2 focus:ring-green-400 text-black"
+              />
+              <input
+                name="lastName"
+                placeholder="Last Name"
+                onChange={handleChange}
+                className="border p-3 rounded focus:ring-2 focus:ring-green-400 text-black"
+              />
+            </div>
 
-{/* CONFIRM PASSWORD */}
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              onChange={handleChange}
+              className="border p-3 rounded focus:ring-2 focus:ring-green-400 text-black"
+            />
+            <input
+              type="tel"
+              name="phone"
+              placeholder="Phone"
+              onChange={handleChange}
+              className="border p-3 rounded focus:ring-2 focus:ring-green-400 text-black"
+            />
 
-<div className="relative">
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Password"
+                onChange={handleChange}
+                className="border p-3 rounded w-full focus:ring-2 focus:ring-green-600 text-black"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3 text-lg text-gray-700 hover:text-green-600 transition"
+              >
+                {showPassword ? <FiEye /> : <FiEyeOff />}
+              </button>
+            </div>
 
-<input
-type={showConfirm?"text":"password"}
-name="confirmPassword"
-placeholder="Confirm Password"
-value={form.confirmPassword}
-onChange={handleChange}
-className="border p-3 rounded w-full"
-/>
+            <div className="relative">
+              <input
+                type={showConfirm ? "text" : "password"}
+                name="confirmPassword"
+                placeholder="Confirm Password"
+                onChange={handleChange}
+                className="border p-3 rounded w-full focus:ring-2 focus:ring-green-600 text-black"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm(!showConfirm)}
+                className="absolute right-3 top-3 text-lg text-gray-700 hover:text-green-600 transition"
+              >
+                {showConfirm ? <FiEye /> : <FiEyeOff />}
+              </button>
+            </div>
 
-<button
-type="button"
-onClick={()=>setShowConfirm(!showConfirm)}
-className="absolute right-3 top-3 text-sm"
->
-{showConfirm?"Hide":"Show"}
-</button>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={sendOtp}
+              disabled={loading}
+              className="bg-green-600 hover:bg-orange-600 text-white p-4 rounded-lg font-semibold text-lg sm:text-xl transition shadow-md"
+            >
+              {loading ? "Sending..." : "Signup"}
+            </motion.button>
+          </div>
+        )}
 
-</div>
+        {/* OTP */}
+        {screen === "otp" && (
+          <div className="flex flex-col gap-6 items-center">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center">
+              Enter OTP
+            </h2>
 
+            <div onPaste={handlePaste} className="flex justify-center gap-3 sm:gap-4">
+              {otp.map((digit, i) => (
+                <motion.input
+                  key={i}
+                  ref={otpRefs[i]}
+                  value={digit}
+                  maxLength={1}
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  onChange={(e) => handleOtpChange(e.target.value, i)}
+                  onKeyDown={(e) => handleKeyDown(e, i)}
+                  whileFocus={{ scale: 1.05 }}
+                  className={`w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 text-center text-black text-lg sm:text-xl border rounded-xl transition-all
+                    ${digit ? "border-green-500 shadow-lg" : "border-gray-300"}
+                    focus:ring-2 focus:ring-blue-400`}
+                />
+              ))}
+            </div>
 
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={verifyOtp}
+              disabled={loading}
+              className="bg-purple-600 hover:bg-purple-800 text-white p-4 rounded-lg font-semibold w-full text-lg sm:text-xl transition shadow-md"
+            >
+              {loading ? "Verifying..." : "Verify OTP"}
+            </motion.button>
 
-<motion.button
-whileHover={{scale:1.03}}
-whileTap={{scale:0.95}}
-onClick={sendOtp}
-disabled={loading}
-className="bg-green-500 text-white p-3 rounded font-bold"
->
+            <div className="text-sm sm:text-base text-gray-600 text-center">
+              {canResend ? (
+                <button onClick={resendOtp} className="text-red-600 hover:underline">
+                  Resend OTP
+                </button>
+              ) : (
+                <p>Resend OTP in {timer}s</p>
+              )}
+            </div>
+          </div>
+        )}
 
-{loading?"Sending OTP...":"Signup"}
-
-</motion.button>
-
-</div>
-
-)}
-
-
-
-
-
-{/* ---------------- OTP SCREEN ---------------- */}
-
-{screen==="otp" && (
-
-<div className="flex flex-col gap-6">
-
-<h2 className="text-xl font-bold text-center">
-Enter OTP
-</h2>
-
-<div
-onPaste={handlePaste}
-className="flex justify-center gap-3"
->
-
-{otp.map((digit,i)=>(
-<input
-key={i}
-ref={otpRefs[i]}
-maxLength="1"
-onChange={(e)=>handleOtpChange(e.target.value,i)}
-className="border w-12 h-12 text-center text-xl rounded"
-/>
-))}
-
-</div>
-
-
-<motion.button
-whileHover={{scale:1.03}}
-whileTap={{scale:0.95}}
-onClick={verifyOtp}
-disabled={loading}
-className="bg-blue-500 text-white p-3 rounded font-bold"
->
-
-{loading?"Verifying...":"Verify OTP"}
-
-</motion.button>
-
-</div>
-
-)}
-
-{/* ---------------- SUCCESS ---------------- */}
-
-{screen==="success" && (
-
-<div className="text-center flex flex-col gap-4">
-
-<h2 className="text-2xl font-bold text-green-600">
-Signup Successful 🎉
-</h2>
-</div>
-
-)}
-</motion.div>
-</div>
-);
-
+        {/* SUCCESS */}
+        {screen === "success" && (
+          <div className="flex flex-col items-center justify-center gap-4 py-8">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 260, damping: 20 }}
+              className="text-6xl sm:text-7xl text-green-500"
+            >
+              🎉
+            </motion.div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-green-600 text-center">
+              Signup Successful
+            </h2>
+            <p className="text-gray-700 text-center max-w-xs sm:max-w-sm">
+              Welcome {form.firstName}! Redirecting to home page...
+            </p>
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
 }
