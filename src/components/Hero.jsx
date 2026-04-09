@@ -75,30 +75,30 @@ export default function Hero() {
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
 
                   {/* PEOPLE */}
-                  <div className="flex items-center gap-2 sm:border-r pr-4 border-gray-300">
+                  <div className="flex items-center gap-2 sm:border-r pr-4 border-gray-800">
                     <span className="text-xs font-semibold text-gray-700">People:</span>
 
                     <button
                       onClick={() => setPeople(Math.max(1, people - 1))}
-                      className="px-2 bg-gray-400 rounded"
+                      className="px-2 bg-gray-400 rounded cursor-pointer"
                     >-</button>
 
                     <span className="text-sm font-bold text-gray-900">{people}</span>
 
                     <button
                       onClick={() => setPeople(people + 1)}
-                      className="px-2 bg-gray-400 rounded"
+                      className="px-2 bg-gray-400 rounded cursor-pointer"
                     >+</button>
                   </div>
 
                   {/* DATE */}
-                  <div className="flex items-center gap-2 sm:border-r px-4 border-gray-300">
-                    <span className="text-xs font-semibold text-gray-500">Date:</span>
+                  <div className="flex items-center gap-2 sm:border-r px-4 border-gray-800">
+                    <span className="text-xs font-semibold text-gray-900">Date:</span>
                     <input
                       type="date"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
-                      className="text-sm outline-none text-black font-bold"
+                      className="text-sm outline-none text-black font-bold cursor-pointer"
                     />
                   </div>
 
@@ -112,7 +112,7 @@ export default function Hero() {
                     >
                       {budget}
                       <svg
-                        className={`ml-1 transition-transform duration-300 ${open ? "rotate-180" : ""}`}
+                        className={`ml-1 transition-transform duration-300  cursor-pointer${open ? "rotate-180" : ""}`}
                         width="14"
                         height="14"
                         fill="none"
@@ -128,7 +128,7 @@ export default function Hero() {
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="absolute top-8 left-0 bg-white  text-black font-bold shadow-lg rounded-md w-28 z-30 border"
+                        className="absolute top-8 left-0  cursor-pointer bg-white  text-black font-bold shadow-lg rounded-md w-28 z-30 border"
                       >
                         {options.map((item, i) => (
                           <div
@@ -154,7 +154,7 @@ export default function Hero() {
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                className="w-full bg-green-600 hover:bg-green-600 mt-5 text-white font-bold py-3 rounded-lg transition"
+                className="w-full cursor-pointer bg-green-600 hover:bg-orange-600 mt-5 text-white font-bold py-3 rounded-lg transition"
               >
                 {data.hero.button}
               </motion.button>
