@@ -4,6 +4,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchRestaurant } from "@/app/redux/features/restaurantSlice";
+import Image from "next/image";
 
 export default function RestaurantMenu() {
   const dispatch = useDispatch();
@@ -82,7 +83,9 @@ export default function RestaurantMenu() {
           {/* Right: hero image */}
           <div className="flex-shrink-0 w-full md:w-[380px] h-[240px] rounded-2xl overflow-hidden shadow-2xl ring-4 ring-white/20">
             <Image
-              src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80"
+              src="/image/biryani.jpg"
+              width={200}
+              height={150}
               alt="Food"
               className="w-full h-full object-cover"
             />
@@ -152,6 +155,8 @@ export default function RestaurantMenu() {
                 <div className="relative h-44 overflow-hidden">
                   <Image
                     src={imageUrl}
+                    width={400}
+                    height={200}
                     alt={item.name}
                     onError={(e) => { e.target.src = "/food.jpg"; }}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
