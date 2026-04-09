@@ -12,7 +12,7 @@ export default function AuthPage() {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const otpRefs = Array.from({ length: 6 }, () => useRef(null));
+  const otpRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
 
   const [screen, setScreen] = useState("signup");
   const [loading, setLoading] = useState(false);
