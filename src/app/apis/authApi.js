@@ -23,3 +23,13 @@ export const customerLogin = async (data) => {
   const res = await api.post("/auth/login", data);
   return res.data;
 };
+
+export const getUserProfile = async (data) => {
+  const res = await api.post("/auth/userprofile", data);
+  return res.data;
+};
+
+export const updateUserProfile = async (data) => {
+  const res = await api.post("/auth/updateprofile", data);
+  return res.data;
+};

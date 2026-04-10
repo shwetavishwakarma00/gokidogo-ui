@@ -1,13 +1,13 @@
-
 "use client";
 
 import { useState, useRef, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { sendOtpThunk, verifyOtpThunk, signupThunk, loginThunk } from "@/app/redux/features/authSlice";
+import { sendOtpThunk, verifyOtpThunk, signupThunk, loginThunk, fetchProfileThunk } from "@/app/redux/features/authSlice";
 import { motion } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { FiEye, FiEyeOff } from "react-icons/fi";
+import { getDeviceId } from "../utils/deviceID";
 
 export default function AuthPage() {
   const dispatch = useDispatch();
@@ -15,7 +15,7 @@ export default function AuthPage() {
 
   const otpRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
 
-  const [screen, setScreen] = useState("signup"); // signup | otp | login | success
+  const [screen, setScreen] = useState("login");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -60,7 +60,7 @@ export default function AuthPage() {
     }
   };
 
-  /* ---------------- OTP ---------------- */
+  /* ---------------- OTP HANDLERS ---------------- */
   const handleOtpChange = (value, index) => {
     if (!/^[0-9]?$/.test(value)) return;
     const newOtp = [...otp];
@@ -91,11 +91,7 @@ export default function AuthPage() {
 
     try {
       setLoading(true);
-
-      // Verify OTP
       await dispatch(verifyOtpThunk({ deviceId: "web123", email: form.email, otp: code })).unwrap();
-
-      // Signup
       await dispatch(
         signupThunk({
           firstname: form.firstName,
@@ -108,7 +104,7 @@ export default function AuthPage() {
       ).unwrap();
 
       toast.success("Signup Successful 🎉");
-      setScreen("login"); // ✅ redirect to login screen
+      setScreen("login");
     } catch (err) {
       console.error(err);
       toast.error("Verification/Signup failed");
@@ -119,22 +115,49 @@ export default function AuthPage() {
 
   /* ---------------- LOGIN ---------------- */
   const login = async () => {
-    if (!loginForm.email || !loginForm.password) return toast.error("Email & Password required");
+    if (!loginForm.email || !loginForm.password) {
+      toast.error("Email & Password required");
+      return;
+    }
 
     try {
       setLoading(true);
+
       const response = await dispatch(
-        loginThunk({ usrid: loginForm.email, passwd: loginForm.password, deviceid: "web123" })
+        loginThunk({
+          usrid: loginForm.email,
+          passwd: loginForm.password,
+          deviceid: "web123",
+        })
       ).unwrap();
 
-      if (typeof window !== "undefined") {
-        localStorage.setItem("user", JSON.stringify(response[0]?.DataValue?.[0]));
+      console.log("LOGIN RESPONSE:", response);
+
+      const user = response?.data?.[0]?.DataValue?.[0];
+
+      if (!user) {
+        toast.error("Login response invalid");
+        return;
       }
+
+      // ✅ Save to localStorage
+      localStorage.setItem("user", JSON.stringify(user));
+
+      // ✅ Fetch profile with correct PascalCase field names
+      dispatch(fetchProfileThunk({
+        customer_ID: user.CustomerId,
+        email: user.EmailAddress,
+        apikey: user.apikey,
+        deviceId: "web123",
+      }));
 
       toast.success("Login Successful 🎉");
       setScreen("success");
 
-      setTimeout(() => router.push("/"), 2000);
+      setTimeout(() => {
+        router.push("/profile");
+      }, 1500);
+
     } catch (err) {
       console.error(err);
       toast.error("Login failed");
@@ -217,6 +240,13 @@ export default function AuthPage() {
             <motion.button whileTap={{ scale: 0.95 }} onClick={sendOtp} disabled={loading} className="bg-green-600 hover:bg-orange-600 text-white p-4 rounded-lg font-semibold text-lg sm:text-xl transition shadow-md">
               {loading ? "Sending..." : "Signup"}
             </motion.button>
+
+            <p className="text-center text-gray-600">
+              Already have an account?{" "}
+              <button onClick={() => setScreen("login")} className="text-blue-600 font-semibold hover:underline">
+                Login
+              </button>
+            </p>
           </div>
         )}
 
@@ -237,7 +267,7 @@ export default function AuthPage() {
                   onChange={(e) => handleOtpChange(e.target.value, i)}
                   onKeyDown={(e) => handleKeyDown(e, i)}
                   whileFocus={{ scale: 1.05 }}
-                  className={`w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 text-center text-black text-lg sm:text-xl border rounded-xl transition-all
+                  className={`w-14 h-14 sm:w-16 sm:h-16 text-center text-black text-lg sm:text-xl border rounded-xl transition-all
                     ${digit ? "border-green-500 shadow-lg" : "border-gray-300"}
                     focus:ring-2 focus:ring-blue-400`}
                 />
@@ -272,6 +302,13 @@ export default function AuthPage() {
             <motion.button whileTap={{ scale: 0.95 }} onClick={login} disabled={loading} className="bg-blue-600 hover:bg-blue-800 text-white p-4 rounded-lg font-semibold w-full text-lg sm:text-xl transition shadow-md">
               {loading ? "Logging in..." : "Login"}
             </motion.button>
+
+            <p className="text-center text-gray-600">
+              Don't have an account?{" "}
+              <button onClick={() => setScreen("signup")} className="text-green-600 font-semibold hover:underline">
+                Signup
+              </button>
+            </p>
           </div>
         )}
 
@@ -280,7 +317,7 @@ export default function AuthPage() {
           <div className="flex flex-col items-center justify-center gap-4 py-8">
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 260, damping: 20 }} className="text-6xl sm:text-7xl text-green-500">🎉</motion.div>
             <h2 className="text-2xl sm:text-3xl font-bold text-green-600 text-center">Login Successful</h2>
-            <p className="text-gray-700 text-center max-w-xs sm:max-w-sm">Welcome! Redirecting to home page...</p>
+            <p className="text-gray-700 text-center max-w-xs sm:max-w-sm">Welcome! Redirecting to profile...</p>
           </div>
         )}
       </motion.div>
