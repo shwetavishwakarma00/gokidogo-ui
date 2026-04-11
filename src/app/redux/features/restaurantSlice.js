@@ -13,6 +13,7 @@ const restaurantSlice = createSlice({
   name: "restaurant",
   initialState: {
     restaurantInfo: null,
+    restaurantId: null,
     categories: [],
     deliveryHours: [],
     zipcodes: [],
@@ -25,13 +26,14 @@ const restaurantSlice = createSlice({
         state.loading = true;
       })
       .addCase(fetchRestaurant.fulfilled, (state, action) => {
-        state.loading = false;
-        const payload = action.payload[0];
-        state.restaurantInfo = payload.Restaurant_Detail[0];
-        state.categories = payload.MenuItem.MenuHead;
-        state.deliveryHours = payload.hours;
-        state.zipcodes = payload.Zipcodes;
-      });
+  state.loading = false;
+  const payload = action.payload[0];
+  state.restaurantInfo = payload.Restaurant_Detail[0];
+  state.restaurantId = payload.Restaurant_Detail[0]?.restroid || "20"; 
+  state.categories = payload.MenuItem.MenuHead;
+  state.deliveryHours = payload.hours;
+  state.zipcodes = payload.Zipcodes;
+})
   },
 });
 

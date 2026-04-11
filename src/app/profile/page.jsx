@@ -24,18 +24,21 @@ export default function ProfilePage() {
 
   useEffect(() => {
     let u = userRedux;
+    
     if (!u) {
       const stored = localStorage.getItem("user");
       if (stored) u = JSON.parse(stored);
     }
     if (u) {
       setUser(u);
+      console.log("USER OBJECT:", u);
       dispatch(fetchProfileThunk({
         customer_ID: u.CustomerId,
         email: u.EmailAddress,
         apikey: u.apikey,
         deviceId: "web123",
       }));
+      
     }
   }, [userRedux, dispatch]);
 
