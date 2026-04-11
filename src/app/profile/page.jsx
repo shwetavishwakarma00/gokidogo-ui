@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProfileThunk, updateProfileThunk } from "@/app/redux/features/authSlice";
+import { useRouter } from "next/navigation";
+import { fetchProfileThunk, updateProfileThunk, logout } from "@/app/redux/features/authSlice";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function ProfilePage() {
   const dispatch = useDispatch();
+  const router = useRouter();
   const profile = useSelector((state) => state.auth?.profile);
   const userRedux = useSelector((state) => state.auth?.user);
 
@@ -32,56 +34,54 @@ export default function ProfilePage() {
         customer_ID: u.CustomerId,
         email: u.EmailAddress,
         apikey: u.apikey,
-        deviceId: "web123", // server expects deviceid
+        deviceId: "web123",
       }));
     }
   }, [userRedux, dispatch]);
 
   useEffect(() => {
-  if (profile) {
-    const p = Array.isArray(profile) ? profile[0] : profile;
-    setForm({
-      firstName: p?.firstName || "",   // ✅ camelCase
-      lastName: p?.lastName || "",
-      mobile: p?.mobile || "",
-      dateOfBirth: p?.dateOfBirth || "",
-      title: p?.title || "",
-      gender: p?.gender || "",
-    });
-  }
-}, [profile]);
+    if (profile) {
+      const p = Array.isArray(profile) ? profile[0] : profile;
+      setForm({
+        firstName: p?.firstName || "",
+        lastName: p?.lastName || "",
+        mobile: p?.mobile || "",
+        dateOfBirth: p?.dateOfBirth || "",
+        title: p?.title || "",
+        gender: p?.gender || "",
+      });
+    }
+  }, [profile]);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const updateProfile = () => {
+  const updateProfile = async () => {
     if (!user) return toast.error("User not loaded");
-    dispatch(updateProfileThunk({
-  customer_ID: user.CustomerId,
-  email: user.EmailAddress,
-  apikey: user.apikey,
-  deviceId: user.CustomerId,
+    const result = await dispatch(updateProfileThunk({
+      customer_ID: user.CustomerId,
+      email: user.EmailAddress,
+      apikey: user.apikey,
+      deviceId: user.CustomerId,
+      firstName: form.firstName,
+      lastName: form.lastName,
+      mobile: form.mobile,
+      dateOfBirth: form.dateOfBirth,
+      title: form.title,
+      gender: form.gender,
+    }));
 
-  firstName: form.firstName,
-  lastName: form.lastName,
-  mobile: form.mobile,
-  dateOfBirth: form.dateOfBirth,
-  title: form.title,
-  gender: form.gender
-}));
+    if (updateProfileThunk.fulfilled.match(result)) {
+      toast.success("Profile Updated ✅");
+    } else {
+      toast.error("Update failed ❌");
+    }
+  };
 
-console.log({
-  customer_ID: user.CustomerId,
-  email: user.EmailAddress,
-  apikey: user.apikey,
-  deviceId: user.CustomerId,
-  firstName: form.firstName,
-  lastName: form.lastName,
-  mobile: form.mobile,
-  dateOfBirth: form.dateOfBirth,
-  title: form.title,
-  gender: form.gender
-});
-    toast.success("Profile Updated ✅");
+  const handleLogout = () => {
+    dispatch(logout());                          // Redux state clear
+    localStorage.removeItem("user");             // localStorage clear
+    toast.success("Logged out successfully!");
+    setTimeout(() => router.push("/login"), 500); // login page pe bhejo
   };
 
   return (
@@ -91,17 +91,30 @@ console.log({
 
         {/* Header */}
         <div className="bg-gradient-to-r from-[#69529d] to-[#7c5bc9] px-8 py-8 text-white">
-          <div className="flex items-center gap-5">
-            <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center text-4xl font-bold">
-              {form.firstName?.[0]?.toUpperCase() || "?"}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-5">
+              <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center text-4xl font-bold">
+                {form.firstName?.[0]?.toUpperCase() || "?"}
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">{form.firstName} {form.lastName}</h1>
+                <p className="text-purple-200 text-sm mt-1">{user?.EmailAddress || ""}</p>
+                <span className="mt-2 inline-block bg-white/20 text-white text-xs px-3 py-1 rounded-full">
+                  {form.title || "Member"}
+                </span>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold">{form.firstName} {form.lastName}</h1>
-              <p className="text-purple-200 text-sm mt-1">{user?.EmailAddress || ""}</p>
-              <span className="mt-2 inline-block bg-white/20 text-white text-xs px-3 py-1 rounded-full">
-                {form.title || "Member"}
-              </span>
-            </div>
+
+            {/* ✅ Logout Button */}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white text-sm font-medium px-4 py-2 rounded-xl transition"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+              </svg>
+              Logout
+            </button>
           </div>
         </div>
 
