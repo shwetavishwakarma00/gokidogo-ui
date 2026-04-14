@@ -6,32 +6,38 @@ import { fetchProfileThunk } from "@/app/redux/features/authSlice";
 import HomePage from "./home/page";
 
 export default function Page() {
+  const dispatch = useDispatch();
 
-const dispatch = useDispatch();
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
 
-useEffect(() => {
+    // ✅ SAFE CHECK
+    if (!userData || userData === "undefined") return;
 
-  const userData = localStorage.getItem("user");
+    let user = null;
 
-  if (!userData) return;
+    try {
+      user = JSON.parse(userData);
+    } catch (err) {
+      console.log("Invalid user JSON:", err);
+      return;
+    }
 
-  const user = JSON.parse(userData);
+    if (!user?.apikey) return;
 
-  if (!user || !user.apikey) return;
+    dispatch(
+      fetchProfileThunk({
+        customer_ID: user.customer_ID,
+        email: user.email,
+        apikey: user.apikey,
+        deviceid: "web123",
+      })
+    );
+  }, [dispatch]);
 
-  dispatch(
-    fetchProfileThunk({
-      customer_ID: user.customer_ID,
-      email: user.email,
-      apikey: user.apikey,
-      deviceid: "web123",
-    })
+  return (
+    <div>
+      <HomePage />
+    </div>
   );
-
-}, []);
-
-return <div>
-  <HomePage/>
-</div>;
-
 }

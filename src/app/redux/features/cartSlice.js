@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+// ✅ Get cart from localStorage
 const getCart = () => {
   if (typeof window !== "undefined") {
     const data = localStorage.getItem("cart");
@@ -8,8 +9,11 @@ const getCart = () => {
   return {};
 };
 
+// ✅ Save cart to localStorage
 const saveCart = (cart) => {
-  localStorage.setItem("cart", JSON.stringify(cart));
+  if (typeof window !== "undefined") {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }
 };
 
 const initialState = {
@@ -21,6 +25,7 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
 
+    // ➕ Add item
     addToCart: (state, action) => {
       const { userId, item } = action.payload;
 
@@ -44,6 +49,7 @@ const cartSlice = createSlice({
       saveCart(state.carts);
     },
 
+    // ➕ Increase qty
     increaseQty: (state, action) => {
       const { userId, id } = action.payload;
 
@@ -56,6 +62,7 @@ const cartSlice = createSlice({
       saveCart(state.carts);
     },
 
+    // ➖ Decrease qty
     decreaseQty: (state, action) => {
       const { userId, id } = action.payload;
 
@@ -67,6 +74,7 @@ const cartSlice = createSlice({
 
       item.qty -= 1;
 
+      // ❗ Auto remove if qty = 0
       if (item.qty <= 0) {
         state.carts[userId] = state.carts[userId].filter(
           (i) => i.mnuid !== id
@@ -76,19 +84,37 @@ const cartSlice = createSlice({
       saveCart(state.carts);
     },
 
+    // ❌ Remove item directly
+    removeFromCart: (state, action) => {
+      const { userId, id } = action.payload;
+
+      const cart = state.carts[userId] || [];
+
+      state.carts[userId] = cart.filter(
+        (item) => item.mnuid !== id
+      );
+
+      saveCart(state.carts);
+    },
+
+    // 🧹 Clear full cart
     clearCart: (state, action) => {
       const userId = action.payload;
+
       state.carts[userId] = [];
+
       saveCart(state.carts);
     }
 
   }
 });
 
+// ✅ EXPORTS
 export const {
   addToCart,
   increaseQty,
   decreaseQty,
+  removeFromCart,
   clearCart
 } = cartSlice.actions;
 
