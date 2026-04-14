@@ -1,217 +1,286 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useRouter } from "next/navigation";
-import { fetchProfileThunk, updateProfileThunk, logout } from "@/app/redux/features/authSlice";
+import { useEffect, useState, useRef } from "react";
+import { LogOut, Lock, User, Camera, Eye, EyeOff } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
+import { useRouter } from "next/navigation";
+
+const genderMap = { "1": "Male", "2": "Female", "3": "Other" };
 
 export default function ProfilePage() {
-  const dispatch = useDispatch();
   const router = useRouter();
-  const profile = useSelector((state) => state.auth?.profile);
-  const userRedux = useSelector((state) => state.auth?.user);
+  const fileInputRef = useRef(null);
 
-  const [user, setUser] = useState(null);
+  const [activeTab, setActiveTab] = useState("profile");
+  const [profileImage, setProfileImage] = useState(null);
+
+  const [showPass, setShowPass] = useState(false);
+
   const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
-    mobile: "",
-    dateOfBirth: "",
-    title: "",
-    gender: "",
+    firstName: "", lastName: "", email: "", mobile: "",
+    dateOfBirth: "", gender: "", address: "",
+    state: "", city: "", country: "",
   });
 
-  useEffect(() => {
-    let u = userRedux;
-    
-    if (!u) {
-      const stored = localStorage.getItem("user");
-      if (stored) u = JSON.parse(stored);
-    }
-    if (u) {
-      setUser(u);
-      console.log("USER OBJECT:", u);
-      dispatch(fetchProfileThunk({
-        customer_ID: u.CustomerId,
-        email: u.EmailAddress,
-        apikey: u.apikey,
-        deviceId: "web123",
-      }));
-      
-    }
-  }, [userRedux, dispatch]);
+  const [passwords, setPasswords] = useState({
+    newPassword: "",
+    confirmPassword: ""
+  });
+
+  const inputCls =
+    "w-full px-4 py-2.5 rounded-xl bg-white border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500";
+
+  const initials =
+    `${form.firstName?.[0] || ""}${form.lastName?.[0] || ""}`.toUpperCase() || "?";
 
   useEffect(() => {
-    if (profile) {
-      const p = Array.isArray(profile) ? profile[0] : profile;
-      setForm({
-        firstName: p?.firstName || "",
-        lastName: p?.lastName || "",
-        mobile: p?.mobile || "",
-        dateOfBirth: p?.dateOfBirth || "",
-        title: p?.title || "",
-        gender: p?.gender || "",
-      });
+    const storedImage = localStorage.getItem("profileImage");
+    if (storedImage) setProfileImage(storedImage);
+
+    const loginUser = JSON.parse(localStorage.getItem("user") || "null");
+    const signupUser = JSON.parse(localStorage.getItem("signupData") || "null");
+
+    let base = {
+      firstName: "", lastName: "", email: "", mobile: "",
+      dateOfBirth: "", gender: "", address: "",
+      state: "", city: "", country: "",
+    };
+
+    if (signupUser) base = { ...base, ...signupUser };
+
+    if (loginUser) {
+      const nameParts = (loginUser.CustomerName || "").split(" ");
+      base = {
+        ...base,
+        firstName: nameParts[0] || "",
+        lastName: nameParts.slice(1).join(" "),
+        email: loginUser.EmailAddress || "",
+        mobile: loginUser.MobileNo || "",
+        dateOfBirth: loginUser.DOB || "",
+        gender: genderMap[loginUser.Gender] || "",
+        address: loginUser.Address || "",
+        state: loginUser.State || "",
+        city: loginUser.City || "",
+        country: loginUser.Country || "",
+      };
     }
-  }, [profile]);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+    const saved = JSON.parse(localStorage.getItem("profileData") || "null");
+    setForm(saved || base);
+  }, []);
 
-  const updateProfile = async () => {
-    if (!user) return toast.error("User not loaded");
-    const result = await dispatch(updateProfileThunk({
-      customer_ID: user.CustomerId,
-      email: user.EmailAddress,
-      apikey: user.apikey,
-      deviceId: user.CustomerId,
-      firstName: form.firstName,
-      lastName: form.lastName,
-      mobile: form.mobile,
-      dateOfBirth: form.dateOfBirth,
-      title: form.title,
-      gender: form.gender,
-    }));
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
-    if (updateProfileThunk.fulfilled.match(result)) {
-      toast.success("Profile Updated ✅");
-    } else {
-      toast.error("Update failed ❌");
-    }
+  const handlePasswordChange = (e) =>
+    setPasswords({ ...passwords, [e.target.name]: e.target.value });
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setProfileImage(reader.result);
+      localStorage.setItem("profileImage", reader.result);
+      toast.success("Profile photo updated 📸");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const saveProfile = () => {
+    localStorage.setItem("profileData", JSON.stringify(form));
+    toast.success("Profile saved ✅");
+  };
+
+  const changePassword = () => {
+    if (!passwords.newPassword)
+      return toast.error("Enter password");
+
+    if (passwords.newPassword !== passwords.confirmPassword)
+      return toast.error("Passwords do not match");
+
+    toast.success("Password updated 🔐");
+    setPasswords({ newPassword: "", confirmPassword: "" });
   };
 
   const handleLogout = () => {
-    dispatch(logout());                          // Redux state clear
-    localStorage.removeItem("user");             // localStorage clear
-    toast.success("Logged out successfully!");
-    setTimeout(() => router.push("/login"), 500); // login page pe bhejo
+    localStorage.clear();
+    toast.success("Logged out 👋");
+    router.push("/login");
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 py-10 px-4">
+    <div className="min-h-screen bg-gray-100 p-6 text-black">
       <Toaster />
-      <div className="max-w-2xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden">
 
-        {/* Header */}
-        <div className="bg-gradient-to-r from-[#69529d] to-[#7c5bc9] px-8 py-8 text-white">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-5">
-              <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center text-4xl font-bold">
-                {form.firstName?.[0]?.toUpperCase() || "?"}
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold">{form.firstName} {form.lastName}</h1>
-                <p className="text-purple-200 text-sm mt-1">{user?.EmailAddress || ""}</p>
-                <span className="mt-2 inline-block bg-white/20 text-white text-xs px-3 py-1 rounded-full">
-                  {form.title || "Member"}
-                </span>
-              </div>
-            </div>
+      <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-lg flex overflow-hidden">
 
-            {/* ✅ Logout Button */}
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white text-sm font-medium px-4 py-2 rounded-xl transition"
+        {/* SIDEBAR */}
+        <div className="w-64 border-r p-6 flex flex-col">
+
+          {/* PROFILE TOP */}
+          <div className="text-center mb-8">
+            <div
+              onClick={() => fileInputRef.current.click()}
+              className="w-24 h-24 mx-auto rounded-full bg-purple-100 flex items-center justify-center cursor-pointer overflow-hidden shadow"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
-              </svg>
-              Logout
-            </button>
-          </div>
-        </div>
-
-        {/* Form */}
-        <div className="px-8 py-8">
-          <h2 className="text-lg font-semibold text-gray-700 mb-6 border-b pb-2">Edit Profile</h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-
-            <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-500 font-medium">First Name</label>
-              <input
-                name="firstName"
-                value={form.firstName}
-                onChange={handleChange}
-                placeholder="First Name"
-                className="border border-gray-200 p-3 rounded-xl text-black focus:ring-2 focus:ring-purple-400 outline-none"
-              />
+              {profileImage ? (
+                <img src={profileImage} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-2xl font-bold text-black">
+                  {initials}
+                </span>
+              )}
             </div>
 
-            <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-500 font-medium">Last Name</label>
-              <input
-                name="lastName"
-                value={form.lastName}
-                onChange={handleChange}
-                placeholder="Last Name"
-                className="border border-gray-200 p-3 rounded-xl text-black focus:ring-2 focus:ring-purple-400 outline-none"
-              />
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-500 font-medium">Mobile</label>
-              <input
-                name="mobile"
-                value={form.mobile}
-                onChange={handleChange}
-                placeholder="Mobile"
-                className="border border-gray-200 p-3 rounded-xl text-black focus:ring-2 focus:ring-purple-400 outline-none"
-              />
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-500 font-medium">Date of Birth</label>
-              <input
-                type="date"
-                name="dateOfBirth"
-                value={form.dateOfBirth}
-                onChange={handleChange}
-                className="border border-gray-200 p-3 rounded-xl text-black focus:ring-2 focus:ring-purple-400 outline-none"
-              />
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-500 font-medium">Title</label>
-              <select
-                name="title"
-                value={form.title}
-                onChange={handleChange}
-                className="border border-gray-200 p-3 rounded-xl text-black focus:ring-2 focus:ring-purple-400 outline-none"
-              >
-                <option value="">Select Title</option>
-                <option>Mr</option>
-                <option>Mrs</option>
-                <option>Ms</option>
-              </select>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-500 font-medium">Gender</label>
-              <select
-                name="gender"
-                value={form.gender}
-                onChange={handleChange}
-                className="border border-gray-200 p-3 rounded-xl text-black focus:ring-2 focus:ring-purple-400 outline-none"
-              >
-                <option value="">Select Gender</option>
-                <option value="M">Male</option>
-                <option value="F">Female</option>
-              </select>
-            </div>
-
+            <p className="mt-3 font-semibold text-black">
+              {form.firstName} {form.lastName}
+            </p>
+            <p className="text-xs text-gray-600">{form.email}</p>
           </div>
 
-          <button
-            onClick={updateProfile}
-            disabled={!user}
-            className="mt-8 w-full bg-gradient-to-r from-[#69529d] to-[#7c5bc9] text-white py-3 rounded-xl font-semibold text-lg hover:opacity-90 transition disabled:opacity-50"
-          >
-            Update Profile
-          </button>
+          {/* MENU */}
+          <MenuBtn icon={<User size={16} />} label="Profile" active={activeTab === "profile"} onClick={() => setActiveTab("profile")} />
+          <MenuBtn icon={<Lock size={16} />} label="Password" active={activeTab === "password"} onClick={() => setActiveTab("password")} />
+
+          <div className="flex-1" />
+
+          <MenuBtn icon={<LogOut size={18} />} label="Logout" danger onClick={handleLogout} />
         </div>
 
+        {/* CONTENT */}
+        <div className="flex-1 p-8 min-h-[650px]">
+
+          {/* TITLE */}
+          <h2 className="text-2xl font-bold text-purple-900 mb-6 underline underline-offset-1 decoration-2">
+            Personal Information
+          </h2>
+          
+          {/* PROFILE */}
+          {activeTab === "profile" && (
+            <div className="grid md:grid-cols-2 gap-5">
+
+              <Input label="First Name" name="firstName" value={form.firstName} onChange={handleChange} />
+              <Input label="Last Name" name="lastName" value={form.lastName} onChange={handleChange} />
+              <Input label="Email" name="email" value={form.email} onChange={handleChange} />
+              <Input label="Mobile" name="mobile" value={form.mobile} onChange={handleChange} />
+
+              <Input type="date" label="Date of Birth" name="dateOfBirth" value={form.dateOfBirth} onChange={handleChange} />
+
+              <div>
+                <label className="text-sm font-medium text-black">Gender</label>
+                <div className="flex gap-4 mt-2 text-black">
+                  {["Male", "Female", "Other"].map((g) => (
+                    <label key={g} className="flex items-center gap-1">
+                      <input type="radio" name="gender" value={g} checked={form.gender === g} onChange={handleChange} />
+                      {g}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="md:col-span-2">
+                <Input label="Address" name="address" value={form.address} onChange={handleChange} />
+              </div>
+
+              <Input label="City" name="city" value={form.city} onChange={handleChange} />
+              <Input label="State" name="state" value={form.state} onChange={handleChange} />
+              <Input label="Country" name="country" value={form.country} onChange={handleChange} />
+
+              <div className="md:col-span-2">
+                <button
+                  onClick={saveProfile}
+                  className="bg-purple-600 hover:bg-orange-700 text-white px-6 py-2.5 rounded-xl"
+                >
+                  Save Changes
+                </button>
+              </div>
+
+            </div>
+          )}
+
+          {/* PASSWORD */}
+          {activeTab === "password" && (
+            <div className="max-w-md space-y-4">
+
+              <div className="relative">
+                <Input
+                  type={showPass ? "text" : "password"}
+                  label="New Password"
+                  name="newPassword"
+                  value={passwords.newPassword}
+                  onChange={handlePasswordChange}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  className="absolute right-3 top-9 text-gray-600"
+                >
+                  {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+
+              <div className="relative">
+                <Input
+                  type={showPass ? "text" : "password"}
+                  label="Confirm Password"
+                  name="confirmPassword"
+                  value={passwords.confirmPassword}
+                  onChange={handlePasswordChange}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  className="absolute right-3 top-9 text-gray-600"
+                >
+                  {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+
+              <button
+                onClick={changePassword}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl"
+              >
+                Update Password
+              </button>
+
+            </div>
+          )}
+
+        </div>
       </div>
+
+      <input type="file" ref={fileInputRef} onChange={handleImageChange} hidden />
     </div>
   );
 }
+
+/* COMPONENTS */
+
+function MenuBtn({ icon, label, active, danger, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm mb-2
+      ${danger ? "text-red-600 hover:bg-red-50 font-semibold"
+        : active ? "bg-purple-100 text-purple-600 font-semibold"
+        : "text-black hover:bg-gray-100"}`}
+    >
+      {icon} {label}
+    </button>
+  );
+}
+
+function Input({ label, ...props }) {
+  return (
+    <div>
+      <label className="text-sm font-medium text-black">{label}</label>
+      <input
+        {...props}
+        className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-300 bg-white text-black focus:ring-2 focus:ring-purple-500 outline-none"
+      />
+    </div>
+  );
+}
+
