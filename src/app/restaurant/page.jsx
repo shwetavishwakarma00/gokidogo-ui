@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import {
+  useEffect,
+  useState,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchRestaurant } from "@/app/redux/features/restaurantSlice";
 import {
@@ -11,7 +17,9 @@ import {
 } from "@/app/redux/features/cartSlice";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Trash2 } from "lucide-react"; // ✅ delete icon
+import { Trash2 } from "lucide-react";
+
+const EURO_TO_INR = 90;
 
 export default function RestaurantMenu() {
   const dispatch = useDispatch();
@@ -24,43 +32,87 @@ export default function RestaurantMenu() {
   const userId = user?.customerId;
 
   const cartItems = useSelector(
-    (state) => state.cart.carts[userId] || []
+    (state) => state.cart.carts?.[userId] ?? []
   );
 
   const [activeCategory, setActiveCategory] = useState(null);
   const [isSticky, setIsSticky] = useState(false);
   const sentinelRef = useRef(null);
 
-  const EURO_TO_INR = 90;
-
+  // ✅ Fetch data
   useEffect(() => {
     dispatch(fetchRestaurant());
   }, [dispatch]);
 
-  useEffect(() => {
-    if (categories?.length) {
-      setActiveCategory(categories[0].category_id);
-    }
-  }, [categories]);
-
+  // ✅ Sticky observer (optimized)
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => setIsSticky(!entry.isIntersecting),
+      ([entry]) => {
+        setIsSticky((prev) =>
+          prev !== !entry.isIntersecting
+            ? !entry.isIntersecting
+            : prev
+        );
+      },
       { threshold: 0 }
     );
     if (sentinelRef.current) observer.observe(sentinelRef.current);
     return () => observer.disconnect();
   }, []);
 
-  if (loading)
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading...
-      </div>
-    );
+  // ✅ Derived active category (memoized)
+  const derivedActiveCategory = useMemo(
+    () => activeCategory ?? categories?.[0]?.category_id,
+    [activeCategory, categories]
+  );
 
-  const selectedCategory = categories?.find(
-    (cat) => cat.category_id === activeCategory
+  // ✅ Selected category (memoized)
+  const selectedCategory = useMemo(
+    () =>
+      categories?.find(
+        (cat) => cat.category_id === derivedActiveCategory
+      ),
+    [categories, derivedActiveCategory]
+  );
+
+  // ✅ Cart map (O(1) lookup)
+  const cartMap = useMemo(() => {
+    const map = {};
+    cartItems.forEach((i) => {
+      map[i.mnuid] = i;
+    });
+    return map;
+  }, [cartItems]);
+
+  // ✅ Totals (memoized)
+  const { subtotal, gst, total } = useMemo(() => {
+    const subtotal = cartItems.reduce(
+      (sum, i) => sum + i.price * i.qty * EURO_TO_INR,
+      0
+    );
+    const gst = subtotal * 0.05;
+    return { subtotal, gst, total: subtotal + gst };
+  }, [cartItems]);
+
+  // ✅ Handlers (memoized)
+  const handleAdd = useCallback(
+    (item) => dispatch(addToCart({ userId, item })),
+    [dispatch, userId]
+  );
+
+  const handleIncrease = useCallback(
+    (id) => dispatch(increaseQty({ userId, id })),
+    [dispatch, userId]
+  );
+
+  const handleDecrease = useCallback(
+    (id) => dispatch(decreaseQty({ userId, id })),
+    [dispatch, userId]
+  );
+
+  const handleRemove = useCallback(
+    (id) => dispatch(removeFromCart({ userId, id })),
+    [dispatch, userId]
   );
 
   const getImage = (item) => {
@@ -70,13 +122,12 @@ export default function RestaurantMenu() {
     return "/fallback.jpg";
   };
 
-  const subtotal = cartItems.reduce(
-    (sum, i) => sum + i.price * i.qty * EURO_TO_INR,
-    0
-  );
-
-  const gst = subtotal * 0.05;
-  const total = subtotal + gst;
+  if (loading)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
 
   return (
     <div className="min-h-screen bg-[#f4f4f8] text-gray-800">
@@ -114,6 +165,7 @@ export default function RestaurantMenu() {
               height={200}
               alt="food"
               className="w-full h-full object-cover"
+              priority
             />
           </div>
 
@@ -140,7 +192,7 @@ export default function RestaurantMenu() {
               key={cat.category_id}
               onClick={() => setActiveCategory(cat.category_id)}
               className={`px-4 py-2 rounded-full text-sm ${
-                activeCategory === cat.category_id
+                derivedActiveCategory === cat.category_id
                   ? "bg-purple-600 text-white"
                   : "bg-gray-100"
               }`}
@@ -154,9 +206,8 @@ export default function RestaurantMenu() {
       {/* MAIN */}
       <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-4 gap-6">
 
-        {/* ✅ ORDER SUMMARY LEFT */}
+        {/* ORDER SUMMARY */}
         <div className="lg:col-span-1 order-2 lg:order-1">
-
           <div className="bg-white rounded-xl shadow p-4 sticky top-24">
 
             <h2 className="font-bold text-lg mb-4">
@@ -172,34 +223,24 @@ export default function RestaurantMenu() {
                   key={item.mnuid}
                   className="flex gap-3 mb-4 border-b pb-3"
                 >
-
-                  {/* ✅ IMAGE */}
                   <Image
                     src={getImage(item)}
                     width={60}
                     height={60}
                     alt={item.name}
                     className="rounded-lg object-cover"
+                    sizes="60px"
                   />
 
                   <div className="flex-1">
-
                     <div className="flex justify-between items-center">
                       <p className="text-sm font-semibold">
                         {item.name}
                       </p>
 
-                      {/* ✅ DELETE ICON */}
                       <button
-                        onClick={() =>
-                          dispatch(
-                            removeFromCart({
-                              userId,
-                              id: item.mnuid,
-                            })
-                          )
-                        }
-                        className="text-red-500 hover:text-red-700"
+                        onClick={() => handleRemove(item.mnuid)}
+                        className="text-red-500"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -209,17 +250,9 @@ export default function RestaurantMenu() {
                       ₹{itemTotal.toFixed(0)}
                     </p>
 
-                    {/* QTY */}
                     <div className="flex gap-2 mt-1">
                       <button
-                        onClick={() =>
-                          dispatch(
-                            decreaseQty({
-                              userId,
-                              id: item.mnuid,
-                            })
-                          )
-                        }
+                        onClick={() => handleDecrease(item.mnuid)}
                         className="border w-6 h-6"
                       >
                         -
@@ -228,20 +261,12 @@ export default function RestaurantMenu() {
                       <span>{item.qty}</span>
 
                       <button
-                        onClick={() =>
-                          dispatch(
-                            increaseQty({
-                              userId,
-                              id: item.mnuid,
-                            })
-                          )
-                        }
+                        onClick={() => handleIncrease(item.mnuid)}
                         className="border w-6 h-6"
                       >
                         +
                       </button>
                     </div>
-
                   </div>
                 </div>
               );
@@ -278,77 +303,67 @@ export default function RestaurantMenu() {
           </div>
         </div>
 
-        {/* MENU RIGHT */}
+        {/* MENU */}
         <div className="lg:col-span-3 order-1 lg:order-2">
-
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5">
-            {selectedCategory?.category_products?.map((item) => {
 
-              const cartItem = cartItems.find(
-                (i) => i.mnuid === item.mnuid
-              );
+            {selectedCategory?.category_products?.length > 0 &&
+              selectedCategory.category_products.map((item) => {
 
-              return (
-                <div key={item.mnuid} className="bg-white rounded-xl shadow">
+                const cartItem = cartMap[item.mnuid];
 
-                  <Image
-                    src={getImage(item)}
-                    width={300}
-                    height={200}
-                    alt={item.name}
-                    className="w-full h-40 object-cover rounded-t-xl"
-                  />
+                return (
+                  <div key={item.mnuid} className="bg-white rounded-xl shadow">
 
-                  <div className="p-3">
-                    <h3 className="font-semibold">{item.name}</h3>
+                    <Image
+                      src={getImage(item)}
+                      width={300}
+                      height={200}
+                      alt={item.name}
+                      className="w-full h-40 object-cover rounded-t-xl"
+                      sizes="(max-width: 768px) 100vw, 300px"
+                    />
 
-                    <p className="text-sm text-gray-500">
-                      ₹{(item.price * EURO_TO_INR).toFixed(0)}
-                    </p>
+                    <div className="p-3">
+                      <h3 className="font-semibold">{item.name}</h3>
 
-                    {!cartItem ? (
-                      <button
-                        onClick={() =>
-                          dispatch(addToCart({ userId, item }))
-                        }
-                        className="bg-purple-600 text-white px-3 py-1 rounded mt-2"
-                      >
-                        Add
-                      </button>
-                    ) : (
-                      <div className="flex gap-2 mt-2">
+                      <p className="text-sm text-gray-500">
+                        ₹{(item.price * EURO_TO_INR).toFixed(0)}
+                      </p>
+
+                      {!cartItem ? (
                         <button
-                          onClick={() =>
-                            dispatch(
-                              decreaseQty({ userId, id: item.mnuid })
-                            )
-                          }
-                          className="border w-6 h-6"
+                          onClick={() => handleAdd(item)}
+                          className="bg-purple-600 text-white px-3 py-1 rounded mt-2"
                         >
-                          -
+                          Add
                         </button>
+                      ) : (
+                        <div className="flex gap-2 mt-2">
+                          <button
+                            onClick={() => handleDecrease(item.mnuid)}
+                            className="border w-6 h-6"
+                          >
+                            -
+                          </button>
 
-                        <span>{cartItem.qty}</span>
+                          <span>{cartItem.qty}</span>
 
-                        <button
-                          onClick={() =>
-                            dispatch(
-                              increaseQty({ userId, id: item.mnuid })
-                            )
-                          }
-                          className="border w-6 h-6"
-                        >
-                          +
-                        </button>
-                      </div>
-                    )}
+                          <button
+                            onClick={() => handleIncrease(item.mnuid)}
+                            className="border w-6 h-6"
+                          >
+                            +
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
                   </div>
+                );
+              })}
 
-                </div>
-              );
-            })}
           </div>
-
         </div>
 
       </div>
