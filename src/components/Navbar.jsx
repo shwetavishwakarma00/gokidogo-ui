@@ -1,12 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+
+  // ✅ FIX: avoid hydration mismatch
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const user = useSelector((state) => state.auth?.user);
+
+  // ✅ IMPORTANT: prevent SSR render mismatch
+  if (!mounted) return null;
 
   return (
     <nav className="sticky top-0 z-50 
@@ -36,17 +47,18 @@ export default function Navbar() {
           <a href="#" className="hover:opacity-80 transition">For Businesses</a>
           <a href="#" className="hover:opacity-80 transition">Sustainability</a>
 
-          {/* ✅ Login ya Profile */}
+          {/* LOGIN / PROFILE */}
           {user ? (
             <Link href="/profile">
               <div className="flex items-center gap-2 bg-white/20 hover:bg-white/30 
               px-3 py-1.5 rounded-lg transition cursor-pointer">
-                {/* Avatar circle with first letter */}
+
                 <div className="w-7 h-7 rounded-full bg-white text-purple-700 
                 flex items-center justify-center font-bold text-sm">
                   {user?.FirstName?.[0]?.toUpperCase() || 
                    user?.EmailAddress?.[0]?.toUpperCase() || "U"}
                 </div>
+
                 <span className="text-white font-semibold text-sm">
                   {user?.FirstName || "Profile"}
                 </span>
@@ -80,7 +92,6 @@ export default function Navbar() {
           <a href="#">For Businesses</a>
           <a href="#">Sustainability</a>
 
-          {/* ✅ Mobile: Login ya Profile */}
           {user ? (
             <Link href="/profile" onClick={() => setOpen(false)}>
               <div className="flex items-center gap-2">
