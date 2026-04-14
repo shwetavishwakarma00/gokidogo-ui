@@ -2,18 +2,26 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { sendOtpThunk, verifyOtpThunk, signupThunk, loginThunk, fetchProfileThunk } from "@/app/redux/features/authSlice";
-import { motion } from "framer-motion";
+import {
+  sendOtpThunk,
+  verifyOtpThunk,
+  signupThunk,
+  loginThunk,
+  fetchProfileThunk,
+} from "@/app/redux/features/authSlice";
+import { motion, AnimatePresence } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-import { getDeviceId } from "../utils/deviceID";
 
 export default function AuthPage() {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const otpRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
+  const otpRefs = [
+    useRef(null), useRef(null), useRef(null),
+    useRef(null), useRef(null), useRef(null),
+  ];
 
   const [screen, setScreen] = useState("login");
   const [loading, setLoading] = useState(false);
@@ -22,15 +30,21 @@ export default function AuthPage() {
   const [otp, setOtp] = useState(Array(6).fill(""));
   const [timer, setTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
+  const [otpError, setOtpError] = useState(false);
 
   const [form, setForm] = useState({
-    title: "",
     firstName: "",
     lastName: "",
     email: "",
     phone: "",
     password: "",
     confirmPassword: "",
+    dob: "",
+    gender: "",
+    address: "",
+    state: "",
+    city: "",
+    country: "",
   });
 
   const [loginForm, setLoginForm] = useState({
@@ -38,21 +52,67 @@ export default function AuthPage() {
     password: "",
   });
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-  const handleLoginChange = (e) => setLoginForm({ ...loginForm, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
-  /* ---------------- SEND OTP ---------------- */
+  const handleLoginChange = (e) =>
+    setLoginForm({ ...loginForm, [e.target.name]: e.target.value });
+
+  /* OTP INPUT */
+  const handleOtpChange = (value, index) => {
+    if (!/^[0-9]?$/.test(value)) return;
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+    setOtpError(false);
+    if (value && index < 5) otpRefs[index + 1].current?.focus();
+  };
+
+  const handleKeyDown = (e, index) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0)
+      otpRefs[index - 1].current?.focus();
+  };
+
+  const handlePasteOtp = (e) => {
+  e.preventDefault();
+
+  const pasteData = e.clipboardData.getData("text").trim();
+
+  if (!/^\d+$/.test(pasteData)) return;
+
+  const digits = pasteData.slice(0, 6).split("");
+
+  const newOtp = [...otp];
+
+  digits.forEach((num, i) => {
+    newOtp[i] = num;
+    if (otpRefs[i]?.current) {
+      otpRefs[i].current.value = num;
+    }
+  });
+
+  setOtp(newOtp);
+
+  // move focus to last filled input
+  const nextIndex = digits.length < 6 ? digits.length : 5;
+  otpRefs[nextIndex]?.current?.focus();
+};
+
+  /* SEND OTP */
   const sendOtp = async () => {
     if (!form.email) return toast.error("Email required");
-    if (form.password !== form.confirmPassword) return toast.error("Passwords don't match");
+    if (form.password !== form.confirmPassword)
+      return toast.error("Passwords don't match");
 
     try {
       setLoading(true);
       await dispatch(sendOtpThunk({ deviceId: "web123", email: form.email })).unwrap();
+
       toast.success("OTP sent 🚀");
       setScreen("otp");
       setTimer(30);
       setCanResend(false);
+      setOtp(Array(6).fill(""));
     } catch {
       toast.error("OTP failed");
     } finally {
@@ -60,38 +120,19 @@ export default function AuthPage() {
     }
   };
 
-  /* ---------------- OTP HANDLERS ---------------- */
-  const handleOtpChange = (value, index) => {
-    if (!/^[0-9]?$/.test(value)) return;
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-    if (value && index < 5) otpRefs[index + 1].current.focus();
-  };
-
-  const handleKeyDown = (e, index) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) otpRefs[index - 1].current.focus();
-  };
-
-  const handlePaste = (e) => {
-    e.preventDefault();
-    const paste = e.clipboardData.getData("text").trim();
-    if (!/^[0-9]+$/.test(paste)) return;
-    const arr = paste.slice(0, 6).split("");
-    const newOtp = [...otp];
-    arr.forEach((num, i) => (newOtp[i] = num));
-    setOtp(newOtp);
-    if (otpRefs[arr.length - 1]) otpRefs[arr.length - 1].current.focus();
-  };
-
-  /* ---------------- VERIFY OTP & SIGNUP ---------------- */
+  /* VERIFY OTP + SIGNUP */
   const verifyOtp = async () => {
     const code = otp.join("");
     if (code.length < 6) return toast.error("Enter full OTP");
 
     try {
       setLoading(true);
-      await dispatch(verifyOtpThunk({ deviceId: "web123", email: form.email, otp: code })).unwrap();
+      setOtpError(false);
+
+      await dispatch(
+        verifyOtpThunk({ deviceId: "web123", email: form.email, otp: code })
+      ).unwrap();
+
       await dispatch(
         signupThunk({
           firstname: form.firstName,
@@ -99,79 +140,108 @@ export default function AuthPage() {
           email: form.email,
           mobile: form.phone,
           passwd: form.password,
-          gender: "1",
+          gender: form.gender,
+          dob: form.dob,
+          address: form.address,
+          state: form.state,
+          city: form.city,
+          country: form.country,
         })
       ).unwrap();
 
+      const genderLabel = { "1": "Male", "2": "Female", "3": "Other" };
+
+      localStorage.setItem(
+        "signupData",
+        JSON.stringify({
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          mobile: form.phone,
+          dateOfBirth: form.dob,
+          gender: genderLabel[form.gender] || form.gender,
+          address: form.address,
+          state: form.state,
+          city: form.city,
+          country: form.country,
+        })
+      );
+
+      // ✅ AUTO FILL LOGIN
+      setLoginForm({
+        email: form.email,
+        password: form.password,
+      });
+
       toast.success("Signup Successful 🎉");
-      setScreen("login");
-    } catch (err) {
-      console.error(err);
-      toast.error("Verification/Signup failed");
+
+      setTimeout(() => setScreen("login"), 1200);
+    } catch {
+      setOtpError(true);
+      toast.error("Invalid OTP ❌");
     } finally {
       setLoading(false);
     }
   };
 
-  /* ---------------- LOGIN ---------------- */
-  const login = async () => {
-    if (!loginForm.email || !loginForm.password) {
-      toast.error("Email & Password required");
-      return;
+  /* LOGIN */
+ const login = async () => {
+  if (!loginForm.email || !loginForm.password) {
+    toast.error("Email & Password required");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const response = await dispatch(
+      loginThunk({
+        usrid: loginForm.email,
+        passwd: loginForm.password,
+        deviceid: "web123",
+      })
+    ).unwrap();
+
+    const users = response?.data?.[0]?.DataValue;
+
+    if (!users || users.length === 0) {
+      return toast.error("Invalid login");
     }
 
-    try {
-      setLoading(true);
+    const user = users[0]; // API should already return matched user
 
-      const response = await dispatch(
-        loginThunk({
-          usrid: loginForm.email,
-          passwd: loginForm.password,
-          deviceid: "web123",
-        })
-      ).unwrap();
+    if (
+      user.EmailAddress !== loginForm.email
+    ) {
+      return toast.error("Invalid email or password");
+    }
 
-      console.log("LOGIN RESPONSE:", response);
+    localStorage.setItem("user", JSON.stringify(user));
 
-      const user = response?.data?.[0]?.DataValue?.[0];
-
-      if (!user) {
-        toast.error("Login response invalid");
-        return;
-      }
-
-      // ✅ Save to localStorage
-      localStorage.setItem("user", JSON.stringify(user));
-
-      // ✅ Fetch profile with correct PascalCase field names
-      dispatch(fetchProfileThunk({
+    dispatch(
+      fetchProfileThunk({
         customer_ID: user.CustomerId,
         email: user.EmailAddress,
         apikey: user.apikey,
         deviceId: "web123",
-      }));
+      })
+    );
 
-      toast.success("Login Successful 🎉");
-      setScreen("success");
+    toast.success("Login Successful 🎉");
+    setTimeout(() => router.push("/profile"), 1500);
 
-      setTimeout(() => {
-        router.push("/profile");
-      }, 1500);
+  } catch (err) {
+    toast.error("Invalid email or password");
+  } finally {
+    setLoading(false);
+  }
+};
 
-    } catch (err) {
-      console.error(err);
-      toast.error("Login failed");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /* ---------------- RESEND TIMER ---------------- */
+  /* TIMER */
   useEffect(() => {
     let interval;
-    if (screen === "otp" && timer > 0) {
-      interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
-    }
+    if (screen === "otp" && timer > 0)
+      interval = setInterval(() => setTimer((p) => p - 1), 1000);
     if (timer === 0) setCanResend(true);
     return () => clearInterval(interval);
   }, [screen, timer]);
@@ -191,136 +261,233 @@ export default function AuthPage() {
     }
   };
 
+  const inputCls =
+    "w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 outline-none text-black bg-white text-sm";
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-300 px-4 py-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 to-purple-300 p-4 sm:p-6 md:p-8">
       <Toaster />
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl p-6 sm:p-10 rounded-3xl shadow-2xl border border-gray-200 bg-white"
-      >
-        {/* SIGNUP */}
-        {screen === "signup" && (
-          <div className="flex flex-col gap-5">
-            <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-800">Create Account</h2>
-            <select
-              name="title"
-              value={form.title}
-              onChange={handleChange}
-              className="border p-3 rounded-lg cursor-pointer text-black focus:ring-2 focus:ring-green-400"
-            >
-              <option value="">Select Title</option>
-              <option>Mr</option>
-              <option>Ms</option>
-              <option>Mrs</option>
-            </select>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <input name="firstName" placeholder="First Name" onChange={handleChange} className="border p-3 rounded focus:ring-2 focus:ring-green-400 text-black" />
-              <input name="lastName" placeholder="Last Name" onChange={handleChange} className="border p-3 rounded focus:ring-2 focus:ring-green-400 text-black" />
-            </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={screen}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -30 }}
+          transition={{ duration: 0.3 }}
+          className="w-full max-w-3xl bg-white p-5 sm:p-8 md:p-10 rounded-2xl shadow-2xl border border-purple-200"
+        >
 
-            <input type="email" name="email" placeholder="Email" onChange={handleChange} className="border p-3 rounded focus:ring-2 focus:ring-green-400 text-black" />
-            <input type="tel" name="phone" placeholder="Phone" onChange={handleChange} className="border p-3 rounded focus:ring-2 focus:ring-green-400 text-black" />
+          {/* LOGIN */}
+          {screen === "login" && (
+            <div className="space-y-4 sm:space-y-5">
+              <h1 className="text-center text-xl sm:text-2xl md:text-3xl font-bold text-purple-900 underline underline-offset-2 decoration-2">
+                Welcome Back 👋
+              </h1>
 
-            <div className="relative">
-              <input type={showPassword ? "text" : "password"} name="password" placeholder="Password" onChange={handleChange} className="border p-3 rounded w-full focus:ring-2 focus:ring-green-600 text-black" />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-lg text-gray-700 hover:text-green-600 transition">
-                {showPassword ? <FiEye /> : <FiEyeOff />}
-              </button>
-            </div>
+              <input
+                className={inputCls}
+                name="email"
+                placeholder="Email"
+                value={loginForm.email}
+                onChange={handleLoginChange}
+              />
 
-            <div className="relative">
-              <input type={showConfirm ? "text" : "password"} name="confirmPassword" placeholder="Confirm Password" onChange={handleChange} className="border p-3 rounded w-full focus:ring-2 focus:ring-green-600 text-black" />
-              <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-3 text-lg text-gray-700 hover:text-green-600 transition">
-                {showConfirm ? <FiEye /> : <FiEyeOff />}
-              </button>
-            </div>
-
-            <motion.button whileTap={{ scale: 0.95 }} onClick={sendOtp} disabled={loading} className="bg-green-600 hover:bg-orange-600 text-white p-4 rounded-lg font-semibold text-lg sm:text-xl transition shadow-md">
-              {loading ? "Sending..." : "Signup"}
-            </motion.button>
-
-            <p className="text-center text-gray-600">
-              Already have an account?{" "}
-              <button onClick={() => setScreen("login")} className="text-blue-600 font-semibold hover:underline">
-                Login
-              </button>
-            </p>
-          </div>
-        )}
-
-        {/* OTP */}
-        {screen === "otp" && (
-          <div className="flex flex-col gap-6 items-center">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center">Enter OTP</h2>
-
-            <div onPaste={handlePaste} className="flex justify-center gap-3 sm:gap-4">
-              {otp.map((digit, i) => (
-                <motion.input
-                  key={i}
-                  ref={otpRefs[i]}
-                  value={digit}
-                  maxLength={1}
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  onChange={(e) => handleOtpChange(e.target.value, i)}
-                  onKeyDown={(e) => handleKeyDown(e, i)}
-                  whileFocus={{ scale: 1.05 }}
-                  className={`w-14 h-14 sm:w-16 sm:h-16 text-center text-black text-lg sm:text-xl border rounded-xl transition-all
-                    ${digit ? "border-green-500 shadow-lg" : "border-gray-300"}
-                    focus:ring-2 focus:ring-blue-400`}
+              <div className="relative">
+                <input
+                  className={inputCls}
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={loginForm.password}
+                  onChange={handleLoginChange}
                 />
-              ))}
-            </div>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-gray-500"
+                >
+                  {showPassword ? <FiEye /> : <FiEyeOff />}
+                </button>
+              </div>
 
-            <motion.button whileTap={{ scale: 0.95 }} onClick={verifyOtp} disabled={loading} className="bg-purple-600 hover:bg-purple-800 text-white p-4 rounded-lg font-semibold w-full text-lg sm:text-xl transition shadow-md">
-              {loading ? "Verifying..." : "Verify OTP"}
-            </motion.button>
-
-            <div className="text-sm sm:text-base text-gray-600 text-center">
-              {canResend ? (
-                <button onClick={resendOtp} className="text-red-600 hover:underline">Resend OTP</button>
-              ) : (
-                <p>Resend OTP in {timer}s</p>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* LOGIN */}
-        {screen === "login" && (
-          <div className="flex flex-col gap-5">
-            <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-800">Login</h2>
-            <input type="email" name="email" placeholder="Email" value={loginForm.email} onChange={handleLoginChange} className="border p-3 rounded w-full focus:ring-2 focus:ring-green-400 text-black" />
-            <div className="relative">
-              <input type={showPassword ? "text" : "password"} name="password" placeholder="Password" value={loginForm.password} onChange={handleLoginChange} className="border p-3 rounded w-full focus:ring-2 focus:ring-green-600 text-black" />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-lg text-gray-700 hover:text-green-600 transition">
-                {showPassword ? <FiEye /> : <FiEyeOff />}
+              <button
+                onClick={login}
+                disabled={loading}
+                className="w-full bg-purple-500 hover:bg-purple-600 text-white py-2 sm:py-3 rounded-lg font-semibold"
+              >
+                {loading ? "Logging in..." : "Login"}
               </button>
+
+              <p className="text-center text-sm text-black">
+                Not registered?{" "}
+                <span
+                  onClick={() => setScreen("signup")}
+                  className="text-blue-700 text-[16px] underline cursor-pointer"
+                >
+                  SignUp
+                </span>
+              </p>
             </div>
-            <motion.button whileTap={{ scale: 0.95 }} onClick={login} disabled={loading} className="bg-blue-600 hover:bg-blue-800 text-white p-4 rounded-lg font-semibold w-full text-lg sm:text-xl transition shadow-md">
-              {loading ? "Logging in..." : "Login"}
-            </motion.button>
+          )}
 
-            <p className="text-center text-gray-600">
-              Don't have an account?{" "}
-              <button onClick={() => setScreen("signup")} className="text-green-600 font-semibold hover:underline">
-                Signup
+          {/* SIGNUP */}
+          {screen === "signup" && (
+            <div className="space-y-4">
+              <h1 className="text-center text-xl sm:text-2xl md:text-3xl font-bold text-purple-900">
+                Create Account
+              </h1>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <input className={inputCls} name="firstName" placeholder="First Name" onChange={handleChange} />
+                <input className={inputCls} name="lastName" placeholder="Last Name" onChange={handleChange} />
+              </div>
+
+              <input className={inputCls} name="email" placeholder="Email Address" onChange={handleChange} />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <input className={inputCls} name="phone" placeholder="Mobile Number" onChange={handleChange} />
+                <input className={inputCls} type="date" name="dob" onChange={handleChange} />
+              </div>
+
+              <textarea className={inputCls} name="address" placeholder="Address" rows={2} onChange={handleChange} />
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                <input className={inputCls} name="city" placeholder="City" onChange={handleChange} />
+                <input className={inputCls} name="state" placeholder="State" onChange={handleChange} />
+                <input className={inputCls} name="country" placeholder="Country" onChange={handleChange} />
+              </div>
+
+              <div className="flex flex-wrap gap-4 text-black text-sm">
+                {[["1", "Male"], ["2", "Female"], ["3", "Other"]].map(([val, label]) => (
+                  <label key={val} className="flex items-center gap-1">
+                    <input type="radio" name="gender" value={val} onChange={handleChange} />
+                    {label}
+                  </label>
+                ))}
+              </div>
+
+              {/* PASSWORD */}
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="Password"
+                  onChange={handleChange}
+                  className={inputCls}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-gray-500"
+                >
+                  {showPassword ? <FiEye /> : <FiEyeOff />}
+                </button>
+              </div>
+
+              {/* CONFIRM PASSWORD */}
+              <div className="relative">
+                <input
+                  type={showConfirm ? "text" : "password"}
+                  name="confirmPassword"
+                  placeholder="Confirm Password"
+                  onChange={handleChange}
+                  className={inputCls}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-3 top-3 text-gray-500"
+                >
+                  {showConfirm ? <FiEye /> : <FiEyeOff />}
+                </button>
+              </div>
+
+              <button
+                onClick={sendOtp}
+                disabled={loading}
+                className="w-full bg-purple-500 hover:bg-purple-600 text-white py-2 sm:py-3 rounded-lg font-semibold"
+              >
+                {loading ? "Sending OTP..." : "SignUp"}
               </button>
-            </p>
-          </div>
-        )}
 
-        {/* SUCCESS */}
-        {screen === "success" && (
-          <div className="flex flex-col items-center justify-center gap-4 py-8">
-            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 260, damping: 20 }} className="text-6xl sm:text-7xl text-green-500">🎉</motion.div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-green-600 text-center">Login Successful</h2>
-            <p className="text-gray-700 text-center max-w-xs sm:max-w-sm">Welcome! Redirecting to profile...</p>
-          </div>
-        )}
-      </motion.div>
+              <p className="text-center text-sm text-black">
+                Already have account?{" "}
+                <span
+                  onClick={() => setScreen("login")}
+                  className="text-blue-700 text-[16px] underline cursor-pointer"
+                >
+                  Login
+                </span>
+              </p>
+            </div>
+          )}
+
+          {/* OTP */}
+         {screen === "otp" && (
+  <div className="text-center space-y-5 sm:space-y-6">
+    
+    <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-purple-900">
+      Verify OTP
+    </h1>
+
+    <div
+      className="flex justify-center text-black gap-2 sm:gap-3 flex-wrap"
+      onPaste={handlePasteOtp}   
+    >
+      {otp.map((digit, index) => (
+        <input
+          key={index}
+          ref={otpRefs[index]}
+          value={digit}
+          type="text"
+          inputMode="numeric"     // ✅ mobile numeric keyboard
+          pattern="[0-9]*"
+          maxLength={1}
+          className={`w-10 sm:w-12 h-12 sm:h-14 text-center text-lg sm:text-xl border-2 rounded-xl outline-none ${
+            otpError ? "border-red-500" : "border-purple-300"
+          }`}
+          onChange={(e) => handleOtpChange(e.target.value, index)}
+          onKeyDown={(e) => handleKeyDown(e, index)}
+        />
+      ))}
+    </div>
+
+    <p className="text-sm text-gray-500">
+      {timer > 0 ? `Resend OTP in ${timer}s` : ""}
+    </p>
+
+    {canResend && (
+      <button
+        onClick={resendOtp}
+        className="text-red-600 underline text-sm"
+      >
+        Resend OTP
+      </button>
+    )}
+
+    <button
+      onClick={verifyOtp}
+      disabled={loading}
+      className="w-full bg-purple-500 hover:bg-purple-600 text-white py-2 sm:py-3 rounded-lg font-semibold"
+    >
+      {loading ? "Verifying..." : "Verify OTP"}
+    </button>
+
+    <p className="text-sm text-black">
+      Wrong email?{" "}
+      <span
+        onClick={() => setScreen("signup")}
+        className="text-blue-700 text-[16px] underline cursor-pointer"
+      >
+        Go back
+      </span>
+    </p>
+  </div>
+)}
+
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }
