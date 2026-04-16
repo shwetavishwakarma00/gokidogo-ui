@@ -1,7 +1,7 @@
 "use client";
 
 import data from "@/data/home.json";
-import { Calendar, Utensils, Truck, ArrowRight } from "lucide-react";
+import { CalendarDays, UtensilsCrossed, Truck, ChevronRight, Check } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "../hooks/useTranslation";
 
@@ -9,88 +9,94 @@ export default function Steps() {
   const { t } = useTranslation();
 
   const steps = [
-    { icon: Calendar, data: data.steps[0] },
-    { icon: Utensils, data: data.steps[1] },
-    { icon: Truck, data: data.steps[2] },
+    {
+      icon: CalendarDays,
+      title: t("steps.step1.title"),
+      desc: t("steps.step1.desc"),
+    },
+    {
+      icon: UtensilsCrossed,
+      title: t("steps.step2.title"),
+      desc: t("steps.step2.desc"),
+    },
+    {
+      icon: Truck,
+      title: t("steps.step3.title"),
+      desc: t("steps.step3.desc"),
+    },
   ];
 
   return (
-    <section className="bg-[#f6f4fb] py-14 px-4 sm:px-6 md:px-10 lg:px-16 xl:px-24">
+    <section className="bg-[#f0edf8] py-10 px-4 sm:px-8 md:px-14 lg:px-20">
 
-      {/* Heading (EXACT UI preserved) */}
+      {/* Section heading */}
       <motion.h2
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
+        transition={{ duration: 0.5 }}
         viewport={{ once: true }}
-        className="text-lg sm:text-xl md:text-2xl font-semibold text-purple-900 mb-12 text-center md:text-left"
+        className="text-lg sm:text-xl font-semibold text-[#2d1c6b] mb-8 text-center sm:text-left"
       >
-        {t("steps.title") || "It's that simple:"}
+        {t("steps.title")}
       </motion.h2>
 
-      {/* Grid (EXACT UI preserved) */}
-      <div className="relative">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 cursor-pointer">
+      {/* Cards row */}
+      <div className="flex flex-col sm:flex-row items-stretch justify-center">
 
-          {steps.map((step, index) => {
-            const Icon = step.icon;
+        {steps.map((step, index) => {
+          const Icon = step.icon;
 
-            return (
-              <div key={index} className="relative flex justify-center">
+          return (
+            <div
+              key={index}
+              className="flex items-center flex-col sm:flex-row w-full sm:flex-1 max-w-xs sm:max-w-none mx-auto sm:mx-0"
+            >
 
-                {/* CARD (EXACT UI preserved) */}
-                <motion.div
-                  initial={{ opacity: 0, y: 40 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.2 }}
-                  viewport={{ once: true }}
-                  whileHover={{ y: -8 }}
-                  className="relative mt-12 w-full max-w-sm"
-                >
+              {/* CARD */}
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: index * 0.15 }}
+                viewport={{ once: true }}
+                className="flex flex-col items-center text-center bg-white rounded-2xl px-6 pt-6 pb-5 w-full shadow-sm"
+              >
 
-                  {/* Glow */}
-                  <div className="absolute inset-0 rounded-2xl bg-purple-200 opacity-0 hover:opacity-20 blur-xl transition duration-300" />
-
-                  {/* ICON */}
-                  <div className="absolute -top-9 left-1/2 -translate-x-1/2 z-10">
-                    <motion.div
-                      whileHover={{ rotate: 8, scale: 1.1 }}
-                      className="bg-gradient-to-br from-purple-600 to-purple-800 text-white p-4 rounded-2xl shadow-lg border-4 border-[#f6f4fb]"
-                    >
-                      <Icon className="w-6 h-6 md:w-7 md:h-7" />
-                    </motion.div>
+                {/* Icon box */}
+                <div className="h-[90px] flex items-center justify-center mb-4">
+                  <div className="w-[72px] h-[72px] rounded-2xl bg-[#ede8f8] flex items-center justify-center">
+                    <Icon className="w-9 h-9 text-[#4c2fa0]" strokeWidth={1.6} />
                   </div>
+                </div>
 
-                  {/* CONTENT */}
-                  <div className="bg-white/80 backdrop-blur-md rounded-2xl pt-14 pb-6 px-6 text-center shadow-md hover:shadow-2xl transition duration-300 border border-white/40">
+                {/* Title */}
+                <p className="font-bold text-[#2d1c6b] text-[15px] leading-snug mb-1.5">
+                  {step.title}
+                </p>
 
-                    <span className="text-xs font-medium text-purple-400 block mb-2">
-                      {t("Step") || "Step"} {index + 1}
-                    </span>
+                {/* Desc with checkmark */}
+                <div className="flex items-center gap-1.5 justify-center">
+                  <Check className="w-3.5 h-3.5 text-[#6c3fc5] shrink-0" strokeWidth={3} />
+                  <span className="text-[13px] text-[#444] leading-tight">
+                    {step.desc}
+                  </span>
+                </div>
 
-                    <h3 className="font-semibold text-purple-900 text-base md:text-lg mb-2">
-                      {step.data.title}
-                    </h3>
+              </motion.div>
 
-                    <p className="text-sm text-gray-500 leading-relaxed">
-                      {step.data.desc}
-                    </p>
+              {/* Arrow */}
+              {index < steps.length - 1 && (
+                <div className="flex items-center justify-center sm:px-2 md:px-3 py-2 sm:py-0 text-[#2d1c6b] shrink-0">
+                  <ChevronRight
+                    className="w-6 h-6 rotate-90 sm:rotate-0 opacity-80"
+                    strokeWidth={2.5}
+                  />
+                </div>
+              )}
 
-                  </div>
-                </motion.div>
+            </div>
+          );
+        })}
 
-                {/* Arrow (EXACT UI preserved) */}
-                {index !== steps.length - 1 && (
-                  <div className="hidden lg:flex absolute top-1/2 right-[-40px] -translate-y-1/2 z-20">
-                    <ArrowRight className="w-10 h-10 text-purple-900 opacity-80" />
-                  </div>
-                )}
-
-              </div>
-            );
-          })}
-
-        </div>
       </div>
     </section>
   );

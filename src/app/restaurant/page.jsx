@@ -167,7 +167,7 @@ export default function RestaurantMenu() {
 
           <div className="w-full md:w-[380px] h-[240px] rounded-2xl overflow-hidden shadow-xl">
             <Image
-              src="/image/biryani.jpg"
+              src="/Image/biryani.jpg"
               width={400}
               height={200}
               alt="food"
