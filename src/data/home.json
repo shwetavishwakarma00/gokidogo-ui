@@ -1,24 +1,24 @@
 {
   "hero": {
-    "title": "Meeting Catering in Frankfurt – No waste, no stress.",
-    "subtitle": "Local restaurants. Reusable packaging. Delivery & pickup included.",
-    "note": "Ready in 2 minutes – From ₹9.90 per person",
-    "button": "Suggest Menu"
+    "image": "/Image/hero.jpg"
   },
+
   "steps": [
-    { "title": "Plan Event", "desc": "Enter details" },
-    { "title": "Choose Menu", "desc": "Customize food" },
-    { "title": "Zero Waste Delivery", "desc": "Delivery & Pickup" }
+    { "titleKey": "steps.step1.title", "descKey": "steps.step1.desc" },
+    { "titleKey": "steps.step2.title", "descKey": "steps.step2.desc" },
+    { "titleKey": "steps.step3.title", "descKey": "steps.step3.desc" }
   ],
+
   "events": [
-    { "title": "Teammeeting", "price": "from ₹9.90 p.p.", "Image": "/Image/team-meeting.jpg" },
-    { "title": "Hackathon", "price": "from ₹8.90 p.p.", "Image": "/Image/hackhthon.jpg" },
-    { "title": "Workshop", "price": "from ₹10.90 p.p.", "Image": "/Image/workshop.jpg" },
-    { "title": "Office Lunch", "price": "from ₹9.90 p.p.", "Image": "/Image/office-lunch.jpg" }
+    { "titleKey": "events.teammeeting", "price": "from ₹9.90 p.p.", "image": "/Image/team-meeting.jpg" },
+    { "titleKey": "events.hackathon", "price": "from ₹8.90 p.p.", "image": "/Image/hackhthon.jpg" },
+    { "titleKey": "events.workshop", "price": "from ₹10.90 p.p.", "image": "/Image/workshop.jpg" },
+    { "titleKey": "events.officeLunch", "price": "from ₹9.90 p.p.", "image": "/Image/office-lunch.jpg" }
   ],
+
   "partners": [
-    { "name": "PastaCultura", "Image": "/Image/PastaCultura.jpg" },
-    { "name": "GreenGarden", "Image": "/Image/GreenGarden.jpg" },
-    { "name": "Tavola Rustica", "Image": "/Image/TavolaRustica.jpg" }
+    { "name": "PastaCultura", "image": "/Image/PastaCultura.jpg" },
+    { "name": "GreenGarden", "image": "/Image/GreenGarden.jpg" },
+    { "name": "Tavola Rustica", "image": "/Image/TavolaRustica.jpg" }
   ]
 }

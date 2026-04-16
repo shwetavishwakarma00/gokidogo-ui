@@ -3,36 +3,40 @@
 import { useSelector, useDispatch } from "react-redux";
 import { increaseQty, decreaseQty } from "@/app/redux/features/cartSlice";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 
 export default function CartSidebar() {
-
   const dispatch = useDispatch();
   const router = useRouter();
+  const { t } = useTranslation();
 
   const userId = "guest";
 
   const items = useSelector(
-    (state) => state.cart.carts[userId] || []
+    (state) => state.cart.carts?.[userId] || []
   );
 
   const total = items.reduce(
-    (sum, i) => sum + i.price * i.qty,
+    (sum, i) => sum + (i.price || 0) * (i.qty || 1),
     0
   );
 
   return (
     <div className="bg-white p-5 rounded-xl shadow sticky top-24">
 
+      {/* TITLE (i18n enabled) */}
       <h2 className="font-bold text-lg mb-4">
-        Order Summary
+        {t("cart.title") || "Order Summary"}
       </h2>
 
+      {/* EMPTY STATE */}
       {items.length === 0 && (
         <p className="text-gray-400 text-sm">
-          Cart empty
+          {t("Empty cart") || "Cart is empty"}
         </p>
       )}
 
+      {/* ITEMS */}
       {items.map((item) => (
         <div
           key={item.mnuid}
@@ -54,7 +58,7 @@ export default function CartSidebar() {
                 dispatch(
                   decreaseQty({
                     userId,
-                    id: item.mnuid
+                    id: item.mnuid,
                   })
                 )
               }
@@ -70,7 +74,7 @@ export default function CartSidebar() {
                 dispatch(
                   increaseQty({
                     userId,
-                    id: item.mnuid
+                    id: item.mnuid,
                   })
                 )
               }
@@ -83,10 +87,11 @@ export default function CartSidebar() {
         </div>
       ))}
 
+      {/* TOTAL + CHECKOUT */}
       {items.length > 0 && (
         <>
           <div className="border-t pt-3 flex justify-between font-bold">
-            <span>Total</span>
+            <span>{t("cart.total") || "Total"}</span>
             <span>€{total.toFixed(2)}</span>
           </div>
 
@@ -94,7 +99,7 @@ export default function CartSidebar() {
             onClick={() => router.push("/checkout")}
             className="w-full bg-green-500 text-white py-2 rounded mt-4"
           >
-            Checkout
+            {t("Checkout") || "Checkout"}
           </button>
         </>
       )}

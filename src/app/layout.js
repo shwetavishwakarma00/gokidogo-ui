@@ -4,6 +4,7 @@ import  Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ClientReduxWrapper from "./redux/ClientReduxWrapper";
 import { Toaster } from "react-hot-toast";
+import { LanguageProvider } from "@/context/LanguageContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,12 +29,17 @@ export default function RootLayout({ children }) {
     > 
       <body className="min-h-full flex flex-col">
         <ClientReduxWrapper>
+        <LanguageProvider>
         <Navbar/>
         {children}
         <Footer/>
         <Toaster />
+        </LanguageProvider>
         </ClientReduxWrapper>
         </body>
     </html>
   );
 }
+
+
+

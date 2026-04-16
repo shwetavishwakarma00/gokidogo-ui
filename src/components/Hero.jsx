@@ -1,9 +1,13 @@
 "use client";
+
 import Image from "next/image";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import { motion } from "framer-motion";
-import data from "@/data/home.json";
 import Link from "next/link";
+import data from "@/data/home.json";
+
+import { LanguageContext } from "../context/LanguageContext";
+import { useTranslation } from "../hooks/useTranslation";
 
 export default function Hero() {
   const [open, setOpen] = useState(false);
@@ -12,10 +16,11 @@ export default function Hero() {
   const [date, setDate] = useState("2024-07-17");
 
   const dropdownRef = useRef(null);
-
   const options = ["₹12", "₹25", "₹50", "₹100"];
 
-  // ✅ Close dropdown on outside click
+  const { lang, setLang } = useContext(LanguageContext);
+  const { t } = useTranslation();
+
   useEffect(() => {
     function handleClickOutside(e) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -28,7 +33,9 @@ export default function Hero() {
 
   return (
     <section
-      style={{ background: "linear-gradient(90deg, #6035b8 0%, #7c5cbf 100%)" }}
+      style={{
+        background: "linear-gradient(90deg, #6035b8 0%, #7c5cbf 100%)",
+      }}
       className="w-full min-h-[50vh] md:min-h-[60vh] lg:min-h-screen pb-16 md:pb-20 lg:pb-24"
     >
       <div className="flex flex-col lg:flex-row items-center px-6 md:px-10 lg:px-16 pt-10 md:pt-14 lg:pt-16 gap-12">
@@ -42,7 +49,7 @@ export default function Hero() {
             transition={{ duration: 0.6 }}
             className="text-3xl sm:text-4xl lg:text-5xl font-extrabold"
           >
-            {data.hero.title}
+            {t("hero_title") || data.hero.title}
           </motion.h2>
 
           <motion.p
@@ -51,60 +58,73 @@ export default function Hero() {
             transition={{ delay: 0.2 }}
             className="mt-4 text-sm md:text-base opacity-90 max-w-md"
           >
-            {data.hero.subtitle}
+            {t("hero_subtitle") || data.hero.subtitle}
           </motion.p>
 
-          {/* BOOKING + NOTE */}
+          {/* BOOKING BOX */}
           <motion.div
             initial={{ opacity: 0, y: 60 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
             className="mt-10 w-full max-w-[560px] lg:absolute lg:top-[65%] lg:right-[-60px] z-20"
           >
-
-            {/* FLOATING BOX */}
             <motion.div
               animate={{ y: [0, -8, 0] }}
               transition={{ repeat: Infinity, duration: 4 }}
               className="bg-white rounded-2xl p-7 mt-10 shadow-2xl"
             >
 
-              {/* FIELD ROW */}
+              {/* ROW */}
               <div className="bg-gray-100 rounded-lg px-4 py-3 mb-4">
-
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
 
                   {/* PEOPLE */}
                   <div className="flex items-center gap-2 sm:border-r pr-4 border-gray-800">
-                    <span className="text-xs font-semibold text-gray-700">People:</span>
+                    <span className="text-xs font-semibold text-gray-700">
+                      {t("people") || "People"}:
+                    </span>
 
                     <button
                       onClick={() => setPeople(Math.max(1, people - 1))}
-                      className="px-2 bg-gray-400 rounded cursor-pointer"
-                    >-</button>
+                      className="px-2 bg-gray-400 rounded"
+                    >
+                      -
+                    </button>
 
-                    <span className="text-sm font-bold text-gray-900">{people}</span>
+                    <span className="text-sm font-bold text-gray-900">
+                      {people}
+                    </span>
 
                     <button
                       onClick={() => setPeople(people + 1)}
-                      className="px-2 bg-gray-400 rounded cursor-pointer"
-                    >+</button>
+                      className="px-2 bg-gray-400 rounded"
+                    >
+                      +
+                    </button>
                   </div>
 
                   {/* DATE */}
                   <div className="flex items-center gap-2 sm:border-r px-4 border-gray-800">
-                    <span className="text-xs font-semibold text-gray-900">Date:</span>
+                    <span className="text-xs font-semibold text-gray-900">
+                      {t("date") || "Date"}:
+                    </span>
+
                     <input
                       type="date"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
-                      className="text-sm outline-none text-black font-bold cursor-pointer"
+                      className="text-sm outline-none text-black font-bold"
                     />
                   </div>
 
                   {/* BUDGET */}
-                  <div ref={dropdownRef} className="relative flex items-center gap-2 flex-1">
-                    <span className="text-xs font-semibold text-gray-700">Budget:</span>
+                  <div
+                    ref={dropdownRef}
+                    className="relative flex items-center gap-2 flex-1"
+                  >
+                    <span className="text-xs font-semibold text-gray-700">
+                      {t("budget") || "Budget"}:
+                    </span>
 
                     <button
                       onClick={() => setOpen(!open)}
@@ -112,24 +132,23 @@ export default function Hero() {
                     >
                       {budget}
                       <svg
-                        className={`ml-1 transition-transform duration-300  cursor-pointer${open ? "rotate-180" : ""}`}
+                        className={`ml-1 transition-transform ${
+                          open ? "rotate-180" : ""
+                        }`}
                         width="14"
                         height="14"
-                        fill="none"
-                        stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
-                        <path strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                        <path
+                          stroke="currentColor"
+                          strokeWidth={2.5}
+                          d="M19 9l-7 7-7-7"
+                        />
                       </svg>
                     </button>
 
-                    {/* DROPDOWN */}
                     {open && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="absolute top-8 left-0  cursor-pointer bg-white  text-black font-bold shadow-lg rounded-md w-28 z-30 border"
-                      >
+                      <motion.div className="absolute top-8 left-0 bg-white text-black font-bold shadow-lg rounded-md w-28 z-30 border">
                         {options.map((item, i) => (
                           <div
                             key={i}
@@ -150,26 +169,26 @@ export default function Hero() {
               </div>
 
               {/* CTA */}
-              <Link href='/restaurant'>
-              <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                className="w-full cursor-pointer bg-green-600 hover:bg-orange-600 mt-5 text-white font-bold py-3 rounded-lg transition"
-              >
-                {data.hero.button}
-              </motion.button>
+              <Link href="/restaurant">
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="w-full cursor-pointer bg-green-600 hover:bg-orange-600 mt-5 text-white font-bold py-3 rounded-lg transition"
+                >
+                  {t("button") || data.hero.button}
+                </motion.button>
               </Link>
+
             </motion.div>
 
             {/* NOTE */}
             <p className="text-sm text-white/80 mt-4">
-              {data.hero.note}
+              {t("note") || data.hero.note}
             </p>
-
           </motion.div>
         </div>
 
-        {/* RIGHT IMAGE */}
+        {/* RIGHT IMAGE (UNCHANGED UI) */}
         <motion.div
           initial={{ opacity: 0, x: 60 }}
           animate={{ opacity: 1, x: 0 }}
@@ -193,5 +212,3 @@ export default function Hero() {
     </section>
   );
 }
-
-
