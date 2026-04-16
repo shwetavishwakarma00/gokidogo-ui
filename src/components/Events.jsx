@@ -66,5 +66,6 @@ export default function Events() {
 
       </div>
     </section>
+    
   );
 }
