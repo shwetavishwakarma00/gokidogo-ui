@@ -175,7 +175,7 @@ export default function Hero() {
                   whileTap={{ scale: 0.97 }}
                   className="w-full cursor-pointer bg-green-600 hover:bg-orange-600 mt-5 text-white font-bold py-3 rounded-lg transition"
                 >
-                  {t("button") || data.hero.button}
+                  {t("Suggest Menu") || data.hero.button}
                 </motion.button>
               </Link>
 
@@ -183,7 +183,7 @@ export default function Hero() {
 
             {/* NOTE */}
             <p className="text-sm text-white/80 mt-4">
-              {t("note") || data.hero.note}
+              {t("In 2 minutes, ready to go – from $9.90 per person.") || data.hero.note}
             </p>
           </motion.div>
         </div>
