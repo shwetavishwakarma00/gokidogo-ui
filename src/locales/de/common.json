@@ -1,0 +1,66 @@
+{
+  "navbar": {
+    "howItWorks": "Wie es funktioniert",
+    "forBusinesses": "Für Unternehmen",
+    "sustainability": "Nachhaltigkeit",
+    "login": "Anmelden",
+    "profile": "Profil"
+  },
+
+  "hero_title": "Meeting Catering in Frankfurt – Kein Abfall, kein Stress.",
+  "hero_subtitle": "Lokale Restaurants. Mehrwegverpackung. Lieferung & Abholung inklusive.",
+  "hero_note": "In 2 Minuten fertig – Ab ₹9,90 pro Person",
+  "hero_button": "Menü vorschlagen",
+
+  "people": "Personen",
+  "date": "Datum",
+  "budget": "Budget",
+
+  "events": {
+    "title": "Perfekt für Ihre Events:",
+    "teammeeting": "Teammeeting",
+    "hackathon": "Hackathon",
+    "workshop": "Workshop",
+    "officeLunch": "Bürolunch"
+  },
+
+  "steps": {
+    "title": "So einfach ist es",
+    "step1": {
+      "title": "Event planen",
+      "desc": "Details eingeben"
+    },
+    "step2": {
+      "title": "Menü wählen",
+      "desc": "Essen anpassen"
+    },
+    "step3": {
+      "title": "Zero-Waste Lieferung",
+      "desc": "Lieferung & Abholung"
+    }
+  },
+
+  "footer": {
+    "plan": "Event planen",
+    "about": "Über uns",
+    "faq": "FAQ",
+    "contact": "Kontakt",
+    "privacy": "Datenschutz"
+  },
+
+  "partners": {
+    "title": "Unsere Gourmet Partner"
+  },
+
+  "login": {
+    "welcome": "Willkommen zurück 👋",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "login": "Anmelden",
+    "signup": "Registrieren",
+    "notRegistered": "Noch nicht registriert?",
+    "createAccount": "Konto erstellen",
+    "verifyOtp": "OTP bestätigen",
+    "resend": "OTP erneut senden"
+  }
+}

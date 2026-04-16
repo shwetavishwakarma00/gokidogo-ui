@@ -1,0 +1,66 @@
+{
+  "navbar": {
+    "howItWorks": "How it works",
+    "forBusinesses": "For Businesses",
+    "sustainability": "Sustainability",
+    "login": "Login",
+    "profile": "Profile"
+  },
+
+  "hero_title": "Meeting Catering in Frankfurt – No waste, no stress.",
+  "hero_subtitle": "Local restaurants. Reusable packaging. Delivery & pickup included.",
+  "hero_note": "Ready in 2 minutes – From ₹9.90 per person",
+  "hero_button": "Suggest Menu",
+
+  "people": "People",
+  "date": "Date",
+  "budget": "Budget",
+
+  "events": {
+    "title": "Perfect for your events:",
+    "teammeeting": "Teammeeting",
+    "hackathon": "Hackathon",
+    "workshop": "Workshop",
+    "officeLunch": "Office Lunch"
+  },
+
+  "steps": {
+    "title": "It's that simple",
+    "step1": {
+      "title": "Plan Event",
+      "desc": "Enter details"
+    },
+    "step2": {
+      "title": "Choose Menu",
+      "desc": "Customize food"
+    },
+    "step3": {
+      "title": "Zero Waste Delivery",
+      "desc": "Delivery & Pickup"
+    }
+  },
+
+  "footer": {
+    "plan": "Plan Event Now",
+    "about": "About Us",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "privacy": "Privacy Policy"
+  },
+
+  "partners": {
+    "title": "Our Gourmet Partners"
+  },
+
+  "login": {
+    "welcome": "Welcome Back 👋",
+    "email": "Email",
+    "password": "Password",
+    "login": "Login",
+    "signup": "Sign Up",
+    "notRegistered": "Not registered?",
+    "createAccount": "Create Account",
+    "verifyOtp": "Verify OTP",
+    "resend": "Resend OTP"
+  }
+}
