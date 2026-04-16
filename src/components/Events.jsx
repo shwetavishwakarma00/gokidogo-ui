@@ -4,6 +4,20 @@ import Image from "next/image";
 import data from "@/data/home.json";
 import { useTranslation } from "../hooks/useTranslation";
 
+const defaultTitles = [
+  "Teammeeting",
+  "Hackathon",
+  "Workshop",
+  "Office Lunch",
+];
+
+const defaultPrices = [
+  "₹ 9,90 P.P.",
+  "₹ 8,90 P.P.",
+  "₹ 10,90 P.P.",
+  "₹ 9,90 P.P.",
+];
+
 export default function Events() {
   const { t } = useTranslation();
 
@@ -25,11 +39,11 @@ export default function Events() {
           >
 
             {/* IMAGE */}
-            <div className="relative w-full h-[160px] sm:h-[180px] md:h-[200px] overflow-hidden">
+            <div className="relative w-full h-[180px] sm:h-[190px] md:h-[200px] lg:h-[210px] overflow-hidden">
               <Image
-                src={event.Image}
+                src={event.image}
                 fill
-                alt={event.title}
+                alt={defaultTitles[index] || event.title}
                 className="object-cover group-hover:scale-105 transition duration-300"
               />
             </div>
@@ -38,11 +52,11 @@ export default function Events() {
             <div className="bg-gradient-to-r from-[#5c3ab5] to-[#6b46c1] text-white text-center py-3 sm:py-4 px-2">
 
               <h3 className="font-semibold text-sm sm:text-base md:text-lg">
-                {event.title}
+                {defaultTitles[index] || event.title}
               </h3>
 
               <p className="text-xs sm:text-sm opacity-90 mt-1">
-                {event.price}
+                {defaultPrices[index]}
               </p>
 
             </div>
@@ -52,5 +66,6 @@ export default function Events() {
 
       </div>
     </section>
+    
   );
 }

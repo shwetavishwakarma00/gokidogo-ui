@@ -9,13 +9,11 @@ export default function Sustainability() {
   return (
     <section className="relative bg-gradient-to-br from-[#f6f4fb] via-[#f3f0ff] to-[#eef2ff] px-4 sm:px-6 md:px-10 lg:px-16 py-10 md:py-14 overflow-hidden">
 
-      {/* Glow Background Effect (EXACT SAME UI) */}
       <div className="absolute top-0 left-0 w-72 h-72 bg-purple-200 rounded-full blur-3xl opacity-30"></div>
       <div className="absolute bottom-0 right-0 w-72 h-72 bg-indigo-200 rounded-full blur-3xl opacity-30"></div>
 
-      {/* Heading (EXACT SAME UI) */}
       <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-purple-900 mb-8 relative z-10">
-        {t("sustainability.title") || "Sustainable & Fair"}
+        {t("Sustainable & Fair") || "Sustainable & Fair"}
       </h2>
 
       {/* Card (EXACT SAME UI STRUCTURE) */}
@@ -29,7 +27,7 @@ export default function Sustainability() {
           </div>
 
           <p className="text-sm sm:text-base text-gray-700 font-medium">
-            {t("sustainability.reuse") || "Reusable instead of disposable"}
+            {t("Reusable instead of single-use") || "Reusable instead of single-use"}
           </p>
 
         </div>
@@ -45,7 +43,7 @@ export default function Sustainability() {
           </div>
 
           <p className="text-sm sm:text-base text-gray-700 font-medium">
-            {t("sustainability.education") || "2.5× for education projects"}
+            {t("2.5x for educational projects") || "2.5x for educational projects"}
           </p>
 
         </div>
@@ -61,7 +59,7 @@ export default function Sustainability() {
           </div>
 
           <p className="text-sm sm:text-base text-gray-700 font-medium">
-            {t("sustainability.waste") || (
+            {t("Already saved 12.4 tons of waste !") || (
               <>
                 Already saved{" "}
                 <span className="text-purple-800 font-semibold">

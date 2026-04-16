@@ -34,7 +34,7 @@ export default function Partners() {
 
               {/* Image (EXACT UI preserved) */}
               <Image
-                src={partner.Image}
+                src={partner.image}
                 width={400}
                 height={200}
                 alt={partner.name}

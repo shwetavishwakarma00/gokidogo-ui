@@ -1,23 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
 import { useSelector } from "react-redux";
 import { LanguageContext } from "../context/LanguageContext";
 import { useTranslation } from "../hooks/useTranslation";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
 
   const user = useSelector((state) => state.auth?.user);
-
   const { lang, setLang } = useContext(LanguageContext);
   const { t } = useTranslation();
-
-  if (!mounted) return null;
 
   const userInitial =
     user?.FirstName?.[0]?.toUpperCase() ||
@@ -29,7 +23,7 @@ export default function Navbar() {
 
       <div className="flex items-center justify-between px-4 sm:px-6 md:px-10 lg:px-16 py-3 md:py-4">
 
-        {/* LOGO (EXACT SAME UI) */}
+        {/* LOGO */}
         <Link href="/">
           <div className="flex items-center gap-1 cursor-pointer">
             <span className="text-lg md:text-xl font-bold tracking-wide">
@@ -41,7 +35,7 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {/* DESKTOP MENU (EXACT SAME UI) */}
+        {/* DESKTOP MENU */}
         <div className="hidden md:flex items-center gap-6 lg:gap-10 text-sm font-medium tracking-wide">
 
           <a href="#" className="hover:opacity-80 transition">
@@ -56,17 +50,17 @@ export default function Navbar() {
             {t("navbar.sustainability")}
           </a>
 
-          {/* LANGUAGE SWITCH */}
+          {/* LANGUAGE SWITCH (DESKTOP) */}
           <select
             value={lang}
             onChange={(e) => setLang(e.target.value)}
-            className="text-black px-2 py-1 rounded"
+            className="text-white px-2 py-1 rounded bg-transparent border border-white/40"
           >
-            <option value="en">EN</option>
-            <option value="de">DE</option>
+            <option value="en" className="text-black">EN</option>
+            <option value="de" className="text-black">DE</option>
           </select>
 
-          {/* LOGIN / PROFILE (EXACT SAME UI) */}
+          {/* LOGIN / PROFILE */}
           {user ? (
             <Link href="/profile">
               <div className="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg transition cursor-pointer">
@@ -96,13 +90,27 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* MOBILE MENU (EXACT SAME UI) */}
+      {/* MOBILE MENU */}
       {open && (
         <div className="md:hidden flex flex-col gap-4 px-4 pb-4 text-sm bg-[#6b46c1] font-medium">
 
           <a>{t("navbar.howItWorks")}</a>
           <a>{t("navbar.forBusinesses")}</a>
           <a>{t("navbar.sustainability")}</a>
+
+          {/* LANGUAGE SWITCH (MOBILE ADDED) */}
+          <div className="flex items-center gap-2 pt-2 border-t border-white/20">
+            <span className="text-xs opacity-80">Language:</span>
+
+            <select
+              value={lang}
+              onChange={(e) => setLang(e.target.value)}
+              className="text-black px-2 py-1 rounded text-xs"
+            >
+              <option value="en">EN</option>
+              <option value="de">DE</option>
+            </select>
+          </div>
 
           <div className="pt-2 border-t border-white/20">
 
