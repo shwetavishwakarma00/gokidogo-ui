@@ -1,261 +1,197 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import {
+import { 
+  customerLogin,
+  customerSignup,
   sendOtpEmail,
   verifyOtpEmail,
-  customerSignup,
-  customerLogin,
-  getUserProfile,
-  updateUserProfile,
-} from "@/app/apis/authApi";
+  getUserProfile as getUserProfileAPI,
+  updateUserProfile as updateUserProfileAPI
+} from "@/app/apis/authApi";import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 
-// ================= SEND OTP =================
-export const sendOtpThunk = createAsyncThunk(
-  "auth/sendOtp",
+
+
+// LOGIN
+export const loginUser = createAsyncThunk(
+  "auth/loginUser",
   async (data, { rejectWithValue }) => {
     try {
-      const response = await sendOtpEmail(data);
-      return response;
-    } catch (error) {
-      return rejectWithValue(error?.response?.data || "OTP send failed");
+      const res = await customerLogin(data);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || "Login Failed");
     }
   }
 );
 
-// ================= VERIFY OTP =================
-export const verifyOtpThunk = createAsyncThunk(
-  "auth/verifyOtp",
+// REGISTER
+export const registerUser = createAsyncThunk(
+  "auth/registerUser",
   async (data, { rejectWithValue }) => {
     try {
-      const response = await verifyOtpEmail(data);
-      return response;
-    } catch (error) {
-      return rejectWithValue(error?.response?.data || "OTP verification failed");
+      const res = await customerSignup(data);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || "Register Failed");
     }
   }
 );
 
-// ================= SIGNUP =================
-export const signupThunk = createAsyncThunk(
-  "auth/signup",
+// SEND OTP
+export const sendOTP = createAsyncThunk(
+  "auth/sendOTP",
   async (data, { rejectWithValue }) => {
     try {
-      const response = await customerSignup(data);
-      return response;
-    } catch (error) {
-      return rejectWithValue(error?.response?.data || "Signup failed");
+      const res = await sendOtpEmail(data);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || "OTP Send Failed");
     }
   }
 );
 
-// ================= LOGIN =================
-export const loginThunk = createAsyncThunk(
-  "auth/login",
-  async (loginData, { rejectWithValue }) => {
-    try {
-      const response = await customerLogin(loginData);
-      return response;
-    } catch (error) {
-      return rejectWithValue(error?.response?.data || "Login failed");
-    }
-  }
-);
-
-// ================= FETCH PROFILE =================
-export const fetchProfileThunk = createAsyncThunk(
-  "profile/fetch",
+// VERIFY OTP
+export const verifyOTP = createAsyncThunk(
+  "auth/verifyOTP",
   async (data, { rejectWithValue }) => {
     try {
-      const response = await getUserProfile(data);
-      return response;
-    } catch (error) {
-      return rejectWithValue(error?.response?.data || "Profile fetch failed");
+      const res = await verifyOtpEmail(data);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || "OTP Verification Failed");
     }
   }
 );
 
-// ================= UPDATE PROFILE =================
-export const updateProfileThunk = createAsyncThunk(
-  "profile/update",
+// FORGOT PASSWORD
+export const forgotPassword = createAsyncThunk(
+  "auth/forgotPassword",
   async (data, { rejectWithValue }) => {
     try {
-      const response = await updateUserProfile(data);
-      return response;
-    } catch (error) {
-      return rejectWithValue(error?.response?.data || "Update failed");
+      const res = await axios.post(`${API}/customer/forgot-password`, data);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || "Password Reset Failed");
     }
   }
 );
 
-// ================= LOAD USER FROM LOCALSTORAGE =================
-// Ye refresh pe Redux state restore karta hai
-const loadUserFromStorage = () => {
-  try {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("user");
-      if (stored) return JSON.parse(stored);
+// GET USER PROFILE
+export const getUserProfile = createAsyncThunk(
+  "auth/getUserProfile",
+  async (data, { rejectWithValue }) => {
+    try {
+      const res = await getUserProfileAPI(data);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || "Profile Fetch Failed");
     }
-  } catch {
-    return null;
   }
-  return null;
-};
+);
 
-const storedUser = loadUserFromStorage();
+// UPDATE USER PROFILE
+export const updateUserProfile = createAsyncThunk(
+  "auth/updateUserProfile",
+  async (data, { rejectWithValue }) => {
+    try {
+      const res = await updateUserProfileAPI(data);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || "Profile Update Failed");
+    }
+  }
+);
 
-// ================= INITIAL STATE =================
-const initialState = {
-  loading: false,
-  otpSent: false,
-  otpVerified: false,
-  signupData: null,
-  // ✅ Agar localStorage mein user hai toh status "succeeded" set karo
-  status: storedUser ? "succeeded" : "idle",
-  user: storedUser || null,
-  profile: null,
-  updateSuccess: false,
-  apikey: storedUser?.apikey || null,
-  error: null,
-};
-
-// ================= SLICE =================
 const authSlice = createSlice({
   name: "auth",
-  initialState,
+  initialState: {
+  user: null,
+  profile: null,
+  loading: false,
+  error: null,
+  message: null
+},
+
   reducers: {
-    // ✅ Ye action manually user restore karne k liye (optional)
-    restoreUser: (state) => {
-      try {
-        if (typeof window !== "undefined") {
-          const stored = localStorage.getItem("user");
-          if (stored) {
-            const user = JSON.parse(stored);
-            state.user = user;
-            state.apikey = user?.apikey || null;
-            state.status = "succeeded";
-          }
-        }
-      } catch {
-        state.user = null;
-      }
-    },
     logout: (state) => {
       state.user = null;
-      state.profile = null;
-      state.apikey = null;
-      state.status = "idle";
-      state.error = null;
-      state.otpSent = false;
-      state.otpVerified = false;
-      state.signupData = null;
-      state.loading = false;
-      state.updateSuccess = false;
-      // ✅ Logout pe localStorage bhi clear karo
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("user");
-      }
-    },
+      state.message = null;
+    }
   },
 
   extraReducers: (builder) => {
-    // ===== SEND OTP =====
+
     builder
-      .addCase(sendOtpThunk.pending, (state) => {
+
+      // LOGIN
+      .addCase(loginUser.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
-      .addCase(sendOtpThunk.fulfilled, (state) => {
+      .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.otpSent = true;
+        state.user = action.payload;
       })
-      .addCase(sendOtpThunk.rejected, (state, action) => {
+      .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
 
-    // ===== VERIFY OTP =====
-    builder
-      .addCase(verifyOtpThunk.pending, (state) => {
+      // REGISTER
+      .addCase(registerUser.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
-      .addCase(verifyOtpThunk.fulfilled, (state) => {
+      .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.otpVerified = true;
+        state.message = action.payload;
       })
-      .addCase(verifyOtpThunk.rejected, (state, action) => {
+      .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
 
-    // ===== SIGNUP =====
-    builder
-      .addCase(signupThunk.pending, (state) => {
-        state.loading = true;
-        state.error = null;
+      // SEND OTP
+      .addCase(sendOTP.fulfilled, (state, action) => {
+        state.message = action.payload;
       })
-      .addCase(signupThunk.fulfilled, (state, action) => {
-        state.loading = false;
-        state.signupData = action.payload;
-      })
-      .addCase(signupThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      });
 
-    // ===== LOGIN =====
-    builder
-      .addCase(loginThunk.pending, (state) => {
-        state.status = "loading";
-        state.error = null;
+      // VERIFY OTP
+      .addCase(verifyOTP.fulfilled, (state, action) => {
+        state.message = action.payload;
       })
-      .addCase(loginThunk.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        const user = action.payload?.[0]?.DataValue?.[0];
-        state.user = user;
-        state.apikey = user?.apikey || null;
-        // ✅ Login pe localStorage mein save karo
-        if (typeof window !== "undefined") {
-          localStorage.setItem("user", JSON.stringify(user));
-        }
-      })
-      .addCase(loginThunk.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.payload || "Login failed";
-      });
 
-    // ===== FETCH PROFILE =====
-    builder
-      .addCase(fetchProfileThunk.pending, (state) => {
-        state.loading = true;
-        state.error = null;
+      // FORGOT PASSWORD
+      .addCase(forgotPassword.fulfilled, (state, action) => {
+        state.message = action.payload;
       })
-      .addCase(fetchProfileThunk.fulfilled, (state, action) => {
-        state.loading = false;
-        state.profile = action.payload;
-      })
-      .addCase(fetchProfileThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      });
 
-    // ===== UPDATE PROFILE =====
-    builder
-      .addCase(updateProfileThunk.pending, (state) => {
-        state.loading = true;
-        state.updateSuccess = false;
-      })
-      .addCase(updateProfileThunk.fulfilled, (state, action) => {
-        state.loading = false;
-        state.updateSuccess = true;
-        state.profile = action.payload?.DataValue || action.payload;
-      })
-      .addCase(updateProfileThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      });
-  },
+
+
+      // GET USER PROFILE
+.addCase(getUserProfile.pending, (state) => {
+  state.loading = true;
+})
+.addCase(getUserProfile.fulfilled, (state, action) => {
+  state.loading = false;
+  state.profile = action.payload.data;
+})
+.addCase(getUserProfile.rejected, (state, action) => {
+  state.loading = false;
+  state.error = action.payload;
+})
+
+// UPDATE USER PROFILE
+.addCase(updateUserProfile.pending, (state) => {
+  state.loading = true;
+})
+.addCase(updateUserProfile.fulfilled, (state, action) => {
+  state.loading = false;
+  state.message = action.payload.message;
+})
+.addCase(updateUserProfile.rejected, (state, action) => {
+  state.loading = false;
+  state.error = action.payload;
+})
+  }
 });
 
-export const { logout, restoreUser } = authSlice.actions;
+export const { logout } = authSlice.actions;
 export default authSlice.reducer;
-

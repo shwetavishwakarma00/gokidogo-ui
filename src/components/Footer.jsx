@@ -6,21 +6,39 @@ export default function Footer() {
   const { t } = useTranslation();
 
   return (
-    <footer className="bg-gradient-to-r from-[#5329c0] to-[#7352c2] text-center py-6 px-4 sm:px-6 md:px-10 text-white">
+    <footer className="bg-gradient-to-r from-[#5126c4] via-[#5b31c8] to-[#6e4bd3] text-white pt-10 pb-8 px-4">
 
-      {/* CTA Button */}
-      <button className="cursor-pointer bg-green-600 hover:bg-orange-700 px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold shadow text-sm sm:text-base">
-        {t("footer.plan")}
-      </button>
+      <div className="max-w-6xl mx-auto text-center">
 
-      <hr className="my-5 border-gray-300 w-full max-w-5xl mx-auto" />
+        {/* CTA */}
+        <button className="bg-[#62b32c] hover:bg-[#55a528] text-white font-semibold px-12 py-3 rounded-md shadow-md">
+          {t("footer.plan") || "Jetzt Event planen"}
+        </button>
 
-      {/* Links */}
-      <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-8 mt-6 text-sm opacity-90 font-bold">
-        <a href="#">{t("footer.about")}</a>
-        <a href="#">{t("footer.faq")}</a>
-        <a href="#">{t("footer.contact")}</a>
-        <a href="#">{t("footer.privacy")}</a>
+        {/* divider */}
+        <div className="w-full h-[1px] bg-white/30 mt-8 mb-6"></div>
+
+        {/* links */}
+        <div className="flex justify-center gap-8 text-sm text-white/90">
+
+          <a href="#" className="hover:text-white">
+            {t("footer.about") || "Über uns"}
+          </a>
+
+          <a href="#" className="hover:text-white">
+            {t("footer.faq") || "FAQ"}
+          </a>
+
+          <a href="#" className="hover:text-white">
+            {t("footer.contact") || "Kontakt"}
+          </a>
+
+          <a href="#" className="hover:text-white">
+            {t("footer.privacy") || "Datenschutz"}
+          </a>
+
+        </div>
+
       </div>
 
     </footer>
