@@ -1,39 +1,77 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { fetchRestaurantApi } from "@/app/apis/restaurantApi";
 
-export const fetchRestaurant = createAsyncThunk(
-  "restaurant/fetchRestaurant",
-  async () => {
-    const data = await fetchRestaurantApi();
-    return data;
-  },
+export const fetchRestaurantMenu = createAsyncThunk(
+  "restaurant/fetchRestaurantMenu",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetchRestaurantApi({
+        restaurantid: 20,
+      });
+
+      const res = response; 
+
+      const categoryMap = {};
+
+      res.menu?.forEach((item) => {
+        const category = item.menu_head || "Other";
+
+        if (!categoryMap[category]) {
+          categoryMap[category] = {
+            category_id: category,
+            category: category,
+            category_products: [],
+          };
+        }
+
+        categoryMap[category].category_products.push({
+          ...item,
+          mnuid: item.sku,
+        });
+      });
+
+      return {
+        restaurantInfo: res.restaurant,
+        categories: Object.values(categoryMap),
+      };
+
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data || "Something went wrong"
+      );
+    }
+  }
 );
 
 const restaurantSlice = createSlice({
   name: "restaurant",
+
   initialState: {
     restaurantInfo: null,
-    restaurantId: null,
     categories: [],
-    deliveryHours: [],
-    zipcodes: [],
     loading: false,
+    error: null,
   },
+
   reducers: {},
+
   extraReducers: (builder) => {
     builder
-      .addCase(fetchRestaurant.pending, (state) => {
+
+      .addCase(fetchRestaurantMenu.pending, (state) => {
         state.loading = true;
       })
-      .addCase(fetchRestaurant.fulfilled, (state, action) => {
-  state.loading = false;
-  const payload = action.payload[0];
-  state.restaurantInfo = payload.Restaurant_Detail[0];
-  state.restaurantId = payload.Restaurant_Detail[0]?.restroid || "20"; 
-  state.categories = payload.MenuItem.MenuHead;
-  state.deliveryHours = payload.hours;
-  state.zipcodes = payload.Zipcodes;
-})
+
+      .addCase(fetchRestaurantMenu.fulfilled, (state, action) => {
+        state.loading = false;
+        state.restaurantInfo = action.payload.restaurantInfo;
+        state.categories = action.payload.categories;
+      })
+
+      .addCase(fetchRestaurantMenu.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
   },
 });
 

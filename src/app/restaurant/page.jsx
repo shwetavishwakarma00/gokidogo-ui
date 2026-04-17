@@ -9,7 +9,7 @@ import {
 } from "react";
 
 import { useDispatch, useSelector } from "react-redux";
-import { fetchRestaurant } from "@/app/redux/features/restaurantSlice";
+import { fetchRestaurantMenu } from "../redux/features/restaurantSlice";
 import {
   addToCart,
   increaseQty,
@@ -34,7 +34,7 @@ export default function RestaurantMenu() {
     useSelector((state) => state.restaurant);
 
   const user = useSelector((state) => state.auth.user);
-  const userId = user?.customerId || "guest";
+  const userId = user?.customerId || "guest_user";
 
   const cartItems = useSelector(
     (state) => state.cart.carts?.[userId] ?? []
@@ -46,7 +46,7 @@ export default function RestaurantMenu() {
 
   /* ================= FETCH ================= */
   useEffect(() => {
-    dispatch(fetchRestaurant());
+    dispatch(fetchRestaurantMenu());
   }, [dispatch]);
 
   /* ================= STICKY CATEGORY ================= */
@@ -101,9 +101,9 @@ export default function RestaurantMenu() {
 
   /* ================= HANDLERS ================= */
   const handleAdd = useCallback(
-    (item) => dispatch(addToCart({ userId, item })),
-    [dispatch, userId]
-  );
+  (item) => dispatch(addToCart({ userId, item })),
+  [dispatch, userId]
+);
 
   const handleIncrease = useCallback(
     (id) => dispatch(increaseQty({ userId, id })),

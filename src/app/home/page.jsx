@@ -1,4 +1,5 @@
 "use client";
+import BekanntAus from '@/components/BekanntAus';
 import  Events  from '@/components/Events';
 import  Hero  from '@/components/Hero';
 import Partners  from '@/components/Partners';
@@ -14,6 +15,7 @@ const HomePage = () => {
       <Events/>
       <Partners/>
       <Sustainability/>
+      <BekanntAus/>
     </div>
   )
 }

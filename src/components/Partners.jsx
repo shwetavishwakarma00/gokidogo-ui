@@ -1,5 +1,4 @@
 "use client";
-
 import Image from "next/image";
 import Link from "next/link";
 import data from "@/data/home.json";
@@ -9,61 +8,55 @@ export default function Partners() {
   const { t } = useTranslation();
 
   return (
-    <section className="bg-[#f6f4fb] px-4 sm:px-6 md:px-10 lg:px-16 py-10 md:py-14">
+    <section className="bg-[#f6f4fb] py-5 px-4 md:px-16">
 
-      {/* Heading (EXACT UI preserved) */}
-      <h2 className="text-base sm:text-lg md:text-xl font-semibold text-purple-900 mb-6 md:mb-10 text-center md:text-left">
-        {t("partners.title") || "Our Frankfurt Gourmet Partners:"}
-      </h2>
+      {/* Heading with line */}
+      <div className="flex items-center gap-4 mb-8">
+        <h2 className="text-[20px] font-semibold text-[#5b3dbd] whitespace-nowrap">
+          {t("partners.title") || "Unser Frankfurter Genuss-Partner:"}
+        </h2>
+        <div className="flex-1 h-[1px] bg-[#d8d2ea]" />
+      </div>
 
-      {/* Grid (EXACT UI preserved) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+      {/* Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
         {data.partners.map((partner, index) => (
-          <Link
-            key={index}
-            href={`/restaurant/${index}`}
-            className="block"
-          >
-            <div
-              className="bg-white rounded-2xl shadow-sm overflow-hidden 
-              transition duration-300 hover:shadow-lg hover:-translate-y-1
-              min-h-[240px] sm:min-h-[260px] md:min-h-[280px]
-              cursor-pointer"
-            >
+          <Link key={index} href={`/restaurant/${index}`}>
+  <div className="bg-white rounded-[14px] shadow-sm overflow-visible">
 
-              {/* Image (EXACT UI preserved) */}
-              <Image
-                src={partner.image}
-                width={400}
-                height={200}
-                alt={partner.name}
-                className="w-full h-[160px] sm:h-[180px] md:h-[200px] object-cover"
-              />
+    {/* IMAGE WRAPPER */}
+    <div className="relative w-full h-[180px] overflow-hidden rounded-t-[14px]">
 
-              {/* Label (EXACT UI preserved) */}
-              <div className="flex justify-center py-4">
-                <span
-                  className={`bg-white shadow px-4 py-1 rounded-lg font-semibold text-sm sm:text-base
-                    ${
-                      index === 0
-                        ? "text-purple-700"
-                        : index === 1
-                        ? "text-green-600"
-                        : "text-red-500"
-                    }`}
-                >
-                  {partner.name}
-                </span>
-              </div>
+      <Image
+        src={partner.image}
+        fill
+        alt={partner.name}
+        className="object-cover"
+      />
 
-            </div>
-          </Link>
+      </div>
+      {/* Badge */}
+      <div className="absolute   left-1/2 -translate-x-1/2 z-20">
+        <span
+          className={`bg-white shadow-lg px-6 py-3 rounded-lg font-semibold text-sm
+          ${
+            index === 0
+              ? "text-purple-700"
+              : index === 1
+              ? "text-green-600"
+              : "text-red-500"
+          }`}
+        >
+          {partner.name}
+        </span>
+      </div>
+
+  </div>
+</Link>
         ))}
 
       </div>
-
     </section>
   );
 }
-

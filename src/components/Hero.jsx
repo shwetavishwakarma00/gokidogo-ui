@@ -31,184 +31,161 @@ export default function Hero() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  return (
-    <section
-      style={{
-        background: "linear-gradient(90deg, #6035b8 0%, #7c5cbf 100%)",
-      }}
-      className="w-full min-h-[50vh] md:min-h-[60vh] lg:min-h-screen pb-16 md:pb-20 lg:pb-24"
-    >
-      <div className="flex flex-col lg:flex-row items-center px-6 md:px-10 lg:px-16 pt-10 md:pt-14 lg:pt-16 gap-12">
+return (
+<section
+  style={{
+    background: "linear-gradient(90deg,#5A35B5 40%,#7C5CC2 60%)",
+  }}
+  className="w-full pt-15 pb-20"
+>
+  <div className="max-w-[1200px] mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
 
-        {/* LEFT */}
-        <div className="flex-1 text-white relative">
+    {/* LEFT */}
+    <div className="text-white">
 
-          <motion.h2
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-3xl sm:text-4xl lg:text-5xl font-extrabold"
-          >
-            {t("hero_title") || data.hero.title}
-          </motion.h2>
+      <motion.h2
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-4xl md:text-5xl font-extrabold leading-tight"
+      >
+        {t("hero_title") || data.hero.title}
+      </motion.h2>
 
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mt-4 text-sm md:text-base opacity-90 max-w-md"
-          >
-            {t("hero_subtitle") || data.hero.subtitle}
-          </motion.p>
+      <p className="mt-4 opacity-90 max-w-[520px]">
+        {t("hero_subtitle") || data.hero.subtitle}
+      </p>
 
-          {/* BOOKING BOX */}
-          <motion.div
-            initial={{ opacity: 0, y: 60 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="mt-10 w-full max-w-[560px] lg:absolute lg:top-[65%] lg:right-[-60px] z-20"
-          >
-            <motion.div
-              animate={{ y: [0, -8, 0] }}
-              transition={{ repeat: Infinity, duration: 4 }}
-              className="bg-white rounded-2xl p-7 mt-10 shadow-2xl"
-            >
+      {/* BOOKING BOX */}
+      <motion.div
+        initial={{ opacity: 0, y: 60 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mt-10 w-full"
+      >
 
-              {/* ROW */}
-              <div className="bg-gray-100 rounded-lg px-4 py-3 mb-4">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="bg-white rounded-xl shadow-xl p-6 w-full">
 
-                  {/* PEOPLE */}
-                  <div className="flex items-center gap-2 sm:border-r pr-4 border-gray-800">
-                    <span className="text-xs font-semibold text-gray-700">
-                      {t("people") || "People"}:
-                    </span>
+          {/* INPUT ROW */}
+          <div className="bg-[#F3F4F6] rounded-lg px-4 py-3 w-full">
+            <div className="flex flex-wrap md:flex-nowrap items-center gap-4">
 
-                    <button
-                      onClick={() => setPeople(Math.max(1, people - 1))}
-                      className="px-2 bg-gray-400 rounded"
-                    >
-                      -
-                    </button>
+              {/* PEOPLE */}
+              <div className="flex items-center gap-2 border-r pr-4 border-gray-300">
+                <span className="text-xs font-semibold text-gray-600">
+                  {t("people") || "People"}:
+                </span>
 
-                    <span className="text-sm font-bold text-gray-900">
-                      {people}
-                    </span>
+                <button
+                  onClick={() => setPeople(Math.max(1, people - 1))}
+                  className="px-2 bg-gray-300 rounded"
+                >
+                  -
+                </button>
 
-                    <button
-                      onClick={() => setPeople(people + 1)}
-                      className="px-2 bg-gray-400 rounded"
-                    >
-                      +
-                    </button>
-                  </div>
+                <span className="font-bold text-gray-900">
+                  {people}
+                </span>
 
-                  {/* DATE */}
-                  <div className="flex items-center gap-2 sm:border-r px-4 border-gray-800">
-                    <span className="text-xs font-semibold text-gray-900">
-                      {t("date") || "Date"}:
-                    </span>
-
-                    <input
-                      type="date"
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                      className="text-sm outline-none text-black font-bold"
-                    />
-                  </div>
-
-                  {/* BUDGET */}
-                  <div
-                    ref={dropdownRef}
-                    className="relative flex items-center gap-2 flex-1"
-                  >
-                    <span className="text-xs font-semibold text-gray-700">
-                      {t("budget") || "Budget"}:
-                    </span>
-
-                    <button
-                      onClick={() => setOpen(!open)}
-                      className="flex items-center gap-1 text-sm font-bold text-gray-900"
-                    >
-                      {budget}
-                      <svg
-                        className={`ml-1 transition-transform ${
-                          open ? "rotate-180" : ""
-                        }`}
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          stroke="currentColor"
-                          strokeWidth={2.5}
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
-                    </button>
-
-                    {open && (
-                      <motion.div className="absolute top-8 left-0 bg-white text-black font-bold shadow-lg rounded-md w-28 z-30 border">
-                        {options.map((item, i) => (
-                          <div
-                            key={i}
-                            onClick={() => {
-                              setBudget(item);
-                              setOpen(false);
-                            }}
-                            className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-                          >
-                            {item}
-                          </div>
-                        ))}
-                      </motion.div>
-                    )}
-                  </div>
-
-                </div>
+                <button
+                  onClick={() => setPeople(people + 1)}
+                  className="px-2 bg-gray-300 rounded"
+                >
+                  +
+                </button>
               </div>
 
-              {/* CTA */}
-              <Link href="/restaurant">
-                <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="w-full cursor-pointer bg-green-600 hover:bg-orange-600 mt-5 text-white font-bold py-3 rounded-lg transition"
+              {/* DATE */}
+              <div className="flex items-center gap-2 border-r px-4 border-gray-300">
+                <span className="text-xs font-semibold text-gray-600">
+                  {t("date") || "Date"}:
+                </span>
+
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="outline-none text-sm text-black bg-transparent"
+                />
+              </div>
+
+              {/* BUDGET */}
+              <div
+                ref={dropdownRef}
+                className="relative flex items-center gap-2"
+              >
+                <span className="text-xs font-semibold text-gray-600">
+                  {t("budget") || "Budget"}:
+                </span>
+
+                <button
+                  onClick={() => setOpen(!open)}
+                  className="flex items-center gap-1 text-sm font-bold text-gray-900"
                 >
-                  {t("Suggest Menu") || data.hero.button}
-                </motion.button>
-              </Link>
+                  {budget}
 
-            </motion.div>
+                  <svg
+                    className={`${open ? "rotate-180" : ""}`}
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
 
-            {/* NOTE */}
-            <p className="text-sm text-white/80 mt-4">
-              {t("In 2 minutes, ready to go – from $9.90 per person.") || data.hero.note}
-            </p>
-          </motion.div>
+                {open && (
+                  <div className="absolute top-8 left-0 bg-white shadow-md rounded-md w-28 border">
+                    {options.map((item, i) => (
+                      <div
+                        key={i}
+                        onClick={() => {
+                          setBudget(item);
+                          setOpen(false);
+                        }}
+                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                      >
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+            </div>
+          </div>
+
+          {/* BUTTON */}
+          <Link href="/restaurant">
+            <button className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg mt-5">
+              {t("Suggest Menu") || data.hero.button}
+            </button>
+          </Link>
+
         </div>
 
-        {/* RIGHT IMAGE (UNCHANGED UI) */}
-        <motion.div
-          initial={{ opacity: 0, x: 60 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
-          className="flex-shrink-0"
-        >
-          <Image
-            src="/Image/hero.jpg"
-            width={600}
-            height={400}
-            alt="food meeting"
-            className="
-              object-cover rounded-xl shadow-xl
-              w-[280px] sm:w-[360px] md:w-[440px] lg:w-[560px]
-              h-[180px] sm:h-[240px] md:h-[300px] lg:h-[360px]
-            "
-          />
-        </motion.div>
+        <p className="text-sm text-white/80 mt-4">
+          {t("In 2 minutes, ready to go – from $9.90 per person.") ||
+            data.hero.note}
+        </p>
 
-      </div>
-    </section>
-  );
+      </motion.div>
+    </div>
+
+    {/* RIGHT IMAGE */}
+    <div className="w-full">
+      <Image
+        src="/Image/hero.jpg"
+        width={600}
+        height={400}
+        alt="food meeting"
+        className="w-full h-[300px] md:h-[360px] object-cover rounded-xl shadow-xl"
+      />
+    </div>
+
+  </div>
+</section>
+)
 }

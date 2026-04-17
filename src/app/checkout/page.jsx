@@ -2,21 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useRouter } from "next/navigation";
 import { checkoutThunk } from "@/app/redux/features/checkoutSlice";
 import { clearCart } from "@/app/redux/features/cartSlice";
-import { fetchProfileThunk } from "@/app/redux/features/authSlice";
+import { getUserProfile } from "@/app/redux/features/authSlice";
 import toast, { Toaster } from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 export default function CheckoutPage() {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const userRedux = useSelector((state) => state.auth?.user);
+  const userReduxRedux = useSelector((state) => state.auth?.userRedux);
   const profile = useSelector((state) => state.auth?.profile);
   const { loading, success } = useSelector((state) => state.checkout);
 
-  const [user, setUser] = useState(null);
+  const [userRedux, setuserRedux] = useState(null);
   const [paymentType, setPaymentType] = useState("cash");
   const [remark, setRemark] = useState("");
 
@@ -30,27 +30,27 @@ export default function CheckoutPage() {
     streetNo: "",
     houseNumber: "",
     floorNo: "",
-    city: "Frankfurt",
-    zip: "60311",
+    city: "",
+    zip: "",
   });
 
-  // ── Load user
+  // ── Load userRedux
   useEffect(() => {
-    let u = userRedux;
+    let u = userReduxRedux;
     if (!u && typeof window !== "undefined") {
-      const stored = localStorage.getItem("user");
+      const stored = localStorage.getItem("userRedux");
       if (stored) u = JSON.parse(stored);
     }
     if (u) {
-      setUser(u);
-      dispatch(fetchProfileThunk({
-        customer_ID: u.CustomerId,
-        email: u.EmailAddress,
-        apikey: u.apikey,
-        deviceId: "web123",
-      }));
+      setuserRedux(u);
+      dispatch(getUserProfile({
+  customer_ID: u.CustomerId,
+  email: u.EmailAddress,
+  apikey: u.apikey,
+  deviceId: "web123",
+}));
     }
-  }, [userRedux, dispatch]);
+  }, [userReduxRedux, dispatch]);
 
   // ── Auto-fill from profile
   useEffect(() => {
@@ -62,13 +62,17 @@ export default function CheckoutPage() {
         firstName: p?.firstName || "",
         lastName: p?.lastName || "",
         phone: p?.mobile || "",
-        email: user?.EmailAddress || "",
+        email: userRedux?.EmailAddress || "",
       }));
     }
-  }, [profile, user]);
+  }, [profile, userRedux]);
 
-  const userId = user?.customerId;
-  const cartItems = useSelector((state) => state.cart.carts[userId] || []);
+  const userReduxId = userReduxRedux?.CustomerId || "guest_user";
+  const cartItems = useSelector((state) => {
+  const id = userReduxRedux?.CustomerId || "guest_user";
+  if (!id) return [];
+  return state.cart.carts?.[id] || [];
+});
   const { restaurantId } = useSelector((state) => state.restaurant);
 
   const subtotal = cartItems.reduce((sum, i) => sum + parseFloat(i.price) * i.qty, 0);
@@ -79,7 +83,7 @@ export default function CheckoutPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleCheckout = async () => {
-    if (!user) return toast.error("Please login first");
+    // if (!userRedux) return toast.error("Please login first");
     if (cartItems.length === 0) return toast.error("Cart is empty!");
 
     if (!form.firstName || !form.phone || !form.street || !form.city) {
@@ -87,76 +91,49 @@ export default function CheckoutPage() {
     }
 
     const orderPayload = {
-      Order: [
-        {
-          customer_ID: user.CustomerId,
-          order_type: "Delivery",
-          salutation: form.salutation,
-          First_Name: form.firstName,
-          Last_Name: form.lastName,
-          Name: `${form.firstName} ${form.lastName}`,
-          Phone: form.phone,
-          email: form.email,
-          street: form.street,
-          street_no: form.streetNo,
-          house_number: form.houseNumber,
-          floor_no: form.floorNo,
-          City: form.city,
-          State: form.city,
-          Location: form.city,
-          delivery_area_ZIP: form.zip,
-          remark: remark,
-          payment_type: paymentType,
-          time_rebate: "0",
-          delivery_area_id: "2",
-          min_order: "0",
-          get_Free_From: "0",
-          payment_price: "0",
-          firm_name: "",
-          net_amt: subtotal.toFixed(2),
-          current_discount: "0",
-          Delivery_time: new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }),
-          discount: "0",
-          promo_code: "",
-          promoDiscount: "0",
-          net_after_discount: subtotal.toFixed(2),
-          vat_normal: "0.07",
-          vat_007_after_dsicount: "0",
-          vat_019_after_dsicount: "0",
-          vat_total_after_dsicount: "0",
-          tiffin_cost: "",
-          total: total.toFixed(2),
-          delivery_charge: deliveryCharge.toFixed(2),
-          final_amount: total.toFixed(2),
-          Restaurant: "1",
-          Restaurant_location: "2",
-          currency: "€",
-          attendedBy: "",
-          // DeviceId: user.CustomerId,
-          DeviceId:"Device123",
-          TipAmt: "0",
-        },
-      ],
-      details: cartItems.map((item, index) => ({
-        toppos: "0",
-        is_addon: "0",
-        id: String(index + 1),
-        product_id: String(item.mnuid),
-        sku: item.sku || "",
-        name: item.name,
-        short_name: item.name?.substring(0, 12) + " ...",
-        price: String(item.price),
-        count: String(item.qty),
-        sum: (parseFloat(item.price) * item.qty).toFixed(2),
-        pax: "",
-      })),
-    };
+  restaurantid: "1",
+  orderSource: "ONLINE",
+  orderType: "Delivery",
+  pmtMethod: paymentType,
+  customerId: userRedux?.CustomerId || "guest",
+  firstName: form.firstName,
+  lastName: form.lastName,
+  cName: `${form.firstName} ${form.lastName}`,
+  mobile: form.phone,
+  email: form.email,
+  street: form.street,
+  address: form.streetNo,
+  city: form.city,
+  houseno: form.houseNumber,
+  floor: form.floorNo,
+  zipcode: form.zip,
+  state: form.city,
+  serviceArea: form.city,
+  remark: remark,
+  currency: "EUR",
+  invamt: total.toFixed(2),
+  paymentPrice: "0",
+  tax: "0",
+  discount: "0",
+  coupon: "",
+  deliveryTime: new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }),
+  deliveryTerm: "",
+  deliveryCharge: deliveryCharge.toFixed(2),
 
+  // items array — backend "items" ya "cart" expect karta hai
+  items: cartItems.map((item, index) => ({
+    itmid: String(item.mnuid),
+    sku: item.sku || "",
+    productname: item.name,
+    unitprice: String(item.price),
+    qty: String(item.qty),
+  })),
+};
     const result = await dispatch(checkoutThunk(orderPayload));
 
     if (checkoutThunk.fulfilled.match(result)) {
       toast.success("Order placed successfully! 🎉");
-      dispatch(clearCart(userId));
+      dispatch(clearCart(userReduxId));
       setTimeout(() => router.push("/"), 1500);
     } else {
       toast.error("Order failed. Please try again ❌");

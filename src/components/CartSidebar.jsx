@@ -10,7 +10,7 @@ export default function CartSidebar() {
   const router = useRouter();
   const { t } = useTranslation();
 
-  const userId = "guest";
+  const userId = "guest_user";
 
   const items = useSelector(
     (state) => state.cart.carts?.[userId] || []
