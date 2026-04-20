@@ -5,6 +5,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { checkoutThunk } from "@/app/redux/features/checkoutSlice";
 import { clearCart } from "@/app/redux/features/cartSlice";
 import { getUserProfile } from "@/app/redux/features/authSlice";
+// ── ADD THIS ──
+import { invoiceEmailThunk, resetInvoiceEmail } from "@/app/redux/features/invoiceEmailSlice";
 import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
@@ -15,6 +17,13 @@ export default function CheckoutPage() {
   const userReduxRedux = useSelector((state) => state.auth?.userRedux);
   const profile = useSelector((state) => state.auth?.profile);
   const { loading, success } = useSelector((state) => state.checkout);
+
+  // ── ADD THIS ──
+  const {
+    loading: emailLoading,
+    success: emailSuccess,
+    error: emailError
+  } = useSelector((state) => state.invoiceEmail);
 
   const [userRedux, setuserRedux] = useState(null);
   const [paymentType, setPaymentType] = useState("cash");
@@ -34,7 +43,7 @@ export default function CheckoutPage() {
     zip: "",
   });
 
-  // ── Load userRedux
+  // ── existing useEffects unchanged ──
   useEffect(() => {
     let u = userReduxRedux;
     if (!u && typeof window !== "undefined") {
@@ -44,15 +53,14 @@ export default function CheckoutPage() {
     if (u) {
       setuserRedux(u);
       dispatch(getUserProfile({
-  customer_ID: u.CustomerId,
-  email: u.EmailAddress,
-  apikey: u.apikey,
-  deviceId: "web123",
-}));
+        customer_ID: u.CustomerId,
+        email: u.EmailAddress,
+        apikey: u.apikey,
+        deviceId: "web123",
+      }));
     }
   }, [userReduxRedux, dispatch]);
 
-  // ── Auto-fill from profile
   useEffect(() => {
     if (profile) {
       const p = Array.isArray(profile) ? profile[0] : profile;
@@ -67,12 +75,24 @@ export default function CheckoutPage() {
     }
   }, [profile, userRedux]);
 
+  // ── SHOW TOAST WHEN EMAIL SENDS ──
+  useEffect(() => {
+    if (emailSuccess) {
+      toast.success("Invoice email sent to your inbox! 📧");
+      dispatch(resetInvoiceEmail());
+    }
+    if (emailError) {
+      toast.error(`Email failed: ${emailError}`);
+      dispatch(resetInvoiceEmail());
+    }
+  }, [emailSuccess, emailError, dispatch]);
+
   const userReduxId = userReduxRedux?.CustomerId || "guest_user";
   const cartItems = useSelector((state) => {
-  const id = userReduxRedux?.CustomerId || "guest_user";
-  if (!id) return [];
-  return state.cart.carts?.[id] || [];
-});
+    const id = userReduxRedux?.CustomerId || "guest_user";
+    if (!id) return [];
+    return state.cart.carts?.[id] || [];
+  });
   const { restaurantId } = useSelector((state) => state.restaurant);
 
   const subtotal = cartItems.reduce((sum, i) => sum + parseFloat(i.price) * i.qty, 0);
@@ -82,8 +102,8 @@ export default function CheckoutPage() {
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
+  // ── UPDATED handleCheckout ──
   const handleCheckout = async () => {
-    // if (!userRedux) return toast.error("Please login first");
     if (cartItems.length === 0) return toast.error("Cart is empty!");
 
     if (!form.firstName || !form.phone || !form.street || !form.city) {
@@ -91,48 +111,57 @@ export default function CheckoutPage() {
     }
 
     const orderPayload = {
-  restaurantid: "1",
-  orderSource: "ONLINE",
-  orderType: "Delivery",
-  pmtMethod: paymentType,
-  customerId: userRedux?.CustomerId || "guest",
-  firstName: form.firstName,
-  lastName: form.lastName,
-  cName: `${form.firstName} ${form.lastName}`,
-  mobile: form.phone,
-  email: form.email,
-  street: form.street,
-  address: form.streetNo,
-  city: form.city,
-  houseno: form.houseNumber,
-  floor: form.floorNo,
-  zipcode: form.zip,
-  state: form.city,
-  serviceArea: form.city,
-  remark: remark,
-  currency: "EUR",
-  invamt: total.toFixed(2),
-  paymentPrice: "0",
-  tax: "0",
-  discount: "0",
-  coupon: "",
-  deliveryTime: new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }),
-  deliveryTerm: "",
-  deliveryCharge: deliveryCharge.toFixed(2),
+      restaurantid: "1",
+      orderSource: "ONLINE",
+      orderType: "Delivery",
+      pmtMethod: paymentType,
+      customerId: userRedux?.CustomerId || "guest",
+      firstName: form.firstName,
+      lastName: form.lastName,
+      cName: `${form.firstName} ${form.lastName}`,
+      mobile: form.phone,
+      email: form.email,
+      street: form.street,
+      address: form.streetNo,
+      city: form.city,
+      houseno: form.houseNumber,
+      floor: form.floorNo,
+      zipcode: form.zip,
+      state: form.city,
+      serviceArea: form.city,
+      remark: remark,
+      currency: "EUR",
+      invamt: total.toFixed(2),
+      paymentPrice: "0",
+      tax: "0",
+      discount: "0",
+      coupon: "",
+      deliveryTime: new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }),
+      deliveryTerm: "",
+      deliveryCharge: deliveryCharge.toFixed(2),
+      items: cartItems.map((item) => ({
+        itmid: String(item.mnuid),
+        sku: item.sku || "",
+        productname: item.name,
+        unitprice: String(item.price),
+        qty: String(item.qty),
+      })),
+    };
 
-  // items array — backend "items" ya "cart" expect karta hai
-  items: cartItems.map((item, index) => ({
-    itmid: String(item.mnuid),
-    sku: item.sku || "",
-    productname: item.name,
-    unitprice: String(item.price),
-    qty: String(item.qty),
-  })),
-};
     const result = await dispatch(checkoutThunk(orderPayload));
 
     if (checkoutThunk.fulfilled.match(result)) {
       toast.success("Order placed successfully! 🎉");
+
+      // ── SEND INVOICE EMAIL AFTER SUCCESSFUL ORDER ──
+      const orderNo = result.payload?.data?.orderNo || result.payload?.orderNo;
+      if (orderNo) {
+        dispatch(invoiceEmailThunk({
+          orderNo,
+          order_type: "regular"
+        }));
+      }
+
       dispatch(clearCart(userReduxId));
       setTimeout(() => router.push("/"), 1500);
     } else {
