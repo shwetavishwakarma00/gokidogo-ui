@@ -1,3 +1,4 @@
+
 "use client";
 
 import { ChevronRight } from "lucide-react";
@@ -14,11 +15,11 @@ export default function Steps() {
   ];
 
   return (
-<section className="w-full bg-[#f6f4fb] py-10 px-15 md:px-14 lg:px-20">
+    <section className="w-full bg-[#f6f4fb] py-2 px-4 md:px-16">
 
   {/* HEADER */}
-  <div className="flex items-center gap-4 mb-12">
-    <h2 className="text-[20px] font-semibold text-[#5b3dbd] whitespace-nowrap">
+      <div className="flex items-center gap-4 mb-8">
+        <h2 className="text-[20px] font-semibold text-[#5b3dbd] whitespace-nowrap">
       {t("steps.title")}
     </h2>
     <div className="flex-1 h-[1px] bg-[#d6d1ee]" />
