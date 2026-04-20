@@ -182,7 +182,7 @@ export default function RestaurantMenu() {
       <div ref={sentinelRef} />
 
       {/* ================= CATEGORY BAR ================= */}
-      <div className={`bg-white border-b z-40 ${isSticky ? "sticky top-0 shadow-md" : ""}`}>
+      {/* <div className={`bg-white border-b z-40 ${isSticky ? "sticky top-0 shadow-md" : ""}`}>
         <div className="max-w-6xl mx-auto px-6 py-3 flex gap-2 overflow-auto">
 
           {categories?.map((cat) => (
@@ -200,7 +200,26 @@ export default function RestaurantMenu() {
           ))}
 
         </div>
-      </div>
+      </div> */}
+
+      <div className={`bg-white border-b z-40 ${isSticky ? "sticky top-0 shadow-sm" : ""}`}>
+  <div className="max-w-6xl mx-auto px-6 py-3 flex gap-3 overflow-x-auto hide-scrollbar scroll-smooth">
+    {categories?.map((cat) => (
+      <button
+        key={cat.category_id}
+        onClick={() => setActiveCategory(cat.category_id)}
+        className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-all duration-200
+        ${
+          derivedActiveCategory === cat.category_id
+            ? "bg-purple-600 text-white shadow"
+            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+        }`}
+      >
+        {cat.category}
+      </button>
+    ))}
+  </div>
+</div>
 
       {/* ================= MAIN ================= */}
       <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-4 gap-6">

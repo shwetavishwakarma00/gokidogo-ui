@@ -51,6 +51,24 @@
   "partners": {
     "title": "Our Gourmet Partners"
   },
+  "media":{
+    "title": "As featured in"
+  },
+
+ "sustainable_fair": {
+  "title": "Sustainable & Fair",
+  "items": [
+    {
+      "label": "Reusable instead of disposable products"
+    },
+    {
+      "label": "2.5x more for educational projects"
+    },
+    {
+      "label": "Already saved 12.4 tons of waste!"
+    }
+  ]
+},
 
   "login": {
     "welcome": "Welcome Back 👋",
@@ -63,4 +81,7 @@
     "verifyOtp": "Verify OTP",
     "resend": "Resend OTP"
   }
+
 }
+
+

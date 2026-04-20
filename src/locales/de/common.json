@@ -51,6 +51,24 @@
   "partners": {
     "title": "Unsere Gourmet Partner"
   },
+  "media":{
+    "title": "Bekannt aus"
+  },
+
+  "sustainable_fair": {
+  "title": "Nachhaltig & Fair",
+  "items": [
+    {
+      "label": "Wiederverwendbar statt Einwegprodukte"
+    },
+    {
+      "label": "2,5x mehr für Bildungsprojekte"
+    },
+    {
+      "label": "Bereits 12,4 Tonnen Abfall eingespart!"
+    }
+  ]
+},
 
   "login": {
     "welcome": "Willkommen zurück 👋",
