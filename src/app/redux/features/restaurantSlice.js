@@ -47,6 +47,7 @@ const restaurantSlice = createSlice({
   name: "restaurant",
 
   initialState: {
+    restaurantId: null,
     restaurantInfo: null,
     categories: [],
     loading: false,
@@ -65,6 +66,7 @@ const restaurantSlice = createSlice({
       .addCase(fetchRestaurantMenu.fulfilled, (state, action) => {
         state.loading = false;
         state.restaurantInfo = action.payload.restaurantInfo;
+        state.restaurantId = action.payload.restaurantId;
         state.categories = action.payload.categories;
       })
 

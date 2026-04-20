@@ -93,7 +93,7 @@ export default function CheckoutPage() {
     if (!id) return [];
     return state.cart.carts?.[id] || [];
   });
-  const { restaurantId } = useSelector((state) => state.restaurant);
+  const { restaurantId, restaurantInfo } = useSelector((state) => state.restaurant);
 
   const subtotal = cartItems.reduce((sum, i) => sum + parseFloat(i.price) * i.qty, 0);
   const deliveryCharge = 0;
@@ -111,7 +111,7 @@ export default function CheckoutPage() {
     }
 
     const orderPayload = {
-      restaurantid: "1",
+      restaurantid: "20",
       orderSource: "ONLINE",
       orderType: "Delivery",
       pmtMethod: paymentType,
