@@ -4,11 +4,11 @@ import Image from "next/image";
 import data from "@/data/home.json";
 import { useTranslation } from "../hooks/useTranslation";
 
-const defaultTitles = [
-  "Teammeeting",
-  "Hackathon",
-  "Workshop",
-  "Office Lunch",
+const eventKeys = [
+  "events.teammeeting",
+  "events.hackathon",
+  "events.workshop",
+  "events.officeLunch",
 ];
 
 const defaultPrices = [
@@ -19,10 +19,11 @@ const defaultPrices = [
 ];
 
 export default function Events() {
+  
   const { t } = useTranslation();
 
   return (
-    <section className="w-full bg-[#f6f4fb] py-5 px-4 md:px-16">
+    <section className="w-full bg-[#f6f4fb] py-2 px-4 md:px-16">
 
       {/* Heading with lines */}
       <div className="flex items-center gap-4 mb-8">
@@ -33,12 +34,12 @@ export default function Events() {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
 
         {data.events.map((event, index) => (
           <div
             key={index}
-            className="bg-white rounded-[14px] overflow-hidden shadow-sm"
+            className="bg-white rounded-[14px] overflow-hidden shadow-sm " 
           >
 
             {/* Image */}
@@ -46,7 +47,7 @@ export default function Events() {
               <Image
                 src={event.image}
                 fill
-                alt={defaultTitles[index]}
+                alt={t(eventKeys[index])}
                 className="object-cover"
               />
             </div>
@@ -55,7 +56,7 @@ export default function Events() {
             <div className="bg-gradient-to-r from-[#5c3ab5] to-[#6d4fd6] text-white text-center py-3">
 
               <h3 className="font-semibold text-[15px]">
-                {defaultTitles[index]}
+                {t(eventKeys[index])}
               </h3>
               <div className="w-40 h-[1px] bg-[#9782f6] mx-auto"></div>
               <p className="text-[13px] opacity-90">
