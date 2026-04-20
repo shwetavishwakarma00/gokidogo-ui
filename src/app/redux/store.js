@@ -3,6 +3,7 @@ import restaurantReducer from "./features/restaurantSlice";
 import authReducer from "./features/authSlice";
 import checkoutReducer from "./features/checkoutSlice";
 import cartReducer from "./features/cartSlice";
+import invoiceEmailReducer from "./features/invoiceEmailSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,5 +11,6 @@ export const store = configureStore({
     auth: authReducer,
     checkout : checkoutReducer,
     cart : cartReducer,
+    invoiceEmail : invoiceEmailReducer,
   },
 });
