@@ -96,7 +96,6 @@ export default function Steps() {
             </div>
           );
         })}
-
       </div>
     </section>
   );
