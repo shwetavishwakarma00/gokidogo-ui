@@ -6,7 +6,7 @@ export default function Footer() {
   const { t } = useTranslation();
 
   return (
-    <footer className="bg-gradient-to-r from-[#5126c4] via-[#5b31c8] to-[#6e4bd3] text-white pt-10 pb-8 px-4">
+    <footer className="bg-gradient-to-r from-[#5126c4] via-[#6a42d6] via-[#7b5ae0] to-[#6e4bd3] text-white pt-10 pb-8 px-4">
 
       <div className="max-w-6xl mx-auto text-center">
 

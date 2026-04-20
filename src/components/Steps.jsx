@@ -1,7 +1,6 @@
 "use client";
 
-import data from "@/data/home.json";
-import { CalendarDays, UtensilsCrossed, Truck, ChevronRight, Check } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "../hooks/useTranslation";
 
@@ -9,94 +8,74 @@ export default function Steps() {
   const { t } = useTranslation();
 
   const steps = [
-    {
-      icon: CalendarDays,
-      title: t("steps.step1.title"),
-      desc: t("steps.step1.desc"),
-    },
-    {
-      icon: UtensilsCrossed,
-      title: t("steps.step2.title"),
-      desc: t("steps.step2.desc"),
-    },
-    {
-      icon: Truck,
-      title: t("steps.step3.title"),
-      desc: t("steps.step3.desc"),
-    },
+    { img: "/Image/Step_1.png", title: t("steps.step1.title"), desc: t("steps.step1.desc") },
+    { img: "/Image/Step_2.png", title: t("steps.step2.title"), desc: t("steps.step2.desc") },
+    { img: "/Image/Step_3.png", title: t("steps.step3.title"), desc: t("steps.step3.desc") },
   ];
 
   return (
-    <section className="bg-[#f0edf8] py-10 px-4 sm:px-8 md:px-14 lg:px-20">
+<section className="w-full bg-[#f6f4fb] py-10 px-15 md:px-14 lg:px-20">
 
-      {/* Section heading */}
-      <motion.h2
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        viewport={{ once: true }}
-        className="text-lg sm:text-xl font-semibold text-[#2d1c6b] mb-8 text-center sm:text-left"
-      >
-        {t("steps.title")}
-      </motion.h2>
+  {/* HEADER */}
+  <div className="flex items-center gap-4 mb-12">
+    <h2 className="text-[20px] font-semibold text-[#5b3dbd] whitespace-nowrap">
+      {t("steps.title")}
+    </h2>
+    <div className="flex-1 h-[1px] bg-[#d6d1ee]" />
+  </div>
 
-      {/* Cards row */}
-      <div className="flex flex-col sm:flex-row items-stretch justify-center">
+  {/* STEPS */}
+  <div className="flex flex-col md:flex-row items-center justify-center gap-12 md:gap-0">
 
-        {steps.map((step, index) => {
-          const Icon = step.icon;
+    {steps.map((step, index) => (
+      <div key={index} className="flex items-center">
 
-          return (
-            <div
-              key={index}
-              className="flex items-center flex-col sm:flex-row w-full sm:flex-1 max-w-xs sm:max-w-none mx-auto sm:mx-0"
-            >
+        {/* CARD WRAPPER */}
+        <div className="relative flex flex-col items-center pt-[8px]">
 
-              {/* CARD */}
-              <motion.div
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45, delay: index * 0.15 }}
-                viewport={{ once: true }}
-                className="flex flex-col items-center text-center bg-white rounded-2xl px-6 pt-6 pb-5 w-full shadow-sm"
-              >
+          {/* IMAGE (UNCHANGED) */}
+          <img
+            src={step.img}
+            alt={step.title}
+            className="absolute top-[0px] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150px] h-auto object-contain z-10"
+          />
 
-                {/* Icon box */}
-                <div className="h-[90px] flex items-center justify-center mb-4">
-                  <div className="w-[72px] h-[72px] rounded-2xl bg-[#ede8f8] flex items-center justify-center">
-                    <Icon className="w-9 h-9 text-[#4c2fa0]" strokeWidth={1.6} />
-                  </div>
-                </div>
+          {/* CARD */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: index * 0.1 }}
+            viewport={{ once: true }}
+            className="bg-[#dcd6f3] rounded-[8px] w-[300px] h-[110px] px-2 pb-5 pt-5 flex flex-col justify-end text-center"
+          >
+            <p className="text-[15px] font-bold text-[#1e1256] mb-1">
+              {step.title}
+            </p>
 
-                {/* Title */}
-                <p className="font-bold text-[#2d1c6b] text-[15px] leading-snug mb-1.5">
-                  {step.title}
-                </p>
+            <p className="text-[13px] text-[#6f6a8a] flex items-center justify-center">
+              <span className="mr-1">✓</span>
+              {step.desc}
+            </p>
+          </motion.div>
+        </div>
 
-                {/* Desc with checkmark */}
-                <div className="flex items-center gap-1.5 justify-center">
-                  <Check className="w-3.5 h-3.5 text-[#6c3fc5] shrink-0" strokeWidth={3} />
-                  <span className="text-[13px] text-[#444] leading-tight">
-                    {step.desc}
-                  </span>
-                </div>
+        {/* ARROW */}
+        {index < steps.length - 1 && (
+          <div className="hidden md:flex items-center px-2 text-[#1e1256]">
+            <ChevronRight className="w-[40px] h-[40px]" />
+          </div>
+        )}
 
-              </motion.div>
-
-              {/* Arrow */}
-              {index < steps.length - 1 && (
-                <div className="flex items-center justify-center sm:px-2 md:px-3 py-2 sm:py-0 text-[#2d1c6b] shrink-0">
-                  <ChevronRight
-                    className="w-6 h-6 rotate-90 sm:rotate-0 opacity-80"
-                    strokeWidth={2.5}
-                  />
-                </div>
-              )}
-
-            </div>
-          );
-        })}
       </div>
-    </section>
+    ))}
+
+  </div>
+
+</section>
   );
-}
+}   
+
+
+
+
+

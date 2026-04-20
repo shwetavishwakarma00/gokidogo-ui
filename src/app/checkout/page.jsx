@@ -350,9 +350,8 @@ export default function CheckoutPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[
-                  { value: "cash", label: "💵 Cash on Delivery" },
+                  { value: "cash", label: "💵 Cash" },
                   { value: "card", label: "💳 Credit / Debit Card" },
-                  { value: "online", label: "📱 Online Payment" },
                 ].map((opt) => (
                   <button
                     key={opt.value}
