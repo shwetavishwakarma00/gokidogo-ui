@@ -1,12 +1,8 @@
+
+
 "use client";
 
-import {
-  useEffect,
-  useState,
-  useRef,
-  useMemo,
-  useCallback,
-} from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 
 import { useDispatch, useSelector } from "react-redux";
 import { fetchRestaurantMenu } from "../redux/features/restaurantSlice";
@@ -16,6 +12,8 @@ import {
   decreaseQty,
   removeFromCart,
 } from "@/app/redux/features/cartSlice";
+import { useMenuConfig } from "@/hooks/useMenuConfig";
+import ConfigureModal from "@/components/ConfigureModal";
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -30,19 +28,21 @@ export default function RestaurantMenu() {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const { restaurantInfo, categories, loading } =
-    useSelector((state) => state.restaurant);
+  const { restaurantInfo, categories, loading } = useSelector(
+    (state) => state.restaurant
+  );
 
   const user = useSelector((state) => state.auth.user);
   const userId = user?.customerId || "guest_user";
 
-  const cartItems = useSelector(
-    (state) => state.cart.carts?.[userId] ?? []
-  );
+  const cartItems = useSelector((state) => state.cart.carts?.[userId] ?? []);
 
   const [activeCategory, setActiveCategory] = useState(null);
   const [isSticky, setIsSticky] = useState(false);
+  const [configureItem, setConfigureItem] = useState(null);
   const sentinelRef = useRef(null);
+
+  const { configurableHeads } = useMenuConfig(restaurantInfo?.id);
 
   /* ================= FETCH ================= */
   useEffect(() => {
@@ -55,7 +55,6 @@ export default function RestaurantMenu() {
       ([entry]) => setIsSticky(!entry.isIntersecting),
       { threshold: 0 }
     );
-
     if (sentinelRef.current) observer.observe(sentinelRef.current);
     return () => observer.disconnect();
   }, []);
@@ -67,10 +66,7 @@ export default function RestaurantMenu() {
   );
 
   const selectedCategory = useMemo(
-    () =>
-      categories?.find(
-        (cat) => cat.category_id === derivedActiveCategory
-      ),
+    () => categories?.find((cat) => cat.category_id === derivedActiveCategory),
     [categories, derivedActiveCategory]
   );
 
@@ -78,7 +74,8 @@ export default function RestaurantMenu() {
   const cartMap = useMemo(() => {
     const map = {};
     cartItems.forEach((i) => {
-      map[i.mnuid] = i;
+      const key = i.cartKey || i.mnuid;
+      map[key] = i;
     });
     return map;
   }, [cartItems]);
@@ -89,21 +86,20 @@ export default function RestaurantMenu() {
       (sum, i) => sum + (i.price || 0) * (i.qty || 1) * EURO_TO_INR,
       0
     );
-
     const gst = subtotal * 0.05;
-
-    return {
-      subtotal,
-      gst,
-      total: subtotal + gst,
-    };
+    return { subtotal, gst, total: subtotal + gst };
   }, [cartItems]);
 
   /* ================= HANDLERS ================= */
   const handleAdd = useCallback(
-  (item) => dispatch(addToCart({ userId, item })),
-  [dispatch, userId]
-);
+    (item) => dispatch(addToCart({ userId, item })),
+    [dispatch, userId]
+  );
+
+  const handleConfiguredAdd = useCallback(
+    (configuredItem) => dispatch(addToCart({ userId, item: configuredItem })),
+    [dispatch, userId]
+  );
 
   const handleIncrease = useCallback(
     (id) => dispatch(increaseQty({ userId, id })),
@@ -136,32 +132,32 @@ export default function RestaurantMenu() {
     );
   }
 
+  console.log("Selected Category:", selectedCategory?.category);
+console.log("Products:", selectedCategory?.category_products?.map(i => i.name));
+console.log("Configurable Heads:", [...configurableHeads]);
+
   return (
     <div className="min-h-screen bg-[#f4f4f8] text-gray-800">
 
-      {/* ================= HERO (1ST CODE STYLE PRESERVED) ================= */}
+      {/* ================= HERO ================= */}
       <div className="relative bg-gradient-to-br from-[#5b3fa0] via-[#6b47b8] to-[#7c5dc9] overflow-hidden">
-
         <div className="absolute top-[-60px] right-[-60px] w-72 h-72 rounded-full bg-white/5" />
         <div className="absolute bottom-[-40px] left-[-40px] w-56 h-56 rounded-full bg-white/5" />
 
         <div className="max-w-6xl mx-auto px-6 py-14 md:py-20 flex flex-col md:flex-row items-center gap-10">
-
           <div className="flex-1 text-white">
             <p className="text-green-300 text-xs font-semibold uppercase mb-3">
               ✦ {t("Restaurant Open Now") || "Now Open"}
             </p>
-
             <h1 className="text-4xl md:text-5xl font-extrabold mb-4">
               {restaurantInfo?.name}
             </h1>
-
             <div className="text-white/70 text-sm mb-6">
               📍 {restaurantInfo?.address}
             </div>
-
             <div className="bg-white/10 border border-white/20 rounded-xl px-5 py-3 text-sm backdrop-blur-sm">
-              🛵 {t("Fast delivery · Fresh food · Best prices") || "Fast delivery · Fresh food · Best prices"}
+              🛵 {t("Fast delivery · Fresh food · Best prices") ||
+                "Fast delivery · Fresh food · Best prices"}
             </div>
           </div>
 
@@ -175,51 +171,29 @@ export default function RestaurantMenu() {
               priority
             />
           </div>
-
         </div>
       </div>
 
       <div ref={sentinelRef} />
 
       {/* ================= CATEGORY BAR ================= */}
-      {/* <div className={`bg-white border-b z-40 ${isSticky ? "sticky top-0 shadow-md" : ""}`}>
-        <div className="max-w-6xl mx-auto px-6 py-3 flex gap-2 overflow-auto">
-
+      <div className={`bg-white border-b z-40 ${isSticky ? "sticky top-0 shadow-sm" : ""}`}>
+        <div className="max-w-6xl mx-auto px-6 py-3 flex gap-3 overflow-x-auto hide-scrollbar scroll-smooth">
           {categories?.map((cat) => (
             <button
               key={cat.category_id}
               onClick={() => setActiveCategory(cat.category_id)}
-              className={`px-4 py-2 rounded-full text-sm ${
+              className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-all duration-200 ${
                 derivedActiveCategory === cat.category_id
-                  ? "bg-purple-600 text-white"
-                  : "bg-gray-100"
+                  ? "bg-purple-600 text-white shadow"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
               {cat.category}
             </button>
           ))}
-
         </div>
-      </div> */}
-
-      <div className={`bg-white border-b z-40 ${isSticky ? "sticky top-0 shadow-sm" : ""}`}>
-  <div className="max-w-6xl mx-auto px-6 py-3 flex gap-3 overflow-x-auto hide-scrollbar scroll-smooth">
-    {categories?.map((cat) => (
-      <button
-        key={cat.category_id}
-        onClick={() => setActiveCategory(cat.category_id)}
-        className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-all duration-200
-        ${
-          derivedActiveCategory === cat.category_id
-            ? "bg-purple-600 text-white shadow"
-            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-        }`}
-      >
-        {cat.category}
-      </button>
-    ))}
-  </div>
-</div>
+      </div>
 
       {/* ================= MAIN ================= */}
       <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -227,21 +201,16 @@ export default function RestaurantMenu() {
         {/* ================= ORDER SUMMARY ================= */}
         <div className="lg:col-span-1 order-2 lg:order-1">
           <div className="bg-white rounded-xl shadow p-4 sticky top-24">
-
             <h2 className="font-bold text-lg mb-4">
               {t("Order Summary") || "Order Summary"}
             </h2>
 
-            {cartItems.map((item) => {
-              const itemTotal =
-                item.price * item.qty * EURO_TO_INR;
+            {cartItems.map((item, index) => {
+              const itemTotal = item.price * item.qty * EURO_TO_INR;
+              const cartKey = item.cartKey || item.mnuid;
 
               return (
-                <div
-                  key={item.mnuid}
-                  className="flex gap-3 mb-4 border-b pb-3"
-                >
-
+                <div key={cartKey} className="flex gap-3 mb-4 border-b pb-3">
                   <Image
                     src={getImage(item)}
                     width={60}
@@ -249,34 +218,41 @@ export default function RestaurantMenu() {
                     alt={item.name}
                     className="rounded-lg object-cover"
                   />
-
                   <div className="flex-1">
-
                     <div className="flex justify-between items-center">
-                      <p className="text-sm font-semibold">
-                        {item.name}
-                      </p>
-
+                      <p className="text-sm font-semibold">{item.name}</p>
                       <button
-                        onClick={() => handleRemove(item.mnuid)}
+                        onClick={() => handleRemove(cartKey)}
                         className="text-red-500"
                       >
                         <Trash2 size={16} />
                       </button>
                     </div>
 
-                    <p className="text-xs text-gray-500">
+                    {/* Addons list */}
+                    {item.addons?.length > 0 && (
+                      <div className="mt-1">
+                        {item.addons.map((addon, i) => (
+                          <p key={i} className="text-xs text-gray-400">
+                            + {addon.name}
+                            {addon.price > 0
+                              ? ` (+₹${(addon.price * EURO_TO_INR).toFixed(0)})`
+                              : " (free)"}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+
+                    <p className="text-xs text-gray-500 mt-1">
                       ₹{itemTotal.toFixed(0)}
                     </p>
 
                     <div className="flex gap-2 mt-1">
-                      <button onClick={() => handleDecrease(item.mnuid)}>-</button>
+                      <button onClick={() => handleDecrease(cartKey)}>-</button>
                       <span>{item.qty}</span>
-                      <button onClick={() => handleIncrease(item.mnuid)}>+</button>
+                      <button onClick={() => handleIncrease(cartKey)}>+</button>
                     </div>
-
                   </div>
-
                 </div>
               );
             })}
@@ -284,22 +260,18 @@ export default function RestaurantMenu() {
             {cartItems.length > 0 && (
               <>
                 <div className="text-sm space-y-2 mt-3">
-
                   <div className="flex justify-between">
                     <span>{t("Sub Total")}</span>
                     <span>₹{subtotal.toFixed(0)}</span>
                   </div>
-
                   <div className="flex justify-between">
                     <span>{t("GST")}</span>
                     <span>₹{gst.toFixed(0)}</span>
                   </div>
-
                   <div className="flex justify-between font-bold">
                     <span>{t("Total")}</span>
                     <span>₹{total.toFixed(0)}</span>
                   </div>
-
                 </div>
 
                 <button
@@ -310,21 +282,20 @@ export default function RestaurantMenu() {
                 </button>
               </>
             )}
-
           </div>
         </div>
 
         {/* ================= MENU ================= */}
         <div className="lg:col-span-3 order-1 lg:order-2">
-
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5">
-
             {selectedCategory?.category_products?.map((item) => {
               const cartItem = cartMap[item.mnuid];
+              const isInCart = cartItems.some(
+                (i) => (i.cartKey || i.mnuid) === item.mnuid
+              );
 
               return (
                 <div key={item.mnuid} className="bg-white rounded-xl shadow">
-
                   <Image
                     src={getImage(item)}
                     width={300}
@@ -334,39 +305,52 @@ export default function RestaurantMenu() {
                   />
 
                   <div className="p-3">
-
                     <h3 className="font-semibold">{item.name}</h3>
-
                     <p className="text-sm text-gray-500">
                       ₹{(item.price * EURO_TO_INR).toFixed(0)}
                     </p>
 
-                    {!cartItem ? (
-                      <button
-                        onClick={() => handleAdd(item)}
-                        className="bg-purple-600 text-white px-3 py-1 rounded mt-2"
-                      >
-                        {t("Add") || "Add"}
-                      </button>
+                    {!isInCart ? (
+                      configurableHeads.has(item.menu_head) ? (
+                        <button
+                          onClick={() => setConfigureItem(item)}
+                          className="bg-purple-600 text-white px-3 py-1 rounded mt-2 text-sm w-full"
+                        >
+                          Configure
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleAdd(item)}
+                          className="bg-purple-600 text-white px-3 py-1 rounded mt-2 text-sm"
+                        >
+                          {t("Add") || "Add"}
+                        </button>
+                      )
                     ) : (
                       <div className="flex gap-2 mt-2">
                         <button onClick={() => handleDecrease(item.mnuid)}>-</button>
-                        <span>{cartItem.qty}</span>
+                        <span>{cartItem?.qty}</span>
                         <button onClick={() => handleIncrease(item.mnuid)}>+</button>
                       </div>
                     )}
-
                   </div>
-
                 </div>
               );
             })}
-
           </div>
-
         </div>
-
       </div>
+
+      {/* ================= CONFIGURE MODAL ================= */}
+      {configureItem && (
+        <ConfigureModal
+          item={configureItem}
+          restaurantId={restaurantInfo?.id || "20"}
+          onClose={() => setConfigureItem(null)}
+          onAddToCart={handleConfiguredAdd}
+        />
+      )}
+
     </div>
   );
 }
