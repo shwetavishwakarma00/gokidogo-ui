@@ -16,10 +16,10 @@ export default function ConfigureModal({
   const [selections, setSelections] = useState({});
   const [loading, setLoading] = useState(true);
   const basePrice = parseFloat(item.price) || 0;
-  const hasFetched = useRef(false); // EK BAAR HI FETCH
+  const hasFetched = useRef(false); 
 
   useEffect(() => {
-    if (hasFetched.current) return; // ALREADY FETCH HO CHUKA HAI
+    if (hasFetched.current) return; 
     hasFetched.current = true;
 
     const fetchData = async () => {
