@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { X } from "lucide-react";
 
 const EURO_TO_INR = 90;
@@ -12,77 +12,105 @@ export default function ConfigureModal({
   onAddToCart,
 }) {
   const [sections, setSections] = useState([]);
+  const [optionsMap, setOptionsMap] = useState({});
   const [selections, setSelections] = useState({});
   const [loading, setLoading] = useState(true);
   const basePrice = parseFloat(item.price) || 0;
+  const hasFetched = useRef(false); // EK BAAR HI FETCH
 
-  /* ===== FETCH ===== */
   useEffect(() => {
-    const fetchConfig = async () => {
+    if (hasFetched.current) return; // ALREADY FETCH HO CHUKA HAI
+    hasFetched.current = true;
+
+    const fetchData = async () => {
       try {
-        const res = await fetch(
+        const configRes = await fetch(
           "https://webapit.gokidogo.de/api/menuconfig/getData",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              restaurantid: restaurantId,
+              restaurantid: String(restaurantId),
               modifier_group: item.menu_head,
             }),
           }
         );
-        const json = await res.json();
-        if (json.success) {
-          const active = json.data.filter((s) => s.active === 1);
-          setSections(active);
+        const configJson = await configRes.json();
+        const activeSections = (configJson.data || []).filter(
+          (s) => s.active === 1
+        );
+        setSections(activeSections);
 
-          // Default selections
-          const defaults = {};
-          active.forEach((s) => {
-            defaults[s.id] = s.type === "Single" ? null : [];
-          });
-          setSelections(defaults);
-        }
+        const optionsRes = await fetch(
+          "https://webapit.gokidogo.de/api/menuoptions/getData",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              restaurantid: String(restaurantId),
+              groupName: item.menu_head,
+            }),
+          }
+        );
+        const optionsJson = await optionsRes.json();
+
+        const grouped = {};
+        (optionsJson.data || []).forEach((opt) => {
+          const key = opt.option_type;
+          if (!grouped[key]) grouped[key] = [];
+          grouped[key].push(opt);
+        });
+        setOptionsMap(grouped);
+
+        const defaults = {};
+        activeSections.forEach((s) => {
+          defaults[s.id] = s.type === "Single" ? null : [];
+        });
+        setSelections(defaults);
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
-    fetchConfig();
-  }, [item, restaurantId]);
+
+    fetchData();
+  }, []); 
 
   /* ===== PRICE CALC ===== */
   const totalPrice = sections.reduce((total, section) => {
-    const price = parseFloat(section.price) || 0;
     const included = section.included || 0;
     const selected = selections[section.id];
+    const sectionOptions = optionsMap[section.name] || [];
 
     if (section.type === "Single") {
-      return total + (selected ? price : 0);
+      if (!selected) return total;
+      const opt = sectionOptions.find((o) => o.id === selected);
+      return total + (parseFloat(opt?.price) || 0);
     } else {
-      const count = Array.isArray(selected) ? selected.length : 0;
-      const paid = Math.max(0, count - included);
-      return total + paid * price;
+      const selectedOpts = Array.isArray(selected) ? selected : [];
+      const paid = Math.max(0, selectedOpts.length - included);
+      const optPrice = parseFloat(sectionOptions[0]?.price) || 0;
+      return total + paid * optPrice;
     }
   }, basePrice);
 
   /* ===== HANDLERS ===== */
-  const handleSingle = (sectionId) => {
+  const handleSingle = (sectionId, optionId) => {
     setSelections((prev) => ({
       ...prev,
-      [sectionId]: prev[sectionId] ? null : sectionId,
+      [sectionId]: prev[sectionId] === optionId ? null : optionId,
     }));
   };
 
-  const handleMulti = (sectionId, optId, max) => {
+  const handleMulti = (sectionId, optionId, max) => {
     setSelections((prev) => {
       const current = prev[sectionId] || [];
-      if (current.includes(optId)) {
-        return { ...prev, [sectionId]: current.filter((o) => o !== optId) };
+      if (current.includes(optionId)) {
+        return { ...prev, [sectionId]: current.filter((o) => o !== optionId) };
       }
       if (current.length >= max) return prev;
-      return { ...prev, [sectionId]: [...current, optId] };
+      return { ...prev, [sectionId]: [...current, optionId] };
     });
   };
 
@@ -92,20 +120,26 @@ export default function ConfigureModal({
 
     sections.forEach((section) => {
       const selected = selections[section.id];
-      const price = parseFloat(section.price) || 0;
       const included = section.included || 0;
+      const sectionOptions = optionsMap[section.name] || [];
 
       if (section.type === "Single" && selected) {
-        addons.push({
-          name: section.name,
-          price,
-        });
-      } else if (section.type === "Multi" && Array.isArray(selected)) {
-        selected.forEach((_, i) => {
+        const opt = sectionOptions.find((o) => o.id === selected);
+        if (opt) {
           addons.push({
-            name: section.name,
-            price: i >= included ? price : 0,
+            name: `${section.name}: ${opt.option_name || opt.size}`,
+            price: parseFloat(opt.price) || 0,
           });
+        }
+      } else if (section.type === "Multi" && Array.isArray(selected)) {
+        selected.forEach((optId, index) => {
+          const opt = sectionOptions.find((o) => o.id === optId);
+          if (opt) {
+            addons.push({
+              name: `${section.name}: ${opt.option_name || opt.size}`,
+              price: index >= included ? parseFloat(opt.price) || 0 : 0,
+            });
+          }
         });
       }
     });
@@ -145,13 +179,12 @@ export default function ConfigureModal({
           )}
 
           {!loading && sections.map((section) => {
-            const price = parseFloat(section.price) || 0;
             const included = section.included || 0;
+            const sectionOptions = optionsMap[section.name] || [];
             const selectedMulti = selections[section.id] || [];
 
             return (
               <div key={section.id}>
-
                 {/* Section Title */}
                 <div className="flex justify-between items-center mb-3">
                   <h3 className="font-semibold text-gray-800">
@@ -171,78 +204,82 @@ export default function ConfigureModal({
                   </div>
                 </div>
 
+                {/* No options available */}
+                {sectionOptions.length === 0 && (
+                  <p className="text-sm text-gray-400">No options available</p>
+                )}
+
                 {/* Single → Radio */}
-                {section.type === "Single" && (
-                  <div
-                    onClick={() => handleSingle(section.id)}
-                    className={`flex justify-between items-center p-3 border rounded-xl cursor-pointer transition ${
-                      selections[section.id]
-                        ? "border-purple-500 bg-purple-50"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="radio"
-                        readOnly
-                        checked={!!selections[section.id]}
-                        className="accent-purple-600"
-                      />
-                      <span className="text-sm text-gray-700">
-                        Add {section.name}
-                      </span>
-                    </div>
-                    <span className="text-sm font-medium text-gray-500">
-                      {price === 0
-                        ? "Free"
-                        : `+₹${(price * EURO_TO_INR).toFixed(0)}`}
-                    </span>
-                  </div>
-                )}
+                {section.type === "Single" &&
+                  sectionOptions.map((opt) => {
+                    const optPrice = parseFloat(opt.price) || 0;
+                    const label = opt.option_name?.trim() || opt.size?.trim() || "";
+                    const isSelected = selections[section.id] === opt.id;
 
-                {/* Multi → Checkboxes */}
-                {section.type === "Multi" && (
-                  <div className="space-y-2">
-                    {Array.from({ length: section.max }).map((_, i) => {
-                      const optId = `${section.id}_${i}`;
-                      const isSelected = selectedMulti.includes(optId);
-                      const selectedIndex = selectedMulti.indexOf(optId);
-                      const isFree = isSelected && selectedIndex < included;
-
-                      return (
-                        <div
-                          key={optId}
-                          onClick={() =>
-                            handleMulti(section.id, optId, section.max)
-                          }
-                          className={`flex justify-between items-center p-3 border rounded-xl cursor-pointer transition ${
-                            isSelected
-                              ? "border-purple-500 bg-purple-50"
-                              : "border-gray-200 hover:border-gray-300"
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <input
-                              type="checkbox"
-                              readOnly
-                              checked={isSelected}
-                              className="accent-purple-600"
-                            />
-                            <span className="text-sm text-gray-700">
-                              {section.name} #{i + 1}
-                            </span>
-                          </div>
-                          <span className="text-sm font-medium text-gray-500">
-                            {isFree
-                              ? "Free"
-                              : `+₹${(price * EURO_TO_INR).toFixed(0)}`}
-                          </span>
+                    return (
+                      <div
+                        key={opt.id}
+                        onClick={() => handleSingle(section.id, opt.id)}
+                        className={`flex justify-between items-center p-3 border rounded-xl cursor-pointer transition mb-2 ${
+                          isSelected
+                            ? "border-purple-500 bg-purple-50"
+                            : "border-gray-200 hover:border-gray-300"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="radio"
+                            readOnly
+                            checked={isSelected}
+                            className="accent-purple-600"
+                          />
+                          <span className="text-sm text-gray-700">{label}</span>
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
+                        <span className="text-sm font-medium text-gray-500">
+                          {optPrice === 0
+                            ? "Free"
+                            : `+₹${(optPrice * EURO_TO_INR).toFixed(0)}`}
+                        </span>
+                      </div>
+                    );
+                  })}
 
+                {/* Multi → Checkbox */}
+                {section.type === "Multi" &&
+                  sectionOptions.map((opt, index) => {
+                    const optPrice = parseFloat(opt.price) || 0;
+                    const label = opt.option_name?.trim() || opt.size?.trim() || "";
+                    const isSelected = selectedMulti.includes(opt.id);
+                    const selectedIndex = selectedMulti.indexOf(opt.id);
+                    const isFree = isSelected && selectedIndex < included;
+
+                    return (
+                      <div
+                        key={opt.id}
+                        onClick={() => handleMulti(section.id, opt.id, section.max)}
+                        className={`flex justify-between items-center p-3 border rounded-xl cursor-pointer transition mb-2 ${
+                          isSelected
+                            ? "border-purple-500 bg-purple-50"
+                            : "border-gray-200 hover:border-gray-300"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="checkbox"
+                            readOnly
+                            checked={isSelected}
+                            className="accent-purple-600"
+                          />
+                          <span className="text-sm text-gray-700">{label}</span>
+                        </div>
+                        <span className="text-sm font-medium text-gray-500">
+                          {isFree
+                            ? "Free"
+                            : `+₹${(optPrice * EURO_TO_INR).toFixed(0)}`}
+                        </span>
+                      </div>
+                    );
+                  })}
               </div>
             );
           })}

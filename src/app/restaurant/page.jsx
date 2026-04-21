@@ -132,10 +132,6 @@ export default function RestaurantMenu() {
     );
   }
 
-  console.log("Selected Category:", selectedCategory?.category);
-console.log("Products:", selectedCategory?.category_products?.map(i => i.name));
-console.log("Configurable Heads:", [...configurableHeads]);
-
   return (
     <div className="min-h-screen bg-[#f4f4f8] text-gray-800">
 
