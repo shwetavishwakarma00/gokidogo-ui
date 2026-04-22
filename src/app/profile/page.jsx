@@ -1,4 +1,7 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
+
+/* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useState, useRef } from "react";
 import { LogOut, Lock, User, Eye, EyeOff } from "lucide-react";
@@ -30,8 +33,10 @@ export default function ProfilePage() {
     `${form.firstName?.[0] || ""}${form.lastName?.[0] || ""}`.toUpperCase() || "?";
 
   useEffect(() => {
+    let newProfileImage = null;
+
     const storedImage = localStorage.getItem("profileImage");
-    if (storedImage) setProfileImage(storedImage);
+    if (storedImage) newProfileImage = storedImage;
 
     const loginUser = JSON.parse(localStorage.getItem("user") || "null");
     const signupUser = JSON.parse(localStorage.getItem("signupData") || "null");
@@ -62,6 +67,8 @@ export default function ProfilePage() {
     }
 
     const saved = JSON.parse(localStorage.getItem("profileData") || "null");
+
+    if (newProfileImage) setProfileImage(newProfileImage);
     setForm(saved || base);
   }, []);
 
@@ -108,10 +115,8 @@ export default function ProfilePage() {
 
       <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
 
-        {/* ── MOBILE TOP BAR (visible only on small screens) ── */}
+        {/* MOBILE */}
         <div className="flex flex-col items-center pt-6 pb-4 px-4 border-b sm:hidden">
-
-          {/* Avatar */}
           <div
             onClick={() => fileInputRef.current.click()}
             className="w-20 h-20 rounded-full bg-purple-100 flex items-center justify-center cursor-pointer overflow-hidden shadow mb-2"
@@ -128,35 +133,17 @@ export default function ProfilePage() {
           </p>
           <p className="text-xs text-gray-500 mb-4">{form.email}</p>
 
-          {/* Tab strip */}
           <div className="flex w-full gap-2">
-            <MobileTabBtn
-              icon={<User size={15} />}
-              label="Profile"
-              active={activeTab === "profile"}
-              onClick={() => setActiveTab("profile")}
-            />
-            <MobileTabBtn
-              icon={<Lock size={15} />}
-              label="Password"
-              active={activeTab === "password"}
-              onClick={() => setActiveTab("password")}
-            />
-            <MobileTabBtn
-              icon={<LogOut size={15} />}
-              label="Logout"
-              danger
-              onClick={handleLogout}
-            />
+            <MobileTabBtn icon={<User size={15} />} label="Profile" active={activeTab === "profile"} onClick={() => setActiveTab("profile")} />
+            <MobileTabBtn icon={<Lock size={15} />} label="Password" active={activeTab === "password"} onClick={() => setActiveTab("password")} />
+            <MobileTabBtn icon={<LogOut size={15} />} label="Logout" danger onClick={handleLogout} />
           </div>
         </div>
 
-        {/* ── DESKTOP LAYOUT (sidebar + content side by side) ── */}
+        {/* DESKTOP */}
         <div className="flex">
 
-          {/* SIDEBAR — hidden on mobile */}
           <div className="hidden sm:flex w-64 border-r p-6 flex-col shrink-0">
-
             <div className="text-center mb-8">
               <div
                 onClick={() => fileInputRef.current.click()}
@@ -182,14 +169,12 @@ export default function ProfilePage() {
             <MenuBtn icon={<LogOut size={18} />} label="Logout" danger onClick={handleLogout} />
           </div>
 
-          {/* CONTENT */}
           <div className="flex-1 p-4 sm:p-8 min-h-[500px] sm:min-h-[650px]">
 
             <h2 className="text-xl sm:text-2xl font-bold text-purple-900 mb-5 sm:mb-6 underline underline-offset-1 decoration-2">
               Personal Information
             </h2>
 
-            {/* PROFILE TAB */}
             {activeTab === "profile" && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
 
@@ -231,7 +216,6 @@ export default function ProfilePage() {
               </div>
             )}
 
-            {/* PASSWORD TAB */}
             {activeTab === "password" && (
               <div className="w-full max-w-md space-y-4">
 
@@ -243,11 +227,7 @@ export default function ProfilePage() {
                     value={passwords.newPassword}
                     onChange={handlePasswordChange}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPass(!showPass)}
-                    className="absolute right-3 top-9 text-gray-600"
-                  >
+                  <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-9 text-gray-600">
                     {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
@@ -260,19 +240,12 @@ export default function ProfilePage() {
                     value={passwords.confirmPassword}
                     onChange={handlePasswordChange}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPass(!showPass)}
-                    className="absolute right-3 top-9 text-gray-600"
-                  >
+                  <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-9 text-gray-600">
                     {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
 
-                <button
-                  onClick={changePassword}
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl"
-                >
+                <button onClick={changePassword} className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl">
                   Update Password
                 </button>
 
@@ -288,7 +261,7 @@ export default function ProfilePage() {
   );
 }
 
-/* ── COMPONENTS ── */
+/* COMPONENTS */
 
 function MenuBtn({ icon, label, active, danger, onClick }) {
   return (
@@ -307,7 +280,6 @@ function MenuBtn({ icon, label, active, danger, onClick }) {
   );
 }
 
-/* Compact tab button used in mobile top bar */
 function MobileTabBtn({ icon, label, active, danger, onClick }) {
   return (
     <button
