@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
-
 import { useDispatch, useSelector } from "react-redux";
 import { fetchRestaurantMenu } from "../redux/features/restaurantSlice";
 import {
@@ -12,7 +11,6 @@ import {
 } from "@/app/redux/features/cartSlice";
 import { useMenuConfig } from "@/hooks/useMenuConfig";
 import ConfigureModal from "@/components/ConfigureModal";
-
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Trash2, ChevronUp } from "lucide-react";
@@ -22,56 +20,46 @@ const EURO_TO_INR = 90;
 
 export default function RestaurantMenu() {
   const { t } = useTranslation();
-
   const dispatch = useDispatch();
   const router = useRouter();
 
   const { restaurantInfo, categories, loading } = useSelector(
-    (state) => state.restaurant
+    (state) => state.restaurant,
   );
-
   const user = useSelector((state) => state.auth.user);
   const userId = user?.customerId || "guest_user";
-
   const cartItems = useSelector((state) => state.cart.carts?.[userId] ?? []);
 
   const [activeCategory, setActiveCategory] = useState(null);
   const [isSticky, setIsSticky] = useState(false);
   const [configureItem, setConfigureItem] = useState(null);
   const sentinelRef = useRef(null);
-
-  // Ref for mobile order summary section (scroll target)
   const mobileOrderSummaryRef = useRef(null);
-
   const { configurableHeads } = useMenuConfig(restaurantInfo?.id);
 
-  /* ================= FETCH ================= */
   useEffect(() => {
     dispatch(fetchRestaurantMenu());
   }, [dispatch]);
 
-  /* ================= STICKY CATEGORY ================= */
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => setIsSticky(!entry.isIntersecting),
-      { threshold: 0 }
+      { threshold: 0 },
     );
     if (sentinelRef.current) observer.observe(sentinelRef.current);
     return () => observer.disconnect();
   }, []);
 
-  /* ================= ACTIVE CATEGORY ================= */
   const derivedActiveCategory = useMemo(
     () => activeCategory ?? categories?.[0]?.category_id,
-    [activeCategory, categories]
+    [activeCategory, categories],
   );
 
   const selectedCategory = useMemo(
     () => categories?.find((cat) => cat.category_id === derivedActiveCategory),
-    [categories, derivedActiveCategory]
+    [categories, derivedActiveCategory],
   );
 
-  /* ================= CART MAP ================= */
   const cartMap = useMemo(() => {
     const map = {};
     cartItems.forEach((i) => {
@@ -81,48 +69,38 @@ export default function RestaurantMenu() {
     return map;
   }, [cartItems]);
 
-  /* ================= TOTALS ================= */
   const { subtotal, gst, total } = useMemo(() => {
     const subtotal = cartItems.reduce(
       (sum, i) => sum + (i.price || 0) * (i.qty || 1) * EURO_TO_INR,
-      0
+      0,
     );
     const gst = subtotal * 0.05;
     return { subtotal, gst, total: subtotal + gst };
   }, [cartItems]);
 
-  /* ================= HANDLERS ================= */
   const handleAdd = useCallback(
     (item) => dispatch(addToCart({ userId, item })),
-    [dispatch, userId]
+    [dispatch, userId],
   );
-
   const handleConfiguredAdd = useCallback(
     (configuredItem) => dispatch(addToCart({ userId, item: configuredItem })),
-    [dispatch, userId]
+    [dispatch, userId],
   );
-
   const handleIncrease = useCallback(
     (id) => dispatch(increaseQty({ userId, id })),
-    [dispatch, userId]
+    [dispatch, userId],
   );
-
   const handleDecrease = useCallback(
     (id) => dispatch(decreaseQty({ userId, id })),
-    [dispatch, userId]
+    [dispatch, userId],
   );
-
   const handleRemove = useCallback(
     (id) => dispatch(removeFromCart({ userId, id })),
-    [dispatch, userId]
+    [dispatch, userId],
   );
-
-  /* ================= SCROLL TO TOP ================= */
   const handleScrollTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
-
-  /* ================= SCROLL TO MOBILE ORDER SUMMARY ================= */
   const handlePriceClick = useCallback(() => {
     if (mobileOrderSummaryRef.current) {
       mobileOrderSummaryRef.current.scrollIntoView({
@@ -132,11 +110,8 @@ export default function RestaurantMenu() {
     }
   }, []);
 
-  /* ================= IMAGE ================= */
   const getImage = (item) => {
-    if (item?.image && item?.sku) {
-      return `${item.image}${item.sku}.jpg`;
-    }
+    if (item?.image && item?.sku) return `${item.image}${item.sku}.jpg`;
     return "/fallback.jpg";
   };
 
@@ -149,31 +124,34 @@ export default function RestaurantMenu() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f4f8] text-gray-800">
-
+    <div
+      className={`min-h-screen bg-[#f4f4f8] text-gray-800 ${cartItems.length > 0 ? "pb-20 lg:pb-0" : ""}`}
+    >
       {/* ================= HERO ================= */}
       <div className="relative bg-gradient-to-br from-[#5b3fa0] via-[#6b47b8] to-[#7c5dc9] overflow-hidden">
         <div className="absolute top-[-60px] right-[-60px] w-72 h-72 rounded-full bg-white/5" />
         <div className="absolute bottom-[-40px] left-[-40px] w-56 h-56 rounded-full bg-white/5" />
-
-        <div className="max-w-6xl mx-auto px-6 py-14 md:py-20 flex flex-col md:flex-row items-center gap-10">
+        {/* ✅ md: → lg: */}
+        <div className="max-w-6xl mx-auto px-6 py-14 lg:py-20 flex flex-col lg:flex-row items-center gap-10">
           <div className="flex-1 text-white">
             <p className="text-green-300 text-xs font-semibold uppercase mb-3">
               ✦ {t("Restaurant Open Now") || "Now Open"}
             </p>
-            <h1 className="text-4xl md:text-5xl font-extrabold mb-4">
+            {/* ✅ md: → lg: */}
+            <h1 className="text-4xl lg:text-5xl font-extrabold mb-4">
               {restaurantInfo?.name}
             </h1>
             <div className="text-white/70 text-sm mb-6">
               📍 {restaurantInfo?.address}
             </div>
             <div className="bg-white/10 border border-white/20 rounded-xl px-5 py-3 text-sm backdrop-blur-sm">
-              🛵 {t("Fast delivery · Fresh food · Best prices") ||
+              🛵{" "}
+              {t("Fast delivery · Fresh food · Best prices") ||
                 "Fast delivery · Fresh food · Best prices"}
             </div>
           </div>
-
-          <div className="w-full md:w-[380px] h-[240px] rounded-2xl overflow-hidden shadow-xl">
+          {/* ✅ md: → lg: */}
+          <div className="w-full lg:w-[380px] h-[240px] rounded-2xl overflow-hidden shadow-xl">
             <Image
               src="/Image/biryani.jpg"
               width={400}
@@ -189,7 +167,9 @@ export default function RestaurantMenu() {
       <div ref={sentinelRef} />
 
       {/* ================= CATEGORY BAR ================= */}
-      <div className={`bg-white border-b z-40 ${isSticky ? "sticky top-0 shadow-sm" : ""}`}>
+      <div
+        className={`bg-white border-b z-40 ${isSticky ? "sticky top-0 shadow-sm" : ""}`}
+      >
         <div className="max-w-6xl mx-auto px-6 py-3 flex gap-3 overflow-x-auto hide-scrollbar scroll-smooth">
           {categories?.map((cat) => (
             <button
@@ -208,8 +188,8 @@ export default function RestaurantMenu() {
       </div>
 
       {/* ================= MAIN ================= */}
-      <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-10 grid grid-cols-1 lg:grid-cols-4 gap-6">
-
+      {/* ✅ md: → lg: */}
+      <div className="max-w-6xl mx-auto px-4 lg:px-6 py-6 lg:py-10 grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* ================= ORDER SUMMARY — desktop only ================= */}
         <div className="lg:col-span-1 order-2 lg:order-1 hidden lg:block">
           <div className="bg-white rounded-xl shadow p-4 sticky top-24">
@@ -220,7 +200,6 @@ export default function RestaurantMenu() {
             {cartItems.map((item) => {
               const itemTotal = item.price * item.qty * EURO_TO_INR;
               const cartKey = item.cartKey || item.mnuid;
-
               return (
                 <div key={cartKey} className="flex gap-3 mb-4 border-b pb-3">
                   <Image
@@ -233,11 +212,13 @@ export default function RestaurantMenu() {
                   <div className="flex-1">
                     <div className="flex justify-between items-center">
                       <p className="text-sm font-semibold">{item.name}</p>
-                      <button onClick={() => handleRemove(cartKey)} className="text-red-500">
+                      <button
+                        onClick={() => handleRemove(cartKey)}
+                        className="text-red-500"
+                      >
                         <Trash2 size={16} />
                       </button>
                     </div>
-
                     {item.addons?.length > 0 && (
                       <div className="mt-1">
                         {item.addons.map((addon, i) => (
@@ -250,9 +231,9 @@ export default function RestaurantMenu() {
                         ))}
                       </div>
                     )}
-
-                    <p className="text-xs text-gray-500 mt-1">₹{itemTotal.toFixed(0)}</p>
-
+                    <p className="text-xs text-gray-500 mt-1">
+                      ₹{itemTotal.toFixed(0)}
+                    </p>
                     <div className="flex gap-2 mt-1">
                       <button onClick={() => handleDecrease(cartKey)}>-</button>
                       <span>{item.qty}</span>
@@ -292,15 +273,13 @@ export default function RestaurantMenu() {
 
         {/* ================= MENU ITEMS ================= */}
         <div className="lg:col-span-3 order-1 lg:order-2">
-
-          {/* Desktop grid */}
+          {/* Desktop grid — lg only */}
           <div className="hidden lg:grid lg:grid-cols-3 gap-5">
             {selectedCategory?.category_products?.map((item) => {
               const cartItem = cartMap[item.mnuid];
               const isInCart = cartItems.some(
-                (i) => (i.cartKey || i.mnuid) === item.mnuid
+                (i) => (i.cartKey || i.mnuid) === item.mnuid,
               );
-
               return (
                 <div key={item.mnuid} className="bg-white rounded-xl shadow">
                   <Image
@@ -333,9 +312,13 @@ export default function RestaurantMenu() {
                       )
                     ) : (
                       <div className="flex gap-2 mt-2">
-                        <button onClick={() => handleDecrease(item.mnuid)}>-</button>
+                        <button onClick={() => handleDecrease(item.mnuid)}>
+                          -
+                        </button>
                         <span>{cartItem?.qty}</span>
-                        <button onClick={() => handleIncrease(item.mnuid)}>+</button>
+                        <button onClick={() => handleIncrease(item.mnuid)}>
+                          +
+                        </button>
                       </div>
                     )}
                   </div>
@@ -344,15 +327,13 @@ export default function RestaurantMenu() {
             })}
           </div>
 
-          {/* Mobile list */}
+          {/* ✅ Mobile + Tablet list — lg:hidden */}
           <div className="flex lg:hidden flex-col gap-3 pb-28">
-
             {selectedCategory?.category_products?.map((item) => {
               const cartItem = cartMap[item.mnuid];
               const isInCart = cartItems.some(
-                (i) => (i.cartKey || i.mnuid) === item.mnuid
+                (i) => (i.cartKey || i.mnuid) === item.mnuid,
               );
-
               return (
                 <div
                   key={item.mnuid}
@@ -369,23 +350,20 @@ export default function RestaurantMenu() {
                         </p>
                       )}
                     </div>
-
                     <div className="flex items-center gap-2 mt-3">
                       <span className="text-[#1a3a1a] font-bold text-sm">
                         ₹{(item.price * EURO_TO_INR).toFixed(0)}
                       </span>
-
                       <button className="w-6 h-6 rounded-full bg-white border border-gray-300 text-[#3a7a3a] text-xs font-bold flex items-center justify-center flex-shrink-0">
                         i
                       </button>
-
                       {!isInCart ? (
                         configurableHeads.has(item.menu_head) ? (
                           <button
                             onClick={() => setConfigureItem(item)}
-                            className="w-6 h-6 rounded-full bg-[#5b3fa0] text-white text-lg leading-none flex items-center justify-center flex-shrink-0"
+                            className="bg-[#5b3fa0] text-white text-xs font-semibold px-3 py-1 rounded-full flex-shrink-0"
                           >
-                            +
+                            Configure
                           </button>
                         ) : (
                           <button
@@ -416,7 +394,6 @@ export default function RestaurantMenu() {
                       )}
                     </div>
                   </div>
-
                   <div className="w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 self-center">
                     <Image
                       src={getImage(item)}
@@ -430,8 +407,8 @@ export default function RestaurantMenu() {
               );
             })}
 
-            {/* ===== MOBILE ORDER SUMMARY — scroll target ===== */}
-          <hr className="mt-5 " />
+            {/* ===== MOBILE ORDER SUMMARY ===== */}
+            <hr className="mt-5" />
             {cartItems.length > 0 && (
               <div
                 ref={mobileOrderSummaryRef}
@@ -440,11 +417,9 @@ export default function RestaurantMenu() {
                 <h2 className="font-bold text-base text-gray-800 mb-3">
                   {t("Order Summary") || "Order Summary"}
                 </h2>
-
                 {cartItems.map((item) => {
                   const itemTotal = item.price * item.qty * EURO_TO_INR;
                   const cartKey = item.cartKey || item.mnuid;
-
                   return (
                     <div
                       key={cartKey}
@@ -469,7 +444,6 @@ export default function RestaurantMenu() {
                             <Trash2 size={14} />
                           </button>
                         </div>
-
                         {item.addons?.length > 0 && (
                           <div className="mt-0.5">
                             {item.addons.map((addon, i) => (
@@ -482,9 +456,10 @@ export default function RestaurantMenu() {
                             ))}
                           </div>
                         )}
-
                         <div className="flex items-center justify-between mt-1.5">
-                          <p className="text-xs text-gray-500">₹{itemTotal.toFixed(0)}</p>
+                          <p className="text-xs text-gray-500">
+                            ₹{itemTotal.toFixed(0)}
+                          </p>
                           <div className="flex items-center gap-1 bg-[#5b3fa0] text-white rounded-full px-2 py-0.5">
                             <button
                               onClick={() => handleDecrease(cartKey)}
@@ -507,8 +482,6 @@ export default function RestaurantMenu() {
                     </div>
                   );
                 })}
-
-                {/* Bill breakdown */}
                 <div className="text-sm space-y-2 mt-3 pt-3 border-t border-gray-100 text-gray-700">
                   <div className="flex justify-between">
                     <span>{t("Sub Total")}</span>
@@ -523,7 +496,6 @@ export default function RestaurantMenu() {
                     <span>₹{total.toFixed(0)}</span>
                   </div>
                 </div>
-
                 <button
                   onClick={() => router.push("/checkout")}
                   className="w-full bg-green-500 text-white py-2.5 rounded-xl mt-4 font-semibold text-sm"
@@ -532,40 +504,40 @@ export default function RestaurantMenu() {
                 </button>
               </div>
             )}
-
           </div>
         </div>
       </div>
 
       {/* ================= MOBILE STICKY CART BAR ================= */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50">
-
-        {/* Up arrow — scrolls page to TOP */}
-        <div className="flex justify-end px-4 mb-1">
-          <button
-            onClick={handleScrollTop}
-            className="w-10 h-10 rounded-full bg-[#5b3fa0] text-white flex items-center justify-center shadow-lg"
-          >
-            <ChevronUp size={20} className="transition-transform duration-300" />
-          </button>
-        </div>
-
-        {/* Green cart bar */}
-        <div className="bg-green-500 text-white px-5 py-3 flex justify-between items-center shadow-lg">
-          <span className="text-sm font-medium">
-            {cartItems.reduce((s, i) => s + i.qty, 0)}{" "}
-            {t("items added") || "items added"}
-          </span>
-
-          {/* Clicking price scrolls to mobile order summary */}
-          <button
+      {/* ✅ cartItems.length > 0 — रिकाम्या cart मध्ये bar दिसणार नाही */}
+      {cartItems.length > 0 && (
+        // ✅ lg:hidden — 1024px पेक्षा कमी screen वर दिसेल
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50">
+          <div className="flex justify-end px-4 mb-1">
+            <button
+              onClick={handleScrollTop}
+              className="w-10 h-10 rounded-full bg-[#5b3fa0] text-white flex items-center justify-center shadow-lg"
+            >
+              <ChevronUp
+                size={20}
+                className="transition-transform duration-300"
+              />
+            </button>
+          </div>
+          <div
+            className="bg-green-500 text-white px-5 py-3 flex justify-between items-center shadow-lg"
             onClick={handlePriceClick}
-            className="font-bold text-base active:opacity-70 transition-opacity"
           >
-            ₹{total.toFixed(0)}
-          </button>
+            <span className="text-sm font-medium">
+              {cartItems.reduce((s, i) => s + i.qty, 0)}{" "}
+              {t("items added") || "items added"}
+            </span>
+            <button className="font-bold text-base active:opacity-70 transition-opacity">
+              ₹{total.toFixed(0)}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ================= CONFIGURE MODAL ================= */}
       {configureItem && (
@@ -576,7 +548,6 @@ export default function RestaurantMenu() {
           onAddToCart={handleConfiguredAdd}
         />
       )}
-
     </div>
   );
 }
