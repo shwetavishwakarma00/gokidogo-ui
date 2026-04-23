@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { X } from "lucide-react";
 
-const EURO_TO_INR = 90;
+
 
 export default function ConfigureModal({
   item,
@@ -31,7 +31,7 @@ export default function ConfigureModal({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               restaurantid: String(restaurantId),
-              modifier_group: item.menu_head,
+              groupName: item.menu_head,
             }),
           }
         );
@@ -163,9 +163,7 @@ export default function ConfigureModal({
         <div className="flex justify-between items-start p-5 border-b">
           <div>
             <h2 className="text-lg font-bold">{item.name}</h2>
-            <p className="text-sm text-gray-500">
-              Base: ₹{(basePrice * EURO_TO_INR).toFixed(0)}
-            </p>
+            <p className="text-sm text-gray-500">Base: €{basePrice.toFixed(2)}</p>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <X size={22} />
@@ -236,9 +234,7 @@ export default function ConfigureModal({
                           <span className="text-sm text-gray-700">{label}</span>
                         </div>
                         <span className="text-sm font-medium text-gray-500">
-                          {optPrice === 0
-                            ? "Free"
-                            : `+₹${(optPrice * EURO_TO_INR).toFixed(0)}`}
+                          {optPrice === 0 ? "Free" : `+€${optPrice.toFixed(2)}`}
                         </span>
                       </div>
                     );
@@ -275,7 +271,7 @@ export default function ConfigureModal({
                         <span className="text-sm font-medium text-gray-500">
                           {isFree
                             ? "Free"
-                            : `+₹${(optPrice * EURO_TO_INR).toFixed(0)}`}
+                            : `+€${(optPrice * EURO_TO_INR).toFixed(0)}`}
                         </span>
                       </div>
                     );
@@ -291,7 +287,7 @@ export default function ConfigureModal({
             onClick={handleConfirm}
             className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl font-semibold text-base transition"
           >
-            Add to Cart — ₹{(totalPrice * EURO_TO_INR).toFixed(0)}
+            Add to Cart — €{totalPrice.toFixed(2)}
           </button>
         </div>
 

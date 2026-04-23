@@ -21,10 +21,13 @@ export function useMenuConfig(restaurantId) {
           }
         );
         const json = await res.json();
-        if (json.success && json.data?.length > 0) {
+        // if (json.success && json.data?.length > 0) {
+        if (json.data?.length > 0) {
           const heads = new Set(
-            json.data.map((item) => item.modifier_group)
-          );
+  json.data
+    .filter((item) => item.menu_head) // empty strings hatao
+    .map((item) => item.menu_head)
+);
           setConfigurableHeads(heads);
         }
       } catch (err) {
