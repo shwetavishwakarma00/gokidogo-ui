@@ -91,9 +91,10 @@ export default function InfoSections() {
       <div className="w-full h-[1px] bg-[#efefef]" />
 
 {/* SECTION 3 ── Text Left · Image Right */}
+{/* SECTION 3 ── Text Left · Image Right */}
 <section className="w-full py-14 px-4 md:px-16 max-w-[1200px] mx-auto">
   <div className="flex flex-col md:flex-row-reverse items-center gap-10">
-    
+
     {/* Image */}
     <motion.div
       {...fadeInRight}
@@ -108,7 +109,7 @@ export default function InfoSections() {
       />
     </motion.div>
 
-    {/* Text */}
+    {/* Content */}
     <motion.div
       {...fadeInLeft}
       className="w-full md:w-[55%]"
@@ -117,20 +118,21 @@ export default function InfoSections() {
         {t("section3.title")}
       </h2>
 
-      <p className="text-[14px] text-black leading-relaxed mb-3">
+      <p className="text-[14px] text-black leading-relaxed mb-5">
         {t("section3.desc")}
       </p>
 
-      <ul className="space-y-3 mb-6">
+      <ul className="space-y-4 mb-6">
+
         {/* STEP 1 */}
         <li className="text-[14px] text-black leading-relaxed flex gap-2">
           <span className="text-[#e8630a] font-bold shrink-0">•</span>
 
           <span>
             <strong className="text-black">
-              {t("section5.step1.label")}
+              {t("section3.step1.label")}
             </strong>{" "}
-            {t("section5.step1.desc")}
+            {t("section3.step1.desc")}
           </span>
         </li>
 
@@ -140,9 +142,9 @@ export default function InfoSections() {
 
           <span>
             <strong className="text-black">
-              {t("section5.step2.label")}
+              {t("section3.step2.label")}
             </strong>{" "}
-            {t("section5.step2.desc")}
+            {t("section3.step2.desc")}
           </span>
         </li>
 
@@ -150,8 +152,9 @@ export default function InfoSections() {
         <li className="text-[14px] text-black leading-relaxed flex gap-2">
           <span className="text-[#e8630a] font-bold shrink-0">•</span>
 
-          <span>{t("section5.step3")}</span>
+          <span>{t("section3.step3")}</span>
         </li>
+
       </ul>
 
       <button className="bg-[#5A35B5] hover:bg-[#7e5dd1] text-white text-[14px] font-semibold px-5 py-2.5 rounded-[6px] transition-colors">
@@ -206,7 +209,6 @@ export default function InfoSections() {
 <div className="w-full h-[1px] bg-[#efefef]" />
 
       {/* ── SECTION 5 ── Image Left · Text Right */}
-      {/* SECTION 5 ── Text left · Image right */}
 <section className="w-full py-14 px-4 md:px-16 max-w-[1200px] mx-auto">
   <div className="flex flex-col md:flex-row items-center gap-10">
 

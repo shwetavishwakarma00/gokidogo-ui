@@ -112,20 +112,22 @@
     "button": "Order Online Now"
   },
 
+
   "section3": {
     "title": "Just 3 Steps: How to Order from MYMY",
-    "desc": "We want to make the ordering process as simple and stress-free as possible for you. That’s why you can order your catering from us in just three steps and look forward to culinary highlights.",
+    "desc": "We want to make the ordering process as simple and stress-free as possible for you. That’s why you can order your catering from us in just three easy steps and look forward to culinary highlights.",
 
     "step1": {
-      "label": "Choose Your Menu Option."
+      "label": "Choose your menu option.",
+      "desc": "Select the perfect catering option for your event."
     },
 
     "step2": {
-      "label": "Add Your Favorite Dishes.",
+      "label": "Add your favorite dishes.",
       "desc": "Optionally, you can also add drinks, equipment, and staff."
     },
 
-    "step3": "Fill in Your Delivery and Order Details.",
+    "step3": "Fill in your delivery and order details.",
 
     "button": "Configure Your Own Menu"
   },
@@ -135,6 +137,7 @@
     "desc": "Our nationwide network of around 200 caterers ensures that you are served quickly and on time in Frankfurt and the surrounding area. This also allows us to accept short-notice orders. We carefully review our chefs before every collaboration, so you can be sure that our dishes are prepared with regional and fresh ingredients. Of course, we also offer vegetarian and vegan options for you.",
     "button": "Check Our Prices"
   },
+  
 
   "section5": {
     "title": "Order Online Now: MYMY Is Your Catering Service in Frankfurt",

@@ -107,22 +107,24 @@
     "cta_text": "Überzeuge Dich selbst und werde einer von bereits 10.000 zufriedenen Kunden.",
     "button": "Jetzt online bestellen"
   },
+"section3": {
+  "title": "Nur 3 Schritte: So bestellst Du bei MYMY",
+  "desc": "Wir möchten Dir den Bestellvorgang so einfach und stressfrei wie möglich machen. Deshalb kannst Du in nur drei Schritten Dein Catering bei uns bestellen und Dich auf kulinarische Highlights freuen.",
 
-  "section3": {
-    "title": "Nur 3 Schritte: So bestellst Du bei MYMY",
-    "desc": "Wir möchten Dir den Bestellvorgang so einfach und stressfrei wie möglich machen. Deshalb kannst Du in nur drei Schritten Dein Catering bei uns bestellen und Dich auf kulinarische Highlights freuen.",
-     "step1": {
-      "label": "Wähle Deine Menüoption."
-    },
-
-    "step2": {
-      "label": "Füge Deine Lieblingsgerichte hinzu.",
-      "desc": "Optional kannst Du auch Getränke, Equipment und Personal dazubuchen."
-    },
-
-    "step3": "Fülle Deine Liefer- und Bestelldetails aus.",
-    "button": "Dein eigenes Menü konfigurieren"
+  "step1": {
+    "label": "Wähle Deine Menüoption.",
+    "desc": "Suche Dir das passende Catering für Dein Event aus."
   },
+
+  "step2": {
+    "label": "Füge Deine Lieblingsgerichte hinzu.",
+    "desc": "Optional kannst Du auch Getränke, Equipment und Personal dazubuchen."
+  },
+
+  "step3": "Fülle Deine Liefer- und Bestelldetails aus.",
+
+  "button": "Dein eigenes Menü konfigurieren"
+},
 
   "section4": {
     "title": "Unsere lokalen Caterer machen Dein Event zu einem kulinarischen Highlight",
