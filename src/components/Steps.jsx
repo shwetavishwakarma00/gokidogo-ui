@@ -12,10 +12,13 @@ export default function Steps() {
     { img: "/Image/Step_1.png", title: t("steps.step1.title"), desc: t("steps.step1.desc") },
     { img: "/Image/Step_2.png", title: t("steps.step2.title"), desc: t("steps.step2.desc") },
     { img: "/Image/Step_3.png", title: t("steps.step3.title"), desc: t("steps.step3.desc") },
-  ];
+    { img: "/Image/Step_4.png", title: t("steps.step4.title"), desc: t("steps.step4.desc") },
+    { img: "/Image/Step_5.png", title: t("steps.step5.title"), desc: t("steps.step5.desc") },
+];
+
 
   return (
-    <section className="w-full bg-[#f6f4fb] py-2 px-4 md:px-16">
+    <section className="w-full bg-[#f6f4fb] py-2 px-4 md:px-16 pt-10">
 
   {/* HEADER */}
       <div className="flex items-center gap-4 mb-8">
@@ -26,7 +29,7 @@ export default function Steps() {
   </div>
 
   {/* STEPS */}
-  <div className="flex flex-col md:flex-row items-center justify-center gap-12 md:gap-0">
+  <div className="flex flex-col md:flex-row items-center justify-center gap-12 md:gap-0 mt-13">
 
     {steps.map((step, index) => (
       <div key={index} className="flex items-center">
@@ -47,7 +50,7 @@ export default function Steps() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: index * 0.1 }}
             viewport={{ once: true }}
-            className="bg-[#dcd6f3] rounded-[8px] w-[300px] h-[110px] px-2 pb-5 pt-5 flex flex-col justify-end text-center"
+            className="bg-[#dcd6f3] rounded-[8px] w-[200px] h-[110px] px-2 pb-5 pt-5 flex flex-col justify-end text-center"
           >
             <p className="text-[15px] font-bold text-[#1e1256] mb-1">
               {step.title}

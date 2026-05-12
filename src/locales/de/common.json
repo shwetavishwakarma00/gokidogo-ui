@@ -9,7 +9,7 @@
 
   "hero_title": "Meeting Catering in Frankfurt – Kein Abfall, kein Stress.",
   "hero_subtitle": "Lokale Restaurants. Mehrwegverpackung. Lieferung & Abholung inklusive.",
-  "hero_note": "In 2 Minuten fertig – Ab ₹9,90 pro Person",
+  "hero_note": "In 2 Minuten fertig – Ab €9,90 pro Person",
   "hero_button": "Menü vorschlagen",
 
   "people": "Personen",
@@ -24,21 +24,29 @@
     "officeLunch": "Bürolunch"
   },
 
-  "steps": {
-    "title": "So einfach ist es",
-    "step1": {
-      "title": "Event planen",
-      "desc": "Details eingeben"
-    },
-    "step2": {
-      "title": "Menü wählen",
-      "desc": "Essen anpassen"
-    },
-    "step3": {
-      "title": "Zero-Waste Lieferung",
-      "desc": "Lieferung & Abholung"
-    }
+ "steps": {
+  "title": "So einfach ist es",
+  "step1": {
+    "title": "Planen Sie Ihr Event",
+    "desc": "Geben Sie die Details ein"
   },
+  "step2": {
+    "title": "Wählen Sie ein Menü",
+    "desc": "Passen Sie das Essen an"
+  },
+  "step3": {
+    "title": "Zero-Waste Lieferung",
+    "desc": "Lieferung & Abholung"
+  },
+  "step4": {
+    "title": "Genießen Sie Ihr Essen",
+    "desc": "Genießen Sie die Aromen"
+  },
+  "step5": {
+    "title": "Geben Sie Feedback",
+    "desc": "Helfen Sie uns, besser zu werden"
+  }
+},
 
   "footer": {
     "plan": "Event planen",
