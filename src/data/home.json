@@ -10,10 +10,10 @@
   ],
 
   "events": [
-    { "titleKey": "events.teammeeting", "price": "from ₹9.90 p.p.", "image": "/Image/team-meeting.jpg" },
-    { "titleKey": "events.hackathon", "price": "from ₹8.90 p.p.", "image": "/Image/hackhthon.jpg" },
-    { "titleKey": "events.workshop", "price": "from ₹10.90 p.p.", "image": "/Image/workshop.jpg" },
-    { "titleKey": "events.officeLunch", "price": "from ₹9.90 p.p.", "image": "/Image/office-lunch.jpg" }
+    { "titleKey": "events.teammeeting", "price": "from €9.90 p.p.", "image": "/Image/team-meeting.jpg" },
+    { "titleKey": "events.hackathon", "price": "from €8.90 p.p.", "image": "/Image/hackhthon.jpg" },
+    { "titleKey": "events.workshop", "price": "from €10.90 p.p.", "image": "/Image/workshop.jpg" },
+    { "titleKey": "events.officeLunch", "price": "from €9.90 p.p.", "image": "/Image/office-lunch.jpg" }
   ],
 
   "partners": [
