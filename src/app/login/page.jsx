@@ -9,6 +9,7 @@ import {
   registerUser,
   loginUser,
   getUserProfile,
+  forgotPassword,
 } from "@/app/redux/features/authSlice";
 
 import { motion, AnimatePresence } from "framer-motion";
@@ -73,10 +74,6 @@ export default function AuthPage() {
   }, []);
 
   /* ── SEND OTP ────────────────────────────────────────────────────────────── */
-  // Correct flow:
-  // 1. Register user (backend stores with active='0', password MD5-hashed)
-  // 2. Send OTP to email
-  // 3. On verify → backend sets active='1' → user can login
   const sendOtp = async () => {
     if (!form.firstName || !form.lastName) return toast.error("Name required");
     if (!validateEmail(form.email)) return toast.error("Invalid email");
@@ -130,8 +127,7 @@ export default function AuthPage() {
   };
 
   /* ── VERIFY OTP ──────────────────────────────────────────────────────────── */
-  // Only verifies OTP — backend sets active='1' → login now works
-  const verifyOtp = async () => {
+    const verifyOtp = async () => {
     const code = otp.join("");
     if (code.length !== 6) return toast.error("Enter valid OTP");
 
@@ -182,6 +178,7 @@ export default function AuthPage() {
     }
   };
 
+
   /* ── OTP TIMER ───────────────────────────────────────────────────────────── */
   useEffect(() => {
     let interval;
@@ -220,6 +217,27 @@ export default function AuthPage() {
     const focusIdx = Math.min(pasted.length, 5);
     otpRefs[focusIdx]?.current?.focus();
   };
+
+  // forget- password flow
+  const forgotPasswordHandler = async () => {
+  if (!validateEmail(loginForm.email))
+    return toast.error("Enter valid email");
+
+  try {
+    setLoading(true);
+
+    await dispatch(
+      forgotPassword({ email: loginForm.email })
+    ).unwrap();
+
+    toast.success("Password reset link sent to your email");
+    setScreen("forgotOtp");
+  } catch (err) {
+    toast.error(typeof err === "string" ? err : "Failed to reset password");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-200 via-white to-purple-300 px-4 text-black">
@@ -265,6 +283,12 @@ export default function AuthPage() {
                     {showPassword ? <FiEye size={18} /> : <FiEyeOff size={18} />}
                   </button>
                 </div>
+                <p
+  className="text-sm text-right text-purple-700 cursor-pointer hover:underline"
+  onClick={() => setScreen("forgot")}
+>
+  Forgot Password?
+</p>
 
                 <button
                   onClick={login}
@@ -448,6 +472,119 @@ export default function AuthPage() {
                 </p>
               </div>
             )}
+
+            {/* ─── FORGOT PASSWORD ─── */}
+{screen === "forgot" && (
+  <div className="space-y-5">
+    <button
+      onClick={() => setScreen("login")}
+      className="text-purple-700 text-sm"
+    >
+      ← Back
+    </button>
+
+    <h2 className="text-2xl font-bold text-center text-black">
+      Forgot Password
+    </h2>
+
+    <p className="text-sm text-gray-500 text-center">
+      Enter your email to reset your password
+    </p>
+
+    <input
+      className={inputCls}
+      placeholder="Enter Email"
+      name="email"
+      value={loginForm.email}
+      onChange={handleLoginChange}
+    />
+
+    <button
+      onClick={forgotPasswordHandler}
+      disabled={loading}
+      className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl"
+    >
+      {loading ? "Sending..." : "Reset Password"}
+    </button>
+  </div>
+)}
+
+{screen === "forgotOtp" && (
+  <div className="space-y-5 text-center">
+
+    <h2 className="text-2xl font-bold">Verify OTP</h2>
+
+    <div className="flex justify-center gap-2">
+      {otp.map((d, i) => (
+        <input
+          key={i}
+          ref={otpRefs[i]}
+          maxLength={1}
+          className="w-12 h-12 border text-center"
+          value={d}
+          onChange={(e) => {
+            const val = e.target.value;
+            const newOtp = [...otp];
+            newOtp[i] = val;
+            setOtp(newOtp);
+          }}
+        />
+      ))}
+    </div>
+
+    <button
+      onClick={() => {
+        toast.success("OTP Verified");
+        setScreen("resetPassword");
+      }}
+      className="w-full bg-purple-600 text-white py-3 rounded-xl"
+    >
+      Verify OTP
+    </button>
+
+  </div>
+)}
+
+{screen === "resetPassword" && (
+  <div className="space-y-5">
+
+    <h2 className="text-2xl font-bold text-center">
+      Set New Password
+    </h2>
+
+    <input
+      className={inputCls}
+      placeholder="New Password"
+      type="password"
+      onChange={(e) =>
+        setLoginForm({ ...loginForm, password: e.target.value })
+      }
+    />
+
+    <button
+      onClick={async () => {
+        try {
+          await dispatch(
+            forgotPassword({
+              email: loginForm.email,
+              password: loginForm.password,
+            })
+          ).unwrap();
+
+          toast.success("Password Updated");
+          setScreen("login");
+
+        } catch {
+          toast.error("Failed to update password");
+        }
+      }}
+      className="w-full bg-purple-600 text-white py-3 rounded-xl"
+    >
+      Update Password
+    </button>
+
+  </div>
+)}
           </motion.div>
         </AnimatePresence>
       </div>
