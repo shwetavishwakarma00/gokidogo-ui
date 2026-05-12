@@ -99,3 +99,7 @@ export const updateUserProfileAPI = (data) =>
     country:     data.country     || "",
     title:       data.title       || "",
   });
+
+  //order history
+  export const orderHistoryApi = (data) =>
+  api.post("/orderhistory", { email: data.email });

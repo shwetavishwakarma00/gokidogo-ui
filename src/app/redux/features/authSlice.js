@@ -6,13 +6,12 @@ import {
   getUserProfileAPI,
   updateUserProfileAPI,
   forgotPasswordApi,
+  orderHistoryApi
 } from "@/app/apis/authApi";
 
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-// ── LOGIN ─────────────────────────────────────────────────────────────────────
-// Sends: { usrid (email), passwd, deviceid }
-// Receives: [{ LoginStatus: [{ Status }], DataValue: [userObj] }]
+// ── LOGIN 
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async (data, { rejectWithValue }) => {
@@ -25,10 +24,7 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-// ── REGISTER ──────────────────────────────────────────────────────────────────
-// Sends: { email, firstname, lastname, mobile, passwd, gender, address,
-//          state, city, country, zip, newsl, smssub }
-// Receives: { RegisterStatus: [{ Status }], DataValue: [{ Message }] }
+// ── REGISTER 
 export const registerUser = createAsyncThunk(
   "auth/registerUser",
   async (data, { rejectWithValue }) => {
@@ -41,9 +37,7 @@ export const registerUser = createAsyncThunk(
   }
 );
 
-// ── SEND OTP ──────────────────────────────────────────────────────────────────
-// Sends: { email }
-// Receives: { status: 1|0, message }
+// ── SEND OTP 
 export const sendOTP = createAsyncThunk(
   "auth/sendOTP",
   async (data, { rejectWithValue }) => {
@@ -58,9 +52,7 @@ export const sendOTP = createAsyncThunk(
   }
 );
 
-// ── VERIFY OTP ────────────────────────────────────────────────────────────────
-// Sends: { email, otp }
-// Receives: { status: 1|0, message }
+// ── VERIFY OTP
 export const verifyOTP = createAsyncThunk(
   "auth/verifyOTP",
   async (data, { rejectWithValue }) => {
@@ -74,9 +66,7 @@ export const verifyOTP = createAsyncThunk(
   }
 );
 
-// ── FORGOT PASSWORD ───────────────────────────────────────────────────────────
-// Sends: { email } to check  OR  { email, password } to reset
-// Receives: { status: 1|0, message }
+// ── FORGOT PASSWORD 
 export const forgotPassword = createAsyncThunk(
   "auth/forgotPassword",
   async (data, { rejectWithValue }) => {
@@ -90,9 +80,7 @@ export const forgotPassword = createAsyncThunk(
   }
 );
 
-// ── GET USER PROFILE ──────────────────────────────────────────────────────────
-// Sends: { email }
-// Receives: { status, message, data: { customerId, firstName, lastName, ... } }
+// ── GET USER PROFILE 
 export const getUserProfile = createAsyncThunk(
   "auth/getUserProfile",
   async (data, { rejectWithValue }) => {
@@ -106,10 +94,7 @@ export const getUserProfile = createAsyncThunk(
   }
 );
 
-// ── UPDATE USER PROFILE ───────────────────────────────────────────────────────
-// Sends: { email, firstName, lastName, mobile, phone, gender,
-//          dateOfBirth, address, city, zip, country, title }
-// Receives: { status: 1, message: "Profile updated successfully" }
+// ── UPDATE USER PROFILE 
 export const updateUserProfile = createAsyncThunk(
   "auth/updateUserProfile",
   async (data, { rejectWithValue }) => {
@@ -123,15 +108,31 @@ export const updateUserProfile = createAsyncThunk(
   }
 );
 
+//order history
+export const getOrderHistory = createAsyncThunk(
+  "auth/getOrderHistory",
+  async (data, { rejectWithValue }) => {
+    try {
+      const res = await orderHistoryApi(data);
+      if (res.data?.status === 0) return rejectWithValue(res.data.message);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || "Order History Failed");
+    }
+  }
+);
+
 // ── SLICE ─────────────────────────────────────────────────────────────────────
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    user: null,       // raw login DataValue[0] object from backend
-    profile: null,    // getUserProfile data object from backend
+    user: null,       
+    profile: null,    
     loading: false,
     error: null,
     message: null,
+    orders: [],
+    ordersLoading: false,
   },
 
   reducers: {
@@ -148,15 +149,13 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     builder
 
-      // ── LOGIN ──────────────────────────────────────────────────────────────
-      // Backend returns: [{ LoginStatus:[{Status}], DataValue:[userObj] }]
+      // ── LOGIN 
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        // Store the full raw response; UI extracts DataValue[0] for localStorage
         state.user = action.payload;
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -164,8 +163,7 @@ const authSlice = createSlice({
         state.error = action.payload;
       })
 
-      // ── REGISTER ───────────────────────────────────────────────────────────
-      // Backend returns: { RegisterStatus:[{Status}], DataValue:[{Message}] }
+      // ── REGISTER 
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -179,7 +177,7 @@ const authSlice = createSlice({
         state.error = action.payload;
       })
 
-      // ── SEND OTP ───────────────────────────────────────────────────────────
+      // ── SEND OTP 
       .addCase(sendOTP.pending, (state) => { state.loading = true; })
       .addCase(sendOTP.fulfilled, (state, action) => {
         state.loading = false;
@@ -190,7 +188,7 @@ const authSlice = createSlice({
         state.error = action.payload;
       })
 
-      // ── VERIFY OTP ─────────────────────────────────────────────────────────
+      // ── VERIFY OTP 
       .addCase(verifyOTP.pending, (state) => { state.loading = true; })
       .addCase(verifyOTP.fulfilled, (state, action) => {
         state.loading = false;
@@ -201,7 +199,7 @@ const authSlice = createSlice({
         state.error = action.payload;
       })
 
-      // ── FORGOT PASSWORD ────────────────────────────────────────────────────
+      // ── FORGOT PASSWORD 
       .addCase(forgotPassword.pending, (state) => { state.loading = true; })
       .addCase(forgotPassword.fulfilled, (state, action) => {
         state.loading = false;
@@ -212,8 +210,7 @@ const authSlice = createSlice({
         state.error = action.payload;
       })
 
-      // ── GET USER PROFILE ───────────────────────────────────────────────────
-      // Backend returns: { status, message, data: { customerId, firstName, ... } }
+      // ── GET USER PROFILE 
       .addCase(getUserProfile.pending, (state) => { state.loading = true; })
       .addCase(getUserProfile.fulfilled, (state, action) => {
         state.loading = false;
@@ -224,8 +221,7 @@ const authSlice = createSlice({
         state.error = action.payload;
       })
 
-      // ── UPDATE USER PROFILE ────────────────────────────────────────────────
-      // Backend returns: { status: 1, message: "Profile updated successfully" }
+      // ── UPDATE USER PROFILE 
       .addCase(updateUserProfile.pending, (state) => { state.loading = true; })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.loading = false;
@@ -234,9 +230,22 @@ const authSlice = createSlice({
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      // ── GET ORDER HISTORY 
+      .addCase(getOrderHistory.pending, (state) => { state.ordersLoading = true; })
+      .addCase(getOrderHistory.fulfilled, (state, action) => {
+        state.ordersLoading = false;
+        state.orders = action.payload?.data || [];
+      })
+      .addCase(getOrderHistory.rejected, (state, action) => {
+        state.ordersLoading = false;
+        state.error = action.payload;
       });
   },
 });
+
+
 
 export const { logout, clearError, clearMessage } = authSlice.actions;
 export default authSlice.reducer;

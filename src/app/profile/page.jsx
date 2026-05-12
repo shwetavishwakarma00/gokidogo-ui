@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { LogOut, Lock, User, Eye, EyeOff, ArrowLeft, Mail } from "lucide-react";
+import { LogOut, Lock, User, Eye, EyeOff, ArrowLeft, Mail, ShoppingBag, ChevronDown, ChevronUp } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { sendOTP, verifyOTP, updateUserProfile, forgotPassword } from "@/app/redux/features/authSlice";
+import { sendOTP, verifyOTP, updateUserProfile, forgotPassword, getOrderHistory } from "@/app/redux/features/authSlice";
 
-// Backend gender codes → display labels
+
 const genderMap = { "1": "Male", "2": "Female", "3": "Other" };
 
 export default function ProfilePage() {
@@ -22,8 +22,11 @@ export default function ProfilePage() {
   const [showConfirmPass, setShowConfirmPass] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [expandedOrder, setExpandedOrder] = useState(null);
 
-  // Email change flow
+ 
   const [emailChangeStep, setEmailChangeStep] = useState("form");
   const [newEmail, setNewEmail] = useState("");
   const [emailOtp, setEmailOtp] = useState(Array(6).fill(""));
@@ -52,13 +55,8 @@ export default function ProfilePage() {
 
     const loginUser = JSON.parse(localStorage.getItem("user") || "null");
 
-    // If not logged in, redirect
     if (!loginUser) { router.push("/login"); return; }
 
-    // Map backend field names to form field names
-    // Backend login returns: FirstName, LastName, EmailAddress, Mobile,
-    //                        DateOfBirth, Gender (1/2/3), Address, City, Zip,
-    //                        Country, Phone, Title
     const nameParts = (loginUser.FullNmae || loginUser.CustomerName || "").split(" ");
 
     setForm({
@@ -77,6 +75,13 @@ export default function ProfilePage() {
       title:       loginUser.Title        || "",
     });
   }, []);
+
+  /* ── FETCH ORDERS WHEN TAB OPENS ─────────────────────────────────────────── */
+  useEffect(() => {
+    if (activeTab !== "orders") return;
+    const email = form.email || JSON.parse(localStorage.getItem("user") || "null")?.EmailAddress;
+    if (email) fetchOrders(email);
+  }, [activeTab, form.email]);
 
   /* ── EMAIL OTP TIMER ─────────────────────────────────────────────────────── */
   useEffect(() => {
@@ -104,9 +109,22 @@ export default function ProfilePage() {
     reader.readAsDataURL(file);
   };
 
+  /* ── FETCH ORDER HISTORY ────────────────────────────────────────────────── */
+  const fetchOrders = async (email) => {
+    if (!email) return;
+    try {
+      setOrdersLoading(true);
+      const result = await dispatch(getOrderHistory({ email })).unwrap();
+      setOrders(result?.data || []);
+    } catch (err) {
+      console.error("Order history error:", err);
+      toast.error("Failed to load orders");
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
   /* ── SAVE PROFILE — calls backend updateUserProfile ─────────────────────── */
-  // Backend UPDATE expects: email, firstName, lastName, mobile, phone, gender,
-  //                         dateOfBirth, address, city, zip, country, title
   const saveProfile = async () => {
     try {
       setSavingProfile(true);
@@ -127,7 +145,6 @@ export default function ProfilePage() {
         }),
       ).unwrap();
 
-      // Also update localStorage so the data is fresh after page reload
       const storedUser = JSON.parse(localStorage.getItem("user") || "null");
       if (storedUser) {
         storedUser.FirstName    = form.firstName;
@@ -154,7 +171,6 @@ export default function ProfilePage() {
   };
 
   /* ── CHANGE PASSWORD — calls backend forgotPassword with new password ────── */
-  // Backend forgotPassword with { email, password } updates the password (MD5 hashed)
   const changePassword = async () => {
     if (!passwords.newPassword) return toast.error("Enter new password");
     if (passwords.newPassword.length < 6)
@@ -206,7 +222,6 @@ export default function ProfilePage() {
       setEmailOtpLoading(true);
       await dispatch(verifyOTP({ email: newEmail, otp: code })).unwrap();
 
-      // Update email in backend via updateUserProfile
       await dispatch(
         updateUserProfile({ ...form, email: newEmail }),
       ).unwrap();
@@ -295,6 +310,7 @@ export default function ProfilePage() {
             <MobileTabBtn icon={<User size={15} />} label="Profile" active={activeTab === "profile"} onClick={() => setActiveTab("profile")} />
             <MobileTabBtn icon={<Lock size={15} />} label="Password" active={activeTab === "password"} onClick={() => setActiveTab("password")} />
             <MobileTabBtn icon={<Mail size={15} />} label="Email" active={activeTab === "changeEmail"} onClick={() => setActiveTab("changeEmail")} />
+            <MobileTabBtn icon={<ShoppingBag size={15} />} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
             <MobileTabBtn icon={<LogOut size={15} />} label="Logout" danger onClick={handleLogout} />
           </div>
         </div>
@@ -324,7 +340,7 @@ export default function ProfilePage() {
 
             <MenuBtn icon={<User size={16} />} label="My Profile" active={activeTab === "profile"} onClick={() => setActiveTab("profile")} />
             <MenuBtn icon={<Lock size={16} />} label="Change Password" active={activeTab === "password"} onClick={() => setActiveTab("password")} />
-            <MenuBtn icon={<Mail size={16} />} label="Change Email" active={activeTab === "changeEmail"} onClick={() => setActiveTab("changeEmail")} />
+            <MenuBtn icon={<ShoppingBag size={16} />} label="Order History" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
             <div className="flex-1" />
             <MenuBtn icon={<LogOut size={18} />} label="Logout" danger onClick={handleLogout} />
           </div>
@@ -352,12 +368,7 @@ export default function ProfilePage() {
                         readOnly
                         className={`${inputCls} mt-0 flex-1 bg-gray-50 cursor-not-allowed text-gray-600`}
                       />
-                      <button
-                        onClick={() => setActiveTab("changeEmail")}
-                        className="px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded-xl transition whitespace-nowrap font-medium"
-                      >
-                        Change
-                      </button>
+                      
                     </div>
                   </div>
 
@@ -379,8 +390,7 @@ export default function ProfilePage() {
                               : "border-gray-200 text-gray-600 hover:border-purple-300"}`}
                         >
                           <input type="radio" name="gender" value={g} checked={form.gender === g} onChange={handleChange} className="hidden" />
-                          {g === "Male" ? "👨" : g === "Female" ? "👩" : "🧑"} {g}
-                        </label>
+                          {g === "Male" ? "Male" : g === "Female" ? "Female" : g}                        </label>
                       ))}
                     </div>
                   </div>
@@ -459,6 +469,89 @@ export default function ProfilePage() {
                 </div>
               </>
             )}
+
+            {/* ══ ORDER HISTORY TAB ══ */}
+            {activeTab === "orders" && (
+              <>
+                <h2 className="text-xl sm:text-2xl font-bold text-purple-900 mb-6">
+                  Order History
+                </h2>
+
+                {ordersLoading ? (
+                  <div className="flex flex-col items-center justify-center py-20 gap-3">
+                    <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                    <p className="text-sm text-gray-400">Loading orders...</p>
+                  </div>
+                ) : orders.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-purple-50 flex items-center justify-center">
+                      <ShoppingBag className="w-8 h-8 text-purple-300" />
+                    </div>
+                    <p className="text-gray-500 font-medium">No orders yet</p>
+                    <p className="text-sm text-gray-400">Your order history will appear here</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {orders.map((order) => (
+                      <div
+                        key={order.orderNo}
+                        className="border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition"
+                      >
+                        {/* Order Header */}
+                        <div
+                          className="flex items-center justify-between p-4 cursor-pointer bg-white hover:bg-gray-50 transition"
+                          onClick={() => setExpandedOrder(expandedOrder === order.orderNo ? null : order.orderNo)}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center shrink-0">
+                              <ShoppingBag className="w-5 h-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-black text-sm">#{order.orderNo}</p>
+                              <p className="text-xs text-gray-400 mt-0.5">
+                                {new Date(order.orderDate).toLocaleDateString("en-IN", {
+                                  day: "numeric", month: "short", year: "numeric"
+                                })}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            <StatusBadge status={order.ordstatus} />
+                            <span className="font-bold text-purple-700 text-sm whitespace-nowrap">
+                              {order.currency} {parseFloat(order.invamt || 0).toFixed(2)}
+                            </span>
+                            {expandedOrder === order.orderNo
+                              ? <ChevronUp size={16} className="text-gray-400" />
+                              : <ChevronDown size={16} className="text-gray-400" />
+                            }
+                          </div>
+                        </div>
+
+                        {/* Order Details (expanded) */}
+                        {expandedOrder === order.orderNo && (
+                          <div className="border-t border-gray-100 bg-gray-50 px-4 py-4 grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
+                            <DetailItem label="Order Type" value={order.orderType} />
+                            <DetailItem label="Payment" value={order.pmtMethod} />
+                            <DetailItem label="Source" value={order.orderSource} />
+                            <DetailItem label="Delivery Time" value={order.deliveryTime || "—"} />
+                            <DetailItem
+                              label="Delivery Charge"
+                              value={`${order.currency} ${parseFloat(order.deliveryCharge || 0).toFixed(2)}`}
+                            />
+                            <DetailItem
+                              label="Total Paid"
+                              value={`${order.currency} ${parseFloat(order.paymentPrice || order.invamt || 0).toFixed(2)}`}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+
 
             {/* ══ CHANGE EMAIL TAB ══ */}
             {activeTab === "changeEmail" && (
@@ -599,6 +692,32 @@ function Field({ label, ...props }) {
     <div>
       <label className="text-sm font-medium text-gray-700">{label}</label>
       <input {...props} className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-black focus:ring-2 focus:ring-purple-500 outline-none transition" />
+    </div>
+  );
+}
+
+function StatusBadge({ status }) {
+  const map = {
+    "Received":   "bg-blue-100 text-blue-700",
+    "Processing": "bg-yellow-100 text-yellow-700",
+    "Preparing":  "bg-orange-100 text-orange-700",
+    "On the way": "bg-purple-100 text-purple-700",
+    "Delivered":  "bg-green-100 text-green-700",
+    "Cancelled":  "bg-red-100 text-red-700",
+  };
+  const cls = map[status] || "bg-gray-100 text-gray-600";
+  return (
+    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${cls}`}>
+      {status || "—"}
+    </span>
+  );
+}
+
+function DetailItem({ label, value }) {
+  return (
+    <div>
+      <p className="text-xs text-gray-400 mb-0.5">{label}</p>
+      <p className="font-medium text-black text-sm">{value || "—"}</p>
     </div>
   );
 }
