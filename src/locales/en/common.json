@@ -25,28 +25,33 @@
   },
 
   "steps": {
-  "title": "It's That Simple",
-  "step1": {
-    "title": "Plan Your Event",
-    "desc": "Enter the details"
+    "title": "It's That Simple",
+
+    "step1": {
+      "title": "Plan Your Event",
+      "desc": "Enter the details"
+    },
+
+    "step2": {
+      "title": "Choose a Menu",
+      "desc": "Customize your food"
+    },
+
+    "step3": {
+      "title": "Zero-Waste Delivery",
+      "desc": "Delivery & Pickup"
+    },
+
+    "step4": {
+      "title": "Enjoy Your Meal",
+      "desc": "Savor the flavors"
+    },
+
+    "step5": {
+      "title": "Provide Feedback",
+      "desc": "Help us improve"
+    }
   },
-  "step2": {
-    "title": "Choose a Menu",
-    "desc": "Customize your food"
-  },
-  "step3": {
-    "title": "Zero-Waste Delivery",
-    "desc": "Delivery & Pickup"
-  },
-  "step4": {
-    "title": "Enjoy Your Meal",
-    "desc": "Savor the flavors"
-  },
-  "step5": {
-    "title": "Provide Feedback",
-    "desc": "Help us improve"
-  }
-},
 
   "footer": {
     "plan": "Plan Event Now",
@@ -59,37 +64,81 @@
   "partners": {
     "title": "Our Gourmet Partners"
   },
-  "media":{
+
+  "media": {
     "title": "As featured in"
   },
 
- "sustainable_fair": {
-  "title": "Sustainable & Fair",
-  "items": [
-    {
-      "label": "Reusable instead of disposable products"
-    },
-    {
-      "label": "2.5x more for educational projects"
-    },
-    {
-      "label": "Already saved 12.4 tons of waste!"
-    }
-  ]
+  "sustainable_fair": {
+    "title": "Sustainable & Fair",
+    "items": [
+      {
+        "label": "Reusable instead of disposable products"
+      },
+      {
+        "label": "2.5x more for educational projects"
+      },
+      {
+        "label": "Already saved 12.4 tons of waste!"
+      }
+    ]
+  },
+
+"login": {
+  "welcome": "Welcome Back 👋",
+  "email": "Email",
+  "password": "Password",
+  "login": "Login",
+  "signup": "Sign Up",
+  "notRegistered": "Not registered?",
+  "createAccount": "Create Account",
+  "verifyOtp": "Verify OTP",
+  "resend": "Resend OTP"
 },
 
-  "login": {
-    "welcome": "Welcome Back 👋",
-    "email": "Email",
-    "password": "Password",
-    "login": "Login",
-    "signup": "Sign Up",
-    "notRegistered": "Not registered?",
-    "createAccount": "Create Account",
-    "verifyOtp": "Verify OTP",
-    "resend": "Resend OTP"
+"Information": {
+  "title": "Our Information"
+},
+  "section1": {
+    "title": "Just the Way You Like It: Create Your Catering Individually",
+    "desc": "Whether it's a business event in the impressive skyscrapers of the financial district or a private celebration in the charming streets of the old town, our tailored solutions adapt to the character of your occasion, whether formal or informal. With our à la carte catering, you have the opportunity to design your catering exactly the way you want. Portions, courses, and dishes can be freely selected and combined starting from a certain minimum order quantity. Feel free to explore our occasions section; from Halloween to party services, you'll find everything!",
+    "button": "Configure Your Own Menu"
+  },
+
+  "section2": {
+    "title": "Event Catering at Fair Prices",
+    "desc": "We offer high-quality event catering in Frankfurt and the surrounding area at fair prices without compromising on quality. Our packages start at €15.90 per person. Every event has different requirements, which is why you can customize our catering service entirely according to your wishes and needs. At MYMY, transparency is very important. This way, you know exactly what to expect, and there are no hidden costs.",
+    "cta_text": "See for yourself and become one of our already 10,000 satisfied customers.",
+    "button": "Order Online Now"
+  },
+
+  "section3": {
+    "title": "Just 3 Steps: How to Order from MYMY",
+    "desc": "We want to make the ordering process as simple and stress-free as possible for you. That’s why you can order your catering from us in just three steps and look forward to culinary highlights.",
+
+    "step1": {
+      "label": "Choose Your Menu Option."
+    },
+
+    "step2": {
+      "label": "Add Your Favorite Dishes.",
+      "desc": "Optionally, you can also add drinks, equipment, and staff."
+    },
+
+    "step3": "Fill in Your Delivery and Order Details.",
+
+    "button": "Configure Your Own Menu"
+  },
+
+  "section4": {
+    "title": "Our Local Caterers Make Your Event a Culinary Highlight",
+    "desc": "Our nationwide network of around 200 caterers ensures that you are served quickly and on time in Frankfurt and the surrounding area. This also allows us to accept short-notice orders. We carefully review our chefs before every collaboration, so you can be sure that our dishes are prepared with regional and fresh ingredients. Of course, we also offer vegetarian and vegan options for you.",
+    "button": "Check Our Prices"
+  },
+
+  "section5": {
+    "title": "Order Online Now: MYMY Is Your Catering Service in Frankfurt",
+    "intro": "We fulfill your culinary wishes. And we do it with free delivery, setup, cleaning, and pickup! Create your catering according to your preferences and needs with just a few clicks. We look forward to supporting you at your next event — whether it’s a small celebration for 10 people or a large event with hundreds of guests. See for yourself and become one of our already 10,000 satisfied customers.",
+    "button": "Choose Your Menu Option"
   }
-
 }
-
-

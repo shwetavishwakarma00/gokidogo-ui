@@ -54,25 +54,29 @@ export default function AuthPage() {
   const inputCls =
     "w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500 outline-none text-black bg-white text-sm";
 
-  /* ================= VALIDATIONS ================= */
+  /* ── VALIDATIONS ─────────────────────────────────────────────────────────── */
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validatePhone = (phone) => /^[0-9]{8,15}$/.test(phone);
   const validatePassword = (password) => password.length >= 6;
 
-  /* ================= HANDLERS ================= */
+  /* ── HANDLERS ────────────────────────────────────────────────────────────── */
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleLoginChange = (e) =>
     setLoginForm({ ...loginForm, [e.target.name]: e.target.value });
 
-  /* ================= AUTO LOGIN ================= */
+  /* ── AUTO LOGIN ──────────────────────────────────────────────────────────── */
   useEffect(() => {
     const user = localStorage.getItem("user");
     if (user) router.push("/profile");
   }, []);
 
-  /* ================= SEND OTP ================= */
+  /* ── SEND OTP ────────────────────────────────────────────────────────────── */
+  // Correct flow:
+  // 1. Register user (backend stores with active='0', password MD5-hashed)
+  // 2. Send OTP to email
+  // 3. On verify → backend sets active='1' → user can login
   const sendOtp = async () => {
     if (!form.firstName || !form.lastName) return toast.error("Name required");
     if (!validateEmail(form.email)) return toast.error("Invalid email");
@@ -84,79 +88,66 @@ export default function AuthPage() {
 
     try {
       setLoading(true);
-      const res = await dispatch(sendOTP({ email: form.email })).unwrap();
 
-      if (res?.message?.toLowerCase()?.includes("already")) {
-        toast("User already registered. Please login.");
+      // Step 1: Register first — password gets MD5-hashed and stored correctly
+      const registerRes = await dispatch(
+        registerUser({
+          email:     form.email,
+          firstname: form.firstName,
+          lastname:  form.lastName,
+          mobile:    form.phone,
+          passwd:    form.password,
+          gender:    form.gender,
+          address:   form.address,
+          state:     form.state,
+          city:      form.city,
+          country:   form.country,
+          zip:       form.zip,
+        }),
+      ).unwrap();
+
+      // Already registered → go to login
+      const regStatus = registerRes?.RegisterStatus?.[0]?.Status;
+      if (regStatus === "Failure") {
+        toast("Already registered — please login.");
         setScreen("login");
         return;
       }
+
+      // Step 2: Send OTP after successful registration
+      await dispatch(sendOTP({ email: form.email })).unwrap();
 
       toast.success("OTP sent 🚀");
       setScreen("otp");
       setTimer(30);
       setCanResend(false);
       setOtp(Array(6).fill(""));
-    } catch {
-      toast.error("Failed to send OTP");
+    } catch (err) {
+      toast.error(typeof err === "string" ? err : "Registration failed");
     } finally {
       setLoading(false);
     }
   };
 
-  /* ================= VERIFY OTP ================= */
+  /* ── VERIFY OTP ──────────────────────────────────────────────────────────── */
+  // Only verifies OTP — backend sets active='1' → login now works
   const verifyOtp = async () => {
     const code = otp.join("");
     if (code.length !== 6) return toast.error("Enter valid OTP");
 
     try {
       setLoading(true);
-
       await dispatch(verifyOTP({ email: form.email, otp: code })).unwrap();
-
-      // Save signup form data to localStorage so profile page can use it
-      const signupData = {
-        firstName: form.firstName,
-        lastName: form.lastName,
-        email: form.email,
-        mobile: form.phone,
-        gender: form.gender,
-        address: form.address,
-        state: form.state,
-        city: form.city,
-        country: form.country,
-        zip: form.zip,
-      };
-      localStorage.setItem("signupData", JSON.stringify(signupData));
-      // Save password separately for local change password logic
-      localStorage.setItem("userPassword", form.password);
-
-      await dispatch(
-        registerUser({
-          firstname: form.firstName,
-          lastname: form.lastName,
-          email: form.email,
-          mobile: form.phone,
-          passwd: form.password,
-          gender: form.gender,
-          address: form.address,
-          state: form.state,
-          city: form.city,
-          country: form.country,
-          zip: form.zip,
-        }),
-      ).unwrap();
-
-      toast.success("Signup Successful 🎉");
+      toast.success("Account verified! Please login 🎉");
       setScreen("login");
-    } catch {
-      toast.error("Invalid OTP");
+    } catch (err) {
+      toast.error(typeof err === "string" ? err : "Invalid OTP");
     } finally {
       setLoading(false);
     }
   };
 
-  /* ================= LOGIN ================= */
+  /* ── LOGIN ───────────────────────────────────────────────────────────────── */
   const login = async () => {
     if (!validateEmail(loginForm.email)) return toast.error("Enter valid email");
     if (!loginForm.password) return toast.error("Password required");
@@ -164,37 +155,34 @@ export default function AuthPage() {
     try {
       setLoading(true);
 
+      // Backend expects: { username (email), password, deviceid }
+      // authApi.js maps usrid → username, passwd → password
       const response = await dispatch(
         loginUser({ usrid: loginForm.email, passwd: loginForm.password }),
       ).unwrap();
 
-      const block = response?.data?.[0];
+      // response is already res.data (array) from axios via Redux
+      // structure: [{ LoginStatus: [{Status}], DataValue: [userObj] }]
+      const block = Array.isArray(response) ? response[0] : response?.data?.[0];
       const status = block?.LoginStatus?.[0]?.Status;
       if (status !== "Success") return toast.error(status || "Login failed");
 
       const user = block?.DataValue?.[0];
       localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("userPassword", loginForm.password);
 
-      dispatch(
-        getUserProfile({
-          customer_ID: user.CustomerId,
-          email: user.EmailAddress,
-          apikey: user.apikey,
-          deviceId: "web123",
-        }),
-      );
+      // Fetch profile immediately after login — backend only needs email
+      dispatch(getUserProfile({ email: user.EmailAddress }));
 
       toast.success("Login Successful 🎉");
       router.push("/profile");
-    } catch {
+    } catch (err) {
       toast.error("Invalid email or password");
     } finally {
       setLoading(false);
     }
   };
 
-  /* ================= OTP TIMER ================= */
+  /* ── OTP TIMER ───────────────────────────────────────────────────────────── */
   useEffect(() => {
     let interval;
     if (screen === "otp" && timer > 0) {
@@ -204,7 +192,7 @@ export default function AuthPage() {
     return () => clearInterval(interval);
   }, [screen, timer]);
 
-  /* ================= RESEND OTP ================= */
+  /* ── RESEND OTP ──────────────────────────────────────────────────────────── */
   const resendOtp = async () => {
     if (!canResend) return;
     try {
@@ -221,7 +209,7 @@ export default function AuthPage() {
     }
   };
 
-  /* ================= OTP PASTE HANDLER ================= */
+  /* ── OTP PASTE HANDLER ───────────────────────────────────────────────────── */
   const handleOtpPaste = (e) => {
     e.preventDefault();
     const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
@@ -280,7 +268,8 @@ export default function AuthPage() {
 
                 <button
                   onClick={login}
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl transition"
+                  disabled={loading}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl transition disabled:opacity-60"
                 >
                   {loading ? "Logging in..." : "Login"}
                 </button>
@@ -339,7 +328,6 @@ export default function AuthPage() {
 
                 <input className={inputCls} placeholder="Zip Code" name="zip" onChange={handleChange} />
 
-                {/* Password with independent eye toggle */}
                 <div className="relative">
                   <input
                     className={inputCls}
@@ -357,7 +345,6 @@ export default function AuthPage() {
                   </button>
                 </div>
 
-                {/* Confirm Password with independent eye toggle */}
                 <div className="relative">
                   <input
                     className={inputCls}
@@ -377,7 +364,8 @@ export default function AuthPage() {
 
                 <button
                   onClick={sendOtp}
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl transition"
+                  disabled={loading}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl transition disabled:opacity-60"
                 >
                   {loading ? "Sending OTP..." : "Register"}
                 </button>
@@ -397,20 +385,12 @@ export default function AuthPage() {
             {/* ─── OTP ─── */}
             {screen === "otp" && (
               <div className="space-y-5 text-center">
-                {/* Back button */}
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setScreen("signup")}
                     className="flex items-center gap-1 text-purple-700 hover:text-purple-900 text-sm font-medium transition"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-4 h-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                     </svg>
                     Back
@@ -419,7 +399,8 @@ export default function AuthPage() {
 
                 <h2 className="text-2xl sm:text-3xl font-bold text-black">Verify OTP</h2>
                 <p className="text-sm text-gray-500">
-                  Enter the 6-digit code sent to <span className="font-medium text-purple-700">{form.email}</span>
+                  Enter the 6-digit code sent to{" "}
+                  <span className="font-medium text-purple-700">{form.email}</span>
                 </p>
 
                 <div className="flex justify-center gap-2 flex-wrap">
@@ -450,17 +431,15 @@ export default function AuthPage() {
 
                 <button
                   onClick={verifyOtp}
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl transition"
+                  disabled={loading}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl transition disabled:opacity-60"
                 >
                   {loading ? "Verifying..." : "Verify OTP"}
                 </button>
 
                 <p className="text-sm text-black">
                   {canResend ? (
-                    <span
-                      onClick={resendOtp}
-                      className="text-purple-600 cursor-pointer hover:underline"
-                    >
+                    <span onClick={resendOtp} className="text-purple-600 cursor-pointer hover:underline">
                       Resend OTP
                     </span>
                   ) : (
@@ -475,6 +454,3 @@ export default function AuthPage() {
     </div>
   );
 }
-
-
-
