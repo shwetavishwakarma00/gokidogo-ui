@@ -137,7 +137,7 @@ return (
                 </button>
 
                 {open && (
-                  <div className="absolute top-8 left-0 bg-white shadow-md rounded-md w-28 border">
+                  <div className="absolute top-6 left-10 bg-white shadow-md rounded-md w-15 border text-gray-900 text-[13px] z-10 font-bold">
                     {options.map((item, i) => (
                       <div
                         key={i}
@@ -145,7 +145,7 @@ return (
                           setBudget(item);
                           setOpen(false);
                         }}
-                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                        className="px-3 py-2 hover:bg-gray-200 cursor-pointer"
                       >
                         {item}
                       </div>
