@@ -24,29 +24,29 @@
     "officeLunch": "Bürolunch"
   },
 
- "steps": {
-  "title": "So einfach ist es",
-  "step1": {
-    "title": "Planen Sie Ihr Event",
-    "desc": "Geben Sie die Details ein"
+  "steps": {
+    "title": "So einfach ist es",
+    "step1": {
+      "title": "Planen Sie Ihr Event",
+      "desc": "Geben Sie die Details ein"
+    },
+    "step2": {
+      "title": "Wählen Sie ein Menü",
+      "desc": "Passen Sie das Essen an"
+    },
+    "step3": {
+      "title": "Zero-Waste Lieferung",
+      "desc": "Lieferung & Abholung"
+    },
+    "step4": {
+      "title": "Genießen Sie Ihr Essen",
+      "desc": "Genießen Sie die Aromen"
+    },
+    "step5": {
+      "title": "Geben Sie Feedback",
+      "desc": "Helfen Sie uns, besser zu werden"
+    }
   },
-  "step2": {
-    "title": "Wählen Sie ein Menü",
-    "desc": "Passen Sie das Essen an"
-  },
-  "step3": {
-    "title": "Zero-Waste Lieferung",
-    "desc": "Lieferung & Abholung"
-  },
-  "step4": {
-    "title": "Genießen Sie Ihr Essen",
-    "desc": "Genießen Sie die Aromen"
-  },
-  "step5": {
-    "title": "Geben Sie Feedback",
-    "desc": "Helfen Sie uns, besser zu werden"
-  }
-},
 
   "footer": {
     "plan": "Event planen",
@@ -59,24 +59,25 @@
   "partners": {
     "title": "Unsere Gourmet Partner"
   },
-  "media":{
+
+  "media": {
     "title": "Bekannt aus"
   },
 
   "sustainable_fair": {
-  "title": "Nachhaltig & Fair",
-  "items": [
-    {
-      "label": "Wiederverwendbar statt Einwegprodukte"
-    },
-    {
-      "label": "2,5x mehr für Bildungsprojekte"
-    },
-    {
-      "label": "Bereits 12,4 Tonnen Abfall eingespart!"
-    }
-  ]
-},
+    "title": "Nachhaltig & Fair",
+    "items": [
+      {
+        "label": "Wiederverwendbar statt Einwegprodukte"
+      },
+      {
+        "label": "2,5x mehr für Bildungsprojekte"
+      },
+      {
+        "label": "Bereits 12,4 Tonnen Abfall eingespart!"
+      }
+    ]
+  },
 
   "login": {
     "welcome": "Willkommen zurück 👋",
@@ -88,5 +89,50 @@
     "createAccount": "Konto erstellen",
     "verifyOtp": "OTP bestätigen",
     "resend": "OTP erneut senden"
+  },
+ 
+    "Information": {
+    "title": "Unsere Informationenr"
+  },
+
+  "section1": {
+    "title": "So wie Du es magst: Stell Dir Dein Catering individuell zusammen",
+    "desc": "Ob Business-Event in den imposanten Wolkenkratzern des Finanzdistrikts oder private Feier in den charmanten Gassen der Altstadt, unsere maßgeschneiderten Lösungen passen sich dem Charakter Deines Anlasses an, ob formell oder informell. Mit unserem À-La-Carte-Catering hast Du die Möglichkeit, Dein Catering ganz nach Deinen Wünschen zu gestalten. Portionen, Gänge und Gerichte sind ab einer bestimmten Mindestbestellmenge frei wähl- und kombinierbar. Schau gerne unter unseren Anlässen nach; von Halloween bis zum Partyservice findest Du alles!",
+    "button": "Dein eigenes Menü konfigurieren"
+  },
+
+  "section2": {
+    "title": "Event-Catering zu fairen Preisen",
+    "desc": "Wir bieten hochwertiges Event-Catering in Frankfurt und Umgebung zu fairen Preisen ohne Kompromisse bei der Qualität. Unsere Pakete beginnen bei 15,90 € pro Person. Jede Veranstaltung hat andere Anforderungen, deshalb kannst Du unseren Partyservice ganz auf Deine Wünsche und Bedürfnisse abstimmen. Bei MYMY wird Transparenz groß geschrieben. So weißt Du genau, was Dich erwartet und es gibt keine versteckten Kosten.",
+    "cta_text": "Überzeuge Dich selbst und werde einer von bereits 10.000 zufriedenen Kunden.",
+    "button": "Jetzt online bestellen"
+  },
+
+  "section3": {
+    "title": "Nur 3 Schritte: So bestellst Du bei MYMY",
+    "desc": "Wir möchten Dir den Bestellvorgang so einfach und stressfrei wie möglich machen. Deshalb kannst Du in nur drei Schritten Dein Catering bei uns bestellen und Dich auf kulinarische Highlights freuen.",
+     "step1": {
+      "label": "Wähle Deine Menüoption."
+    },
+
+    "step2": {
+      "label": "Füge Deine Lieblingsgerichte hinzu.",
+      "desc": "Optional kannst Du auch Getränke, Equipment und Personal dazubuchen."
+    },
+
+    "step3": "Fülle Deine Liefer- und Bestelldetails aus.",
+    "button": "Dein eigenes Menü konfigurieren"
+  },
+
+  "section4": {
+    "title": "Unsere lokalen Caterer machen Dein Event zu einem kulinarischen Highlight",
+    "desc": "Unser deutschlandweites Netzwerk von rund 200 Caterern sorgt dafür, dass Du in Frankfurt und Umgebung schnell und pünktlich beliefert wirst. Dadurch sind wir auch in der Lage, kurzfristige Bestellungen anzunehmen. Unsere Köche prüfen wir vor jeder Zusammenarbeit sorgfältig, sodass Du sicher sein kannst, dass unsere Speisen mit regionalen und frischen Zutaten zubereitet werden. Natürlich haben wir auch vegetarische und vegane Optionen für Dich.",
+    "button": "Prüfe unsere Preise"
+  },
+
+  "section5": {
+    "title": "Jetzt online bestellen: MYMY ist Dein Cateringservice in Frankfurt",
+    "intro": "Wir erfüllen Deine kulinarischen Wünsche. Und das mit kostenloser Lieferung, Aufbau, Reinigung und Abholung! Stell Dir Dein Catering ganz nach Deinen Vorlieben und Bedürfnissen mit wenigen Klicks zusammen. Wir freuen uns darauf, Dich bei Deinem nächsten Event zu unterstützen – ganz gleich, ob es sich um eine kleine Feier für 10 Personen oder ein großes Fest mit Hunderten von Gästen handelt. Überzeuge Dich selbst und werde einer von bereits 10.000 zufriedenen Kunden.",
+    "button": "Wähle Deine Menüoption"
   }
 }

@@ -75,7 +75,7 @@ export default function ConfigureModal({
     };
 
     fetchData();
-  }, []); 
+  }, [item.menu_head, restaurantId]); 
 
   /* ===== PRICE CALC ===== */
   const totalPrice = sections.reduce((total, section) => {
@@ -271,7 +271,7 @@ export default function ConfigureModal({
                         <span className="text-sm font-medium text-gray-500">
                           {isFree
                             ? "Free"
-                            : `+€${(optPrice * EURO_TO_INR).toFixed(0)}`}
+                            : `+€${optPrice.toFixed(2)}`}
                         </span>
                       </div>
                     );
