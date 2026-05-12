@@ -9,7 +9,7 @@
 
   "hero_title": "Meeting Catering in Frankfurt – No waste, no stress.",
   "hero_subtitle": "Local restaurants. Reusable packaging. Delivery & pickup included.",
-  "hero_note": "Ready in 2 minutes – From €9.90 per person",
+  "hero_note": "Ready in 2 minutes – From ₹9.90 per person",
   "hero_button": "Suggest Menu",
 
   "people": "People",
@@ -25,28 +25,20 @@
   },
 
   "steps": {
-  "title": "It's That Simple",
-  "step1": {
-    "title": "Plan Your Event",
-    "desc": "Enter the details"
+    "title": "It's that simple",
+    "step1": {
+      "title": "Plan Event",
+      "desc": "Enter details"
+    },
+    "step2": {
+      "title": "Choose Menu",
+      "desc": "Customize food"
+    },
+    "step3": {
+      "title": "Zero Waste Delivery",
+      "desc": "Delivery & Pickup"
+    }
   },
-  "step2": {
-    "title": "Choose a Menu",
-    "desc": "Customize your food"
-  },
-  "step3": {
-    "title": "Zero-Waste Delivery",
-    "desc": "Delivery & Pickup"
-  },
-  "step4": {
-    "title": "Enjoy Your Meal",
-    "desc": "Savor the flavors"
-  },
-  "step5": {
-    "title": "Provide Feedback",
-    "desc": "Help us improve"
-  }
-},
 
   "footer": {
     "plan": "Plan Event Now",

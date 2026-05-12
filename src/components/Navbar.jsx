@@ -29,7 +29,6 @@ export default function Navbar() {
             <span className="text-lg md:text-xl font-bold tracking-wide">
               gokidogo
             </span>
-            
             <span className="text-xs md:text-sm opacity-80 tracking-wider">
               EVENTS
             </span>
