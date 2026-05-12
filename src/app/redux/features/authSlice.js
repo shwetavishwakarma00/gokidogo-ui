@@ -122,6 +122,20 @@ export const getOrderHistory = createAsyncThunk(
   }
 );
 
+
+// ── CHANGE PASSWORD
+export const changePassword = createAsyncThunk(
+  "auth/changePassword",
+  async (data, { rejectWithValue }) => {
+    try {
+      const res = await changePasswordApi(data);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || "Error");
+    }
+  }
+);
+
 // ── SLICE ─────────────────────────────────────────────────────────────────────
 const authSlice = createSlice({
   name: "auth",
@@ -241,6 +255,23 @@ const authSlice = createSlice({
       .addCase(getOrderHistory.rejected, (state, action) => {
         state.ordersLoading = false;
         state.error = action.payload;
+      })
+
+      // ── CHANGE PASSWORD
+       // CHANGE PASSWORD
+      .addCase(changePassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+
+      .addCase(changePassword.fulfilled, (state, action) => {
+        state.loading = false;
+        state.message = action.payload.message;
+      })
+
+      .addCase(changePassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || "Password change failed";
       });
   },
 });

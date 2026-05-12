@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useState, useRef, useEffect, useContext } from "react";
 import { motion } from "framer-motion";
@@ -10,16 +10,21 @@ import { LanguageContext } from "../context/LanguageContext";
 import { useTranslation } from "../hooks/useTranslation";
 
 export default function Hero() {
+
+  const today = new Date().toISOString().split("T")[0];
   const [open, setOpen] = useState(false);
   const [budget, setBudget] = useState("€12");
   const [people, setPeople] = useState(12);
-  const [date, setDate] = useState("2024-07-17");
+  const [date, setDate] = useState(today);
 
   const dropdownRef = useRef(null);
   const options = ["€12", "€25", "€50", "€100"];
 
   const { lang, setLang } = useContext(LanguageContext);
   const { t } = useTranslation();
+  const router = useRouter();
+
+
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -104,11 +109,12 @@ export default function Hero() {
                     </span>
 
                     <input
-                      type="date"
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                      className="outline-none text-sm text-black bg-transparent"
-                    />
+  type="date"
+  value={date}
+  min={today}
+  onChange={(e) => setDate(e.target.value)}
+  className="outline-none text-sm text-black bg-transparent"
+/>
                   </div>
 
                   {/* BUDGET */}

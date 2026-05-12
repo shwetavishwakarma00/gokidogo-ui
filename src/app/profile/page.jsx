@@ -721,3 +721,4 @@ function DetailItem({ label, value }) {
     </div>
   );
 }
+
