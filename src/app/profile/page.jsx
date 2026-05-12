@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { LogOut, Lock, User, Eye, EyeOff, ArrowLeft, Mail } from "lucide-react";
+import { LogOut, Lock, User, Eye, EyeOff, ArrowLeft, Mail, ShoppingBag, ChevronDown, ChevronUp } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
-import { sendOTP, verifyOTP } from "@/app/redux/features/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { sendOTP, verifyOTP, updateUserProfile, forgotPassword, getOrderHistory } from "@/app/redux/features/authSlice";
+
 
 const genderMap = { "1": "Male", "2": "Female", "3": "Other" };
 
@@ -19,9 +20,14 @@ export default function ProfilePage() {
   const [profileImage, setProfileImage] = useState(null);
   const [showNewPass, setShowNewPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [expandedOrder, setExpandedOrder] = useState(null);
 
-  // Email change flow
-  const [emailChangeStep, setEmailChangeStep] = useState("form"); // form | otp
+ 
+  const [emailChangeStep, setEmailChangeStep] = useState("form");
   const [newEmail, setNewEmail] = useState("");
   const [emailOtp, setEmailOtp] = useState(Array(6).fill(""));
   const [emailOtpTimer, setEmailOtpTimer] = useState(30);
@@ -30,8 +36,8 @@ export default function ProfilePage() {
 
   const [form, setForm] = useState({
     firstName: "", lastName: "", email: "", mobile: "",
-    dateOfBirth: "", gender: "", address: "",
-    state: "", city: "", country: "", zip: "",
+    phone: "", dateOfBirth: "", gender: "", address: "",
+    state: "", city: "", country: "", zip: "", title: "",
   });
 
   const [passwords, setPasswords] = useState({
@@ -42,66 +48,42 @@ export default function ProfilePage() {
   const initials =
     `${form.firstName?.[0] || ""}${form.lastName?.[0] || ""}`.toUpperCase() || "?";
 
-  /* ─── LOAD DATA ─── */
+  /* ── LOAD DATA FROM localStorage ─────────────────────────────────────────── */
   useEffect(() => {
     const storedImage = localStorage.getItem("profileImage");
     if (storedImage) setProfileImage(storedImage);
 
     const loginUser = JSON.parse(localStorage.getItem("user") || "null");
-    const signupData = JSON.parse(localStorage.getItem("signupData") || "null");
-    const savedProfile = JSON.parse(localStorage.getItem("profileData") || "null");
 
-    // If user has manually saved profile data, use that as priority
-    if (savedProfile) {
-      setForm(savedProfile);
-      return;
-    }
+    if (!loginUser) { router.push("/login"); return; }
 
-    let base = {
-      firstName: "", lastName: "", email: "", mobile: "",
-      dateOfBirth: "", gender: "", address: "",
-      state: "", city: "", country: "", zip: "",
-    };
+    const nameParts = (loginUser.FullNmae || loginUser.CustomerName || "").split(" ");
 
-    // Fill from signupData first (has all signup form fields)
-    if (signupData) {
-      base = {
-        ...base,
-        firstName: signupData.firstName || "",
-        lastName: signupData.lastName || "",
-        email: signupData.email || "",
-        mobile: signupData.mobile || "",
-        gender: signupData.gender || "",
-        address: signupData.address || "",
-        state: signupData.state || "",
-        city: signupData.city || "",
-        country: signupData.country || "",
-        zip: signupData.zip || "",
-      };
-    }
-
-    // Overlay with API login data (overrides where available)
-    if (loginUser) {
-      const nameParts = (loginUser.CustomerName || "").split(" ");
-      base = {
-        ...base,
-        firstName: nameParts[0] || base.firstName,
-        lastName: nameParts.slice(1).join(" ") || base.lastName,
-        email: loginUser.EmailAddress || base.email,
-        mobile: loginUser.MobileNo || base.mobile,
-        dateOfBirth: loginUser.DOB || base.dateOfBirth,
-        gender: genderMap[loginUser.Gender] || base.gender,
-        address: loginUser.Address || base.address,
-        state: loginUser.State || base.state,
-        city: loginUser.City || base.city,
-        country: loginUser.Country || base.country,
-      };
-    }
-
-    setForm(base);
+    setForm({
+      firstName:   loginUser.FirstName    || nameParts[0] || "",
+      lastName:    loginUser.LastName     || nameParts.slice(1).join(" ") || "",
+      email:       loginUser.EmailAddress || "",
+      mobile:      loginUser.Mobile       || "",
+      phone:       loginUser.Phone        || "",
+      dateOfBirth: loginUser.DateOfBirth  || "",
+      gender:      genderMap[loginUser.Gender] || loginUser.Gender || "",
+      address:     loginUser.Address      || "",
+      state:       loginUser.Prov         || "",   // backend: Prov = State
+      city:        loginUser.City         || "",
+      country:     loginUser.Country      || "",
+      zip:         loginUser.Zip          || "",
+      title:       loginUser.Title        || "",
+    });
   }, []);
 
-  /* ─── EMAIL OTP TIMER ─── */
+  /* ── FETCH ORDERS WHEN TAB OPENS ─────────────────────────────────────────── */
+  useEffect(() => {
+    if (activeTab !== "orders") return;
+    const email = form.email || JSON.parse(localStorage.getItem("user") || "null")?.EmailAddress;
+    if (email) fetchOrders(email);
+  }, [activeTab, form.email]);
+
+  /* ── EMAIL OTP TIMER ─────────────────────────────────────────────────────── */
   useEffect(() => {
     if (activeTab !== "changeEmail" || emailChangeStep !== "otp") return;
     if (emailOtpTimer <= 0) { setEmailOtpCanResend(true); return; }
@@ -127,26 +109,91 @@ export default function ProfilePage() {
     reader.readAsDataURL(file);
   };
 
-  /* ─── SAVE PROFILE ─── */
-  const saveProfile = () => {
-    localStorage.setItem("profileData", JSON.stringify(form));
-    localStorage.setItem("signupData", JSON.stringify(form));
-    toast.success("Profile saved ✅");
+  /* ── FETCH ORDER HISTORY ────────────────────────────────────────────────── */
+  const fetchOrders = async (email) => {
+    if (!email) return;
+    try {
+      setOrdersLoading(true);
+      const result = await dispatch(getOrderHistory({ email })).unwrap();
+      setOrders(result?.data || []);
+    } catch (err) {
+      console.error("Order history error:", err);
+      toast.error("Failed to load orders");
+    } finally {
+      setOrdersLoading(false);
+    }
   };
 
-  /* ─── CHANGE PASSWORD ─── */
-  const changePassword = () => {
+  /* ── SAVE PROFILE — calls backend updateUserProfile ─────────────────────── */
+  const saveProfile = async () => {
+    try {
+      setSavingProfile(true);
+      await dispatch(
+        updateUserProfile({
+          email:       form.email,
+          firstName:   form.firstName,
+          lastName:    form.lastName,
+          mobile:      form.mobile,
+          phone:       form.phone,
+          gender:      form.gender,
+          dateOfBirth: form.dateOfBirth,
+          address:     form.address,
+          city:        form.city,
+          zip:         form.zip,
+          country:     form.country,
+          title:       form.title,
+        }),
+      ).unwrap();
+
+      const storedUser = JSON.parse(localStorage.getItem("user") || "null");
+      if (storedUser) {
+        storedUser.FirstName    = form.firstName;
+        storedUser.LastName     = form.lastName;
+        storedUser.Mobile       = form.mobile;
+        storedUser.Phone        = form.phone;
+        storedUser.DateOfBirth  = form.dateOfBirth;
+        storedUser.Gender       = form.gender;
+        storedUser.Address      = form.address;
+        storedUser.Prov         = form.state;
+        storedUser.City         = form.city;
+        storedUser.Country      = form.country;
+        storedUser.Zip          = form.zip;
+        storedUser.Title        = form.title;
+        localStorage.setItem("user", JSON.stringify(storedUser));
+      }
+
+      toast.success("Profile saved ✅");
+    } catch (err) {
+      toast.error("Failed to save profile");
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  /* ── CHANGE PASSWORD — calls backend forgotPassword with new password ────── */
+  const changePassword = async () => {
     if (!passwords.newPassword) return toast.error("Enter new password");
     if (passwords.newPassword.length < 6)
       return toast.error("Password must be at least 6 characters");
     if (passwords.newPassword !== passwords.confirmPassword)
       return toast.error("Passwords do not match");
-    localStorage.setItem("userPassword", passwords.newPassword);
-    toast.success("Password updated 🔐 — use this password next time you login");
-    setPasswords({ newPassword: "", confirmPassword: "" });
+
+    try {
+      setChangingPassword(true);
+      await dispatch(
+        forgotPassword({ email: form.email, password: passwords.newPassword }),
+      ).unwrap();
+
+      toast.success("Password updated 🔐 — use this password next time you login");
+      setPasswords({ newPassword: "", confirmPassword: "" });
+    } catch (err) {
+      toast.error("Failed to update password");
+    } finally {
+      setChangingPassword(false);
+    }
   };
 
-  /* ─── SEND EMAIL CHANGE OTP ─── */
+  /* ── SEND EMAIL CHANGE OTP ───────────────────────────────────────────────── */
   const sendEmailChangeOtp = async () => {
     if (!newEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail))
       return toast.error("Enter a valid new email");
@@ -167,7 +214,7 @@ export default function ProfilePage() {
     }
   };
 
-  /* ─── VERIFY EMAIL CHANGE OTP ─── */
+  /* ── VERIFY EMAIL CHANGE OTP ─────────────────────────────────────────────── */
   const verifyEmailChangeOtp = async () => {
     const code = emailOtp.join("");
     if (code.length !== 6) return toast.error("Enter valid 6-digit OTP");
@@ -175,10 +222,12 @@ export default function ProfilePage() {
       setEmailOtpLoading(true);
       await dispatch(verifyOTP({ email: newEmail, otp: code })).unwrap();
 
+      await dispatch(
+        updateUserProfile({ ...form, email: newEmail }),
+      ).unwrap();
+
       const updatedForm = { ...form, email: newEmail };
       setForm(updatedForm);
-      localStorage.setItem("profileData", JSON.stringify(updatedForm));
-      localStorage.setItem("signupData", JSON.stringify(updatedForm));
 
       const storedUser = JSON.parse(localStorage.getItem("user") || "null");
       if (storedUser) {
@@ -197,7 +246,7 @@ export default function ProfilePage() {
     }
   };
 
-  /* ─── RESEND EMAIL OTP ─── */
+  /* ── RESEND EMAIL OTP ────────────────────────────────────────────────────── */
   const resendEmailOtp = async () => {
     if (!emailOtpCanResend) return;
     try {
@@ -214,7 +263,7 @@ export default function ProfilePage() {
     }
   };
 
-  /* ─── EMAIL OTP PASTE ─── */
+  /* ── EMAIL OTP PASTE ─────────────────────────────────────────────────────── */
   const handleEmailOtpPaste = (e) => {
     e.preventDefault();
     const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
@@ -240,7 +289,6 @@ export default function ProfilePage() {
       <Toaster position="top-center" />
 
       <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
-        {/* Top accent */}
         <div className="h-1 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-purple-700" />
 
         {/* ── MOBILE TOP BAR ── */}
@@ -262,6 +310,7 @@ export default function ProfilePage() {
             <MobileTabBtn icon={<User size={15} />} label="Profile" active={activeTab === "profile"} onClick={() => setActiveTab("profile")} />
             <MobileTabBtn icon={<Lock size={15} />} label="Password" active={activeTab === "password"} onClick={() => setActiveTab("password")} />
             <MobileTabBtn icon={<Mail size={15} />} label="Email" active={activeTab === "changeEmail"} onClick={() => setActiveTab("changeEmail")} />
+            <MobileTabBtn icon={<ShoppingBag size={15} />} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
             <MobileTabBtn icon={<LogOut size={15} />} label="Logout" danger onClick={handleLogout} />
           </div>
         </div>
@@ -291,7 +340,7 @@ export default function ProfilePage() {
 
             <MenuBtn icon={<User size={16} />} label="My Profile" active={activeTab === "profile"} onClick={() => setActiveTab("profile")} />
             <MenuBtn icon={<Lock size={16} />} label="Change Password" active={activeTab === "password"} onClick={() => setActiveTab("password")} />
-            <MenuBtn icon={<Mail size={16} />} label="Change Email" active={activeTab === "changeEmail"} onClick={() => setActiveTab("changeEmail")} />
+            <MenuBtn icon={<ShoppingBag size={16} />} label="Order History" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
             <div className="flex-1" />
             <MenuBtn icon={<LogOut size={18} />} label="Logout" danger onClick={handleLogout} />
           </div>
@@ -299,7 +348,7 @@ export default function ProfilePage() {
           {/* CONTENT */}
           <div className="flex-1 p-4 sm:p-8 min-h-[500px] sm:min-h-[650px]">
 
-            {/* ══════════ PROFILE TAB ══════════ */}
+            {/* ══ PROFILE TAB ══ */}
             {activeTab === "profile" && (
               <>
                 <h2 className="text-xl sm:text-2xl font-bold text-purple-900 mb-6">
@@ -319,17 +368,14 @@ export default function ProfilePage() {
                         readOnly
                         className={`${inputCls} mt-0 flex-1 bg-gray-50 cursor-not-allowed text-gray-600`}
                       />
-                      <button
-                        onClick={() => setActiveTab("changeEmail")}
-                        className="px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded-xl transition whitespace-nowrap font-medium"
-                      >
-                        Change
-                      </button>
+                      
                     </div>
                   </div>
 
                   <Field label="Mobile Number" name="mobile" value={form.mobile} onChange={handleChange} />
+                  <Field label="Phone" name="phone" value={form.phone} onChange={handleChange} />
                   <Field type="date" label="Date of Birth" name="dateOfBirth" value={form.dateOfBirth} onChange={handleChange} />
+                  <Field label="Title (Mr/Mrs/Dr)" name="title" value={form.title} onChange={handleChange} />
 
                   {/* Gender */}
                   <div>
@@ -344,8 +390,7 @@ export default function ProfilePage() {
                               : "border-gray-200 text-gray-600 hover:border-purple-300"}`}
                         >
                           <input type="radio" name="gender" value={g} checked={form.gender === g} onChange={handleChange} className="hidden" />
-                          {g === "Male" ? "👨" : g === "Female" ? "👩" : "🧑"} {g}
-                        </label>
+                          {g === "Male" ? "Male" : g === "Female" ? "Female" : g}                        </label>
                       ))}
                     </div>
                   </div>
@@ -362,16 +407,17 @@ export default function ProfilePage() {
                   <div className="sm:col-span-2 pt-2">
                     <button
                       onClick={saveProfile}
-                      className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white px-8 py-2.5 rounded-xl font-semibold shadow-md shadow-purple-200 transition"
+                      disabled={savingProfile}
+                      className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white px-8 py-2.5 rounded-xl font-semibold shadow-md shadow-purple-200 transition disabled:opacity-60"
                     >
-                      Save Changes
+                      {savingProfile ? "Saving..." : "Save Changes"}
                     </button>
                   </div>
                 </div>
               </>
             )}
 
-            {/* ══════════ PASSWORD TAB ══════════ */}
+            {/* ══ PASSWORD TAB ══ */}
             {activeTab === "password" && (
               <>
                 <h2 className="text-xl sm:text-2xl font-bold text-purple-900 mb-6">
@@ -393,11 +439,7 @@ export default function ProfilePage() {
                       placeholder="Min 6 characters"
                       className={inputCls}
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowNewPass((p) => !p)}
-                      className="absolute right-3 top-9 text-gray-400 hover:text-purple-600 transition"
-                    >
+                    <button type="button" onClick={() => setShowNewPass((p) => !p)} className="absolute right-3 top-9 text-gray-400 hover:text-purple-600 transition">
                       {showNewPass ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
@@ -412,26 +454,106 @@ export default function ProfilePage() {
                       placeholder="Re-enter new password"
                       className={inputCls}
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPass((p) => !p)}
-                      className="absolute right-3 top-9 text-gray-400 hover:text-purple-600 transition"
-                    >
+                    <button type="button" onClick={() => setShowConfirmPass((p) => !p)} className="absolute right-3 top-9 text-gray-400 hover:text-purple-600 transition">
                       {showConfirmPass ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
 
                   <button
                     onClick={changePassword}
-                    className="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white py-2.5 rounded-xl font-semibold shadow-md shadow-purple-200 transition"
+                    disabled={changingPassword}
+                    className="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white py-2.5 rounded-xl font-semibold shadow-md shadow-purple-200 transition disabled:opacity-60"
                   >
-                    Update Password
+                    {changingPassword ? "Updating..." : "Update Password"}
                   </button>
                 </div>
               </>
             )}
 
-            {/* ══════════ CHANGE EMAIL TAB ══════════ */}
+            {/* ══ ORDER HISTORY TAB ══ */}
+            {activeTab === "orders" && (
+              <>
+                <h2 className="text-xl sm:text-2xl font-bold text-purple-900 mb-6">
+                  Order History
+                </h2>
+
+                {ordersLoading ? (
+                  <div className="flex flex-col items-center justify-center py-20 gap-3">
+                    <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                    <p className="text-sm text-gray-400">Loading orders...</p>
+                  </div>
+                ) : orders.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-purple-50 flex items-center justify-center">
+                      <ShoppingBag className="w-8 h-8 text-purple-300" />
+                    </div>
+                    <p className="text-gray-500 font-medium">No orders yet</p>
+                    <p className="text-sm text-gray-400">Your order history will appear here</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {orders.map((order) => (
+                      <div
+                        key={order.orderNo}
+                        className="border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition"
+                      >
+                        {/* Order Header */}
+                        <div
+                          className="flex items-center justify-between p-4 cursor-pointer bg-white hover:bg-gray-50 transition"
+                          onClick={() => setExpandedOrder(expandedOrder === order.orderNo ? null : order.orderNo)}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center shrink-0">
+                              <ShoppingBag className="w-5 h-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-black text-sm">#{order.orderNo}</p>
+                              <p className="text-xs text-gray-400 mt-0.5">
+                                {new Date(order.orderDate).toLocaleDateString("en-IN", {
+                                  day: "numeric", month: "short", year: "numeric"
+                                })}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            <StatusBadge status={order.ordstatus} />
+                            <span className="font-bold text-purple-700 text-sm whitespace-nowrap">
+                              {order.currency} {parseFloat(order.invamt || 0).toFixed(2)}
+                            </span>
+                            {expandedOrder === order.orderNo
+                              ? <ChevronUp size={16} className="text-gray-400" />
+                              : <ChevronDown size={16} className="text-gray-400" />
+                            }
+                          </div>
+                        </div>
+
+                        {/* Order Details (expanded) */}
+                        {expandedOrder === order.orderNo && (
+                          <div className="border-t border-gray-100 bg-gray-50 px-4 py-4 grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
+                            <DetailItem label="Order Type" value={order.orderType} />
+                            <DetailItem label="Payment" value={order.pmtMethod} />
+                            <DetailItem label="Source" value={order.orderSource} />
+                            <DetailItem label="Delivery Time" value={order.deliveryTime || "—"} />
+                            <DetailItem
+                              label="Delivery Charge"
+                              value={`${order.currency} ${parseFloat(order.deliveryCharge || 0).toFixed(2)}`}
+                            />
+                            <DetailItem
+                              label="Total Paid"
+                              value={`${order.currency} ${parseFloat(order.paymentPrice || order.invamt || 0).toFixed(2)}`}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+
+
+            {/* ══ CHANGE EMAIL TAB ══ */}
             {activeTab === "changeEmail" && (
               <>
                 {emailChangeStep === "otp" && (
@@ -448,7 +570,6 @@ export default function ProfilePage() {
                   Change Email Address
                 </h2>
 
-                {/* Step 1 — Enter new email */}
                 {emailChangeStep === "form" && (
                   <div className="w-full max-w-md space-y-5">
                     <div className="p-4 bg-purple-50 border border-purple-200 rounded-xl">
@@ -473,20 +594,11 @@ export default function ProfilePage() {
                       disabled={emailOtpLoading}
                       className="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white py-2.5 rounded-xl font-semibold shadow-md shadow-purple-200 transition disabled:opacity-60"
                     >
-                      {emailOtpLoading ? (
-                        <span className="flex items-center justify-center gap-2">
-                          <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                          </svg>
-                          Sending OTP...
-                        </span>
-                      ) : "Send Verification OTP"}
+                      {emailOtpLoading ? "Sending OTP..." : "Send Verification OTP"}
                     </button>
                   </div>
                 )}
 
-                {/* Step 2 — OTP verification */}
                 {emailChangeStep === "otp" && (
                   <div className="w-full max-w-md space-y-6">
                     <div className="text-center">
@@ -497,7 +609,6 @@ export default function ProfilePage() {
                       <p className="font-bold text-purple-700">{newEmail}</p>
                     </div>
 
-                    {/* OTP Inputs */}
                     <div className="flex justify-center gap-2 sm:gap-3">
                       {emailOtp.map((d, i) => (
                         <input
@@ -533,14 +644,9 @@ export default function ProfilePage() {
                       {emailOtpLoading ? "Verifying..." : "Verify & Update Email"}
                     </button>
 
-                    {/* Resend with red countdown */}
                     <div className="text-center">
                       {emailOtpCanResend ? (
-                        <button
-                          onClick={resendEmailOtp}
-                          disabled={emailOtpLoading}
-                          className="text-sm font-semibold text-purple-600 hover:text-fuchsia-600 transition underline underline-offset-2"
-                        >
+                        <button onClick={resendEmailOtp} disabled={emailOtpLoading} className="text-sm font-semibold text-purple-600 hover:text-fuchsia-600 transition underline underline-offset-2">
                           Resend OTP
                         </button>
                       ) : (
@@ -565,19 +671,9 @@ export default function ProfilePage() {
 }
 
 /* ── Sub-components ── */
-
 function MenuBtn({ icon, label, active, danger, onClick }) {
   return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm mb-1.5 w-full transition font-medium
-      ${danger
-        ? "text-red-600 hover:bg-red-50"
-        : active
-          ? "bg-purple-100 text-purple-700"
-          : "text-gray-600 hover:bg-gray-100"
-      }`}
-    >
+    <button onClick={onClick} className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm mb-1.5 w-full transition font-medium ${danger ? "text-red-600 hover:bg-red-50" : active ? "bg-purple-100 text-purple-700" : "text-gray-600 hover:bg-gray-100"}`}>
       {icon} {label}
     </button>
   );
@@ -585,16 +681,7 @@ function MenuBtn({ icon, label, active, danger, onClick }) {
 
 function MobileTabBtn({ icon, label, active, danger, onClick }) {
   return (
-    <button
-      onClick={onClick}
-      className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-medium transition
-      ${danger
-        ? "text-red-600 bg-red-50 hover:bg-red-100"
-        : active
-          ? "bg-purple-100 text-purple-700"
-          : "text-gray-600 bg-gray-100 hover:bg-gray-200"
-      }`}
-    >
+    <button onClick={onClick} className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-medium transition ${danger ? "text-red-600 bg-red-50 hover:bg-red-100" : active ? "bg-purple-100 text-purple-700" : "text-gray-600 bg-gray-100 hover:bg-gray-200"}`}>
       {icon} {label}
     </button>
   );
@@ -604,10 +691,33 @@ function Field({ label, ...props }) {
   return (
     <div>
       <label className="text-sm font-medium text-gray-700">{label}</label>
-      <input
-        {...props}
-        className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-black focus:ring-2 focus:ring-purple-500 outline-none transition"
-      />
+      <input {...props} className="mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-black focus:ring-2 focus:ring-purple-500 outline-none transition" />
+    </div>
+  );
+}
+
+function StatusBadge({ status }) {
+  const map = {
+    "Received":   "bg-blue-100 text-blue-700",
+    "Processing": "bg-yellow-100 text-yellow-700",
+    "Preparing":  "bg-orange-100 text-orange-700",
+    "On the way": "bg-purple-100 text-purple-700",
+    "Delivered":  "bg-green-100 text-green-700",
+    "Cancelled":  "bg-red-100 text-red-700",
+  };
+  const cls = map[status] || "bg-gray-100 text-gray-600";
+  return (
+    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${cls}`}>
+      {status || "—"}
+    </span>
+  );
+}
+
+function DetailItem({ label, value }) {
+  return (
+    <div>
+      <p className="text-xs text-gray-400 mb-0.5">{label}</p>
+      <p className="font-medium text-black text-sm">{value || "—"}</p>
     </div>
   );
 }
