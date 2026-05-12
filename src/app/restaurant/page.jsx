@@ -562,15 +562,6 @@ const getImage = (item) => {
             onClick={handlePriceClick}
             className="font-bold text-base active:opacity-70 transition-opacity"
           >
-
-            <span className="text-sm font-medium">
-              {cartItems.reduce((s, i) => s + i.qty, 0)}{" "}
-              {t("items added") || "items added"}
-            </span>
-            <button className="font-bold text-base active:opacity-70 transition-opacity">
-              €{total.toFixed(0)}
-            </button>
-          </div>
             ₹{total.toFixed(0)}
           </button>
         </div>

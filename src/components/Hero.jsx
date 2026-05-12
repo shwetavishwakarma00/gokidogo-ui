@@ -94,73 +94,12 @@ export default function Hero() {
 
                     <span className="font-bold text-gray-900">{people}</span>
 
-<<<<<<< HEAD
-              {/* DATE */}
-              <div className="flex items-center gap-2 border-r px-4 border-gray-300">
-                <span className="text-xs font-semibold text-gray-600">
-                  {t("date") || "Date"}:
-                </span>
-
-                <input
-  type="date"
-  value={date}
-  min={today}
-  onChange={(e) => setDate(e.target.value)}
-  className="outline-none text-sm text-black bg-transparent"
-/>
-              </div>
-
-              {/* BUDGET */}
-              <div
-                ref={dropdownRef}
-                className="relative flex items-center gap-2"
-              >
-                <span className="text-xs font-semibold text-gray-600">
-                  {t("budget") || "Budget"}:
-                </span>
-
-                <button
-                  onClick={() => setOpen(!open)}
-                  className="flex items-center gap-1 text-sm font-bold text-gray-900"
-                >
-                  {budget}
-
-                  <svg
-                    className={`${open ? "rotate-180" : ""}`}
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeWidth={2.5}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-
-                {open && (
-                  <div className="absolute top-6 left-10 bg-white shadow-md rounded-md w-15 border text-gray-900 text-[13px] z-10 font-bold">
-                    {options.map((item, i) => (
-                      <div
-                        key={i}
-                        onClick={() => {
-                          setBudget(item);
-                          setOpen(false);
-                        }}
-                        className="px-3 py-2 hover:bg-gray-200 cursor-pointer"
-                      >
-                        {item}
-                      </div>
-                    ))}
-=======
                     <button
                       onClick={() => setPeople(people + 1)}
                       className="px-2 bg-gray-300 rounded"
                     >
                       +
                     </button>
->>>>>>> 654f13b104283750846135d9dcb2dcce7e888a88
                   </div>
 
                   {/* DATE */}
@@ -170,11 +109,12 @@ export default function Hero() {
                     </span>
 
                     <input
-                      type="date"
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                      className="outline-none text-sm text-black bg-transparent"
-                    />
+  type="date"
+  value={date}
+  min={today}
+  onChange={(e) => setDate(e.target.value)}
+  className="outline-none text-sm text-black bg-transparent"
+/>
                   </div>
 
                   {/* BUDGET */}
@@ -236,26 +176,10 @@ export default function Hero() {
 
             </div>
 
-<<<<<<< HEAD
-          {/* BUTTON */}
-          <Link href="/restaurant">
-            <button
-  onClick={() =>
-    router.push(
-      `/restaurant?budget=${budget}&people=${people}&date=${date}`
-    )
-  }
-  className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg mt-5"
->
-  {t("Suggest Menu") || data.hero.button}
-</button>
-          </Link>
-=======
             <p className="text-sm text-white/80 mt-4">
               {t("In 2 minutes, ready to go – from $9.90 per person.") ||
                 data.hero.note}
             </p>
->>>>>>> 654f13b104283750846135d9dcb2dcce7e888a88
 
           </motion.div>
         </div>
