@@ -225,14 +225,14 @@ export default function RestaurantMenu() {
                           <p key={i} className="text-xs text-gray-400">
                             + {addon.name}
                             {addon.price > 0
-                              ? ` (+₹${(addon.price * EURO_TO_INR).toFixed(0)})`
+                              ? ` (+€${(addon.price * EURO_TO_INR).toFixed(0)})`
                               : " (free)"}
                           </p>
                         ))}
                       </div>
                     )}
                     <p className="text-xs text-gray-500 mt-1">
-                      ₹{itemTotal.toFixed(0)}
+                      €{itemTotal.toFixed(0)}
                     </p>
                     <div className="flex gap-2 mt-1">
                       <button onClick={() => handleDecrease(cartKey)}>-</button>
@@ -249,15 +249,15 @@ export default function RestaurantMenu() {
                 <div className="text-sm space-y-2 mt-3">
                   <div className="flex justify-between">
                     <span>{t("Sub Total")}</span>
-                    <span>₹{subtotal.toFixed(0)}</span>
+                    <span>€{subtotal.toFixed(0)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>{t("GST")}</span>
-                    <span>₹{gst.toFixed(0)}</span>
+                    <span>€{gst.toFixed(0)}</span>
                   </div>
                   <div className="flex justify-between font-bold">
                     <span>{t("Total")}</span>
-                    <span>₹{total.toFixed(0)}</span>
+                    <span>€{total.toFixed(0)}</span>
                   </div>
                 </div>
                 <button
@@ -292,7 +292,7 @@ export default function RestaurantMenu() {
                   <div className="p-3">
                     <h3 className="font-semibold">{item.name}</h3>
                     <p className="text-sm text-gray-500">
-                      ₹{(item.price * EURO_TO_INR).toFixed(0)}
+                      €{(item.price * EURO_TO_INR).toFixed(0)}
                     </p>
                     {!isInCart ? (
                       configurableHeads.has(item.menu_head) ? (
@@ -352,7 +352,7 @@ export default function RestaurantMenu() {
                     </div>
                     <div className="flex items-center gap-2 mt-3">
                       <span className="text-[#1a3a1a] font-bold text-sm">
-                        ₹{(item.price * EURO_TO_INR).toFixed(0)}
+                        €{(item.price * EURO_TO_INR).toFixed(0)}
                       </span>
                       <button className="w-6 h-6 rounded-full bg-white border border-gray-300 text-[#3a7a3a] text-xs font-bold flex items-center justify-center flex-shrink-0">
                         i
@@ -450,7 +450,7 @@ export default function RestaurantMenu() {
                               <p key={i} className="text-xs text-gray-400">
                                 + {addon.name}
                                 {addon.price > 0
-                                  ? ` (+₹${(addon.price * EURO_TO_INR).toFixed(0)})`
+                                  ? ` (+€${(addon.price * EURO_TO_INR).toFixed(0)})`
                                   : " (free)"}
                               </p>
                             ))}
@@ -458,7 +458,7 @@ export default function RestaurantMenu() {
                         )}
                         <div className="flex items-center justify-between mt-1.5">
                           <p className="text-xs text-gray-500">
-                            ₹{itemTotal.toFixed(0)}
+                            €{itemTotal.toFixed(0)}
                           </p>
                           <div className="flex items-center gap-1 bg-[#5b3fa0] text-white rounded-full px-2 py-0.5">
                             <button
@@ -485,15 +485,15 @@ export default function RestaurantMenu() {
                 <div className="text-sm space-y-2 mt-3 pt-3 border-t border-gray-100 text-gray-700">
                   <div className="flex justify-between">
                     <span>{t("Sub Total")}</span>
-                    <span>₹{subtotal.toFixed(0)}</span>
+                    <span>€{subtotal.toFixed(0)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>{t("GST (5%)")}</span>
-                    <span>₹{gst.toFixed(0)}</span>
+                    <span>€{gst.toFixed(0)}</span>
                   </div>
                   <div className="flex justify-between font-bold text-gray-900 pt-2 border-t border-gray-200">
                     <span>{t("Total")}</span>
-                    <span>₹{total.toFixed(0)}</span>
+                    <span>€{total.toFixed(0)}</span>
                   </div>
                 </div>
                 <button
@@ -533,7 +533,7 @@ export default function RestaurantMenu() {
               {t("items added") || "items added"}
             </span>
             <button className="font-bold text-base active:opacity-70 transition-opacity">
-              ₹{total.toFixed(0)}
+              €{total.toFixed(0)}
             </button>
           </div>
         </div>

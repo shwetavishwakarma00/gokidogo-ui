@@ -164,7 +164,7 @@ export default function ConfigureModal({
           <div>
             <h2 className="text-lg font-bold">{item.name}</h2>
             <p className="text-sm text-gray-500">
-              Base: ₹{(basePrice * EURO_TO_INR).toFixed(0)}
+              Base: €{(basePrice * EURO_TO_INR).toFixed(0)}
             </p>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
@@ -238,7 +238,7 @@ export default function ConfigureModal({
                         <span className="text-sm font-medium text-gray-500">
                           {optPrice === 0
                             ? "Free"
-                            : `+₹${(optPrice * EURO_TO_INR).toFixed(0)}`}
+                            : `+€${(optPrice * EURO_TO_INR).toFixed(0)}`}
                         </span>
                       </div>
                     );
@@ -275,7 +275,7 @@ export default function ConfigureModal({
                         <span className="text-sm font-medium text-gray-500">
                           {isFree
                             ? "Free"
-                            : `+₹${(optPrice * EURO_TO_INR).toFixed(0)}`}
+                            : `+€${(optPrice * EURO_TO_INR).toFixed(0)}`}
                         </span>
                       </div>
                     );
@@ -291,7 +291,7 @@ export default function ConfigureModal({
             onClick={handleConfirm}
             className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl font-semibold text-base transition"
           >
-            Add to Cart — ₹{(totalPrice * EURO_TO_INR).toFixed(0)}
+            Add to Cart — €{(totalPrice * EURO_TO_INR).toFixed(0)}
           </button>
         </div>
 

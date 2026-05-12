@@ -279,7 +279,7 @@ export default function ProfilePage() {
                 {profileImage ? (
                   <img src={profileImage} className="w-full h-full object-cover" alt="Profile" />
                 ) : (
-                  <span className="text-2xl font-bold text-purple-700">{initials}</span>
+                  <span className="text-2xl font-bold text-purple-800">{initials}</span>
                 )}
               </div>
               <p className="mt-3 font-semibold text-black">{form.firstName} {form.lastName}</p>
