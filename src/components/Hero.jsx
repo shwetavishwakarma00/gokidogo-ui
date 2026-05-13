@@ -14,7 +14,7 @@ export default function Hero() {
   const today = new Date().toISOString().split("T")[0];
   const [open, setOpen] = useState(false);
   const [budget, setBudget] = useState("€12");
-  const [people, setPeople] = useState(12);
+  const [people, setPeople] = useState(1);
   const [date, setDate] = useState(today);
   const [budgetSelected, setBudgetSelected] = useState(false); // ← track explicit selection
 
