@@ -134,5 +134,58 @@
     "title": "Jetzt online bestellen: MYMY ist Dein Cateringservice in Frankfurt",
     "intro": "Wir erfüllen Deine kulinarischen Wünsche. Und das mit kostenloser Lieferung, Aufbau, Reinigung und Abholung! Stell Dir Dein Catering ganz nach Deinen Vorlieben und Bedürfnissen mit wenigen Klicks zusammen. Wir freuen uns darauf, Dich bei Deinem nächsten Event zu unterstützen – ganz gleich, ob es sich um eine kleine Feier für 10 Personen oder ein großes Fest mit Hunderten von Gästen handelt. Überzeuge Dich selbst und werde einer von bereits 10.000 zufriedenen Kunden.",
     "button": "Wähle Deine Menüoption"
-  }
+  },
+  
+  "fingerfood": {
+    "title": "Fingerfood Menüs",
+    "subtitle": "Kalte Fingerfood-Häppchen, serviert auf Einwegplatten aus nachhaltigem Material.",
+    "choose": "Wählen Sie vier, fünf oder sechs Häppchen pro Person.",
+    "delivery": "Lieferung, Aufbau, Reinigung und Abholung kostenlos deutschlandweit! Getränke, Equipment und Personal optional.",
+    "exclVat": "zzgl. MwSt.",
+    "minimum": "Mindestens 15 Personen",
+    "button": "Essen auswählen",
+
+    "basic": {
+      "title": "Fingerfood Basic",
+      "desc": "Einfach, schnell & günstig – Wählen Sie aus einer Basis-Auswahl von 4 Fingerfood-Favoriten",
+      "items": "4 Fingerfood",
+      "dishes": "23 Gerichte verfügbar",
+      "price": "Ab €16,90 / Person"
+    },
+
+    "classic": {
+      "title": "Fingerfood Classic",
+      "desc": "Ausgewogen & beliebt – Wählen Sie aus einer klassischen Auswahl von 5 Fingerfood-Favoriten",
+      "items": "5 Fingerfood",
+      "dishes": "42 Gerichte verfügbar",
+      "price": "Ab €21,90 / Person"
+    },
+
+    "premium": {
+      "title": "Fingerfood Premium",
+      "desc": "Vielfältig & exklusiv – Wählen Sie aus einer Premium-Auswahl von 6 Fingerfood-Favoriten",
+      "items": "6 Fingerfood",
+      "dishes": "53 Gerichte verfügbar",
+      "price": "Ab €28,90 / Person"
+    }
+  },
+  "menu": {
+  "loading": "Laden...",
+  "moreInfo": "Mehr Informationen",
+  "orderOverview": "Bestellübersicht",
+  "deliveryDate": "Lieferdatum",
+  "postalCode": "Postleitzahl",
+  "menuPortionQty": "Portionsmenge",
+  "numberOfPeople": "Personenanzahl",
+  "subTotal": "Zwischensumme",
+  "gst": "MwSt. (5%)",
+  "flatServiceFee": "Pauschale Servicegebühr",
+  "total": "Gesamt",
+  "outOf": "von",
+  "dishesSelected": "Gerichte ausgewählt.",
+  "next": "Weiter",
+  "checkout": "Zur Kasse",
+  "itemsAdded": "Artikel hinzugefügt"
+}
+
 }

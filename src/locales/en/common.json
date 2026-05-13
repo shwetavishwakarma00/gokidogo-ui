@@ -140,5 +140,57 @@
     "title": "Order Online Now: MYMY Is Your Catering Service in Frankfurt",
     "intro": "We fulfill your culinary wishes. And we do it with free delivery, setup, cleaning, and pickup! Create your catering according to your preferences and needs with just a few clicks. We look forward to supporting you at your next event — whether it’s a small celebration for 10 people or a large event with hundreds of guests. See for yourself and become one of our already 10,000 satisfied customers.",
     "button": "Choose Your Menu Option"
-  }
+  },
+
+  "fingerfood": {
+    "title": "Fingerfood Menus",
+    "subtitle": "Cold fingerfood bites, served on disposable platters made from sustainable material.",
+    "choose": "Select four, five or six bites per person.",
+    "delivery": "Delivery, setup, cleaning and collection free of charge, nationwide! Drinks, equipment and staff optional.",
+    "exclVat": "Excl. VAT",
+    "minimum": "15 Person Minimum",
+    "button": "Select Food",
+
+    "basic": {
+      "title": "Fingerfood Basic",
+      "desc": "Simple, fast & inexpensive – Choose from basic selection 4 finger food favorites",
+      "items": "4 Fingerfood",
+      "dishes": "23 dishes available",
+      "price": "From €16.90 / person"
+    },
+
+    "classic": {
+      "title": "Fingerfood Classic",
+      "desc": "Balanced & familiar – Choose from a classic selection 5 finger food favorites",
+      "items": "5 Fingerfood",
+      "dishes": "42 dishes available",
+      "price": "From €21.90 / person"
+    },
+
+    "premium": {
+      "title": "Fingerfood Premium",
+      "desc": "Varied & broad – Choose from premium selection of 6 finger food favorites",
+      "items": "6 Fingerfood",
+      "dishes": "53 dishes available",
+      "price": "From €28.90 / person"
+    }
+  },
+  "menu": {
+  "loading": "Loading...",
+  "moreInfo": "More information",
+  "orderOverview": "Order Overview",
+  "deliveryDate": "Delivery Date",
+  "postalCode": "Postal Code",
+  "menuPortionQty": "Menu Portion Qty",
+  "numberOfPeople": "Number of People",
+  "subTotal": "Sub Total",
+  "gst": "GST (5%)",
+  "flatServiceFee": "Flat Service Fee",
+  "total": "Total",
+  "outOf": "out of",
+  "dishesSelected": "dishes selected.",
+  "next": "Next",
+  "checkout": "Checkout",
+  "itemsAdded": "items added"
+}
 }
