@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import { useDispatch } from "react-redux";          // ← NEW
 import { setBooking } from "@/app/redux/features/bookingSlice"; // ← NEW
 import data from "@/data/home.json";
-
 import { LanguageContext } from "../context/LanguageContext";
 import { useTranslation } from "../hooks/useTranslation";
 
@@ -17,10 +16,8 @@ export default function Hero() {
   const [people, setPeople] = useState(1);
   const [date, setDate] = useState(today);
   const [budgetSelected, setBudgetSelected] = useState(false); // ← track explicit selection
-
   const dropdownRef = useRef(null);
   const options = ["€12", "€25", "€50", "€100"];
-
   const { lang, setLang } = useContext(LanguageContext);
   const { t } = useTranslation();
   const router = useRouter();
@@ -36,12 +33,11 @@ export default function Hero() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ── NEW: save filters to Redux then navigate ──
   const handleSuggestMenu = () => {
     dispatch(setBooking({
       date,
       people,
-      budget: budgetSelected ? budget : "", // ← sirf tab bhejo jab explicitly choose kiya
+      budget: budgetSelected ? budget : "", 
     }));
     router.push("/restaurant");
   };

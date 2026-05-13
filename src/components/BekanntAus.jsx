@@ -1,7 +1,4 @@
-
-
 "use client";
-
 import Image from "next/image";
 import { useTranslation } from "../hooks/useTranslation";
 
@@ -33,29 +30,11 @@ export default function BekanntAus() {
 
           {/* Logos Grid */}
           <div
-            className="
-              grid
-              grid-cols-2
-              sm:grid-cols-3
-              md:grid-cols-4
-              gap-6 sm:gap-8 md:gap-10 lg:gap-12
-              justify-items-center
-              items-center
-            "
-          >
+            className=" grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 sm:gap-8 md:gap-10 lg:gap-12 justify-items-center items-center">
             {logos.map((logo, i) => (
               <div
                 key={i}
-                className="
-                  relative
-                  w-[120px]
-                  sm:w-[140px]
-                  md:w-[160px]
-                  lg:w-[180px]
-                  aspect-[3/1]
-                  flex items-center justify-center
-                "
-              >
+                className="relative w-[120px] sm:w-[140px] md:w-[160px] lg:w-[180px] aspect-[3/1] flex items-center justify-center">
                 <Image
                   src={logo.src}
                   alt={logo.alt}

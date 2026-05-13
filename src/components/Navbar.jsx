@@ -27,12 +27,10 @@ export default function Navbar() {
     return () => window.removeEventListener("userChanged", sync);
   }, []);
 
-  // ✅ Redux update hone pe bhi sync karo
   useEffect(() => {
     if (reduxUser) setLocalUser(reduxUser);
   }, [reduxUser]);
 
-  // ✅ Bahar click pe dropdown band
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -43,7 +41,6 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ✅ localUser ko priority do logout ke baad
   const user = localUser || reduxUser;
 
   const userInitial =
@@ -51,7 +48,6 @@ export default function Navbar() {
     user?.EmailAddress?.[0]?.toUpperCase() ||
     "U";
 
-  // ✅ Fix — window.location.replace use karo
   const handleLogout = () => {
     localStorage.removeItem("user");
     setLocalUser(null);
@@ -87,7 +83,6 @@ export default function Navbar() {
             <option value="de" className="text-black">DE</option>
           </select>
 
-          {/* ✅ USER CIRCLE / LOGIN */}
           {user ? (
             <div className="relative" ref={dropdownRef}>
               <button
