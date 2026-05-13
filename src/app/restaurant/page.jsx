@@ -1,4 +1,5 @@
 "use client";
+import { Suspense } from "react";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchRestaurantMenu } from "../redux/features/restaurantSlice";
@@ -26,7 +27,7 @@ const parseBudget = (budgetStr) => {
   return isNaN(num) ? Infinity : num;
 };
 
-export default function RestaurantMenu() {
+ function RestaurantMenu() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const router = useRouter();
@@ -652,5 +653,13 @@ const derivedActiveCategory = useMemo(
         />
       )}
     </div>
+  );
+}
+
+export default function RestaurantPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <RestaurantMenu />
+    </Suspense>
   );
 }
