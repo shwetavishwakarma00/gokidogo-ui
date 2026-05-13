@@ -11,9 +11,8 @@ import {
   getUserProfile,
   forgotPassword,
 } from "@/app/redux/features/authSlice";
-
+import { toast } from 'sonner'
 import { motion, AnimatePresence } from "framer-motion";
-import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 
@@ -241,7 +240,6 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-200 via-white to-purple-300 px-4 text-black">
-      <Toaster />
 
       <div className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl bg-white rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10">
         <AnimatePresence mode="wait">
@@ -407,71 +405,7 @@ export default function AuthPage() {
             )}
 
             {/* ─── OTP ─── */}
-            {screen === "otp" && (
-              <div className="space-y-5 text-center">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setScreen("signup")}
-                    className="flex items-center gap-1 text-purple-700 hover:text-purple-900 text-sm font-medium transition"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                    </svg>
-                    Back
-                  </button>
-                </div>
-
-                <h2 className="text-2xl sm:text-3xl font-bold text-black">Verify OTP</h2>
-                <p className="text-sm text-gray-500">
-                  Enter the 6-digit code sent to{" "}
-                  <span className="font-medium text-purple-700">{form.email}</span>
-                </p>
-
-                <div className="flex justify-center gap-2 flex-wrap">
-                  {otp.map((d, i) => (
-                    <input
-                      key={i}
-                      ref={otpRefs[i]}
-                      maxLength={1}
-                      className="w-12 h-12 border-2 border-gray-300 focus:border-purple-500 text-center text-lg rounded-xl text-black outline-none transition"
-                      value={d}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        if (!/^[0-9]?$/.test(val)) return;
-                        const newOtp = [...otp];
-                        newOtp[i] = val;
-                        setOtp(newOtp);
-                        if (val && i < 5) otpRefs[i + 1].current.focus();
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Backspace" && !otp[i] && i > 0) {
-                          otpRefs[i - 1].current.focus();
-                        }
-                      }}
-                      onPaste={i === 0 ? handleOtpPaste : undefined}
-                    />
-                  ))}
-                </div>
-
-                <button
-                  onClick={verifyOtp}
-                  disabled={loading}
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl transition disabled:opacity-60"
-                >
-                  {loading ? "Verifying..." : "Verify OTP"}
-                </button>
-
-                <p className="text-sm text-black">
-                  {canResend ? (
-                    <span onClick={resendOtp} className="text-purple-600 cursor-pointer hover:underline">
-                      Resend OTP
-                    </span>
-                  ) : (
-                    `Resend in ${timer}s`
-                  )}
-                </p>
-              </div>
-            )}
+            
 
             {/* ─── FORGOT PASSWORD ─── */}
 {screen === "forgot" && (
@@ -509,39 +443,77 @@ export default function AuthPage() {
   </div>
 )}
 
-{screen === "forgotOtp" && (
+{(screen === "otp" || screen === "forgotOtp") && (
   <div className="space-y-5 text-center">
+    <div className="flex items-center gap-2">
+      <button
+        // ✅ Yahan bas screen check karo — back kahan jaana hai
+        onClick={() => setScreen(screen === "otp" ? "signup" : "forgot")}
+        className="flex items-center gap-1 text-purple-700 hover:text-purple-900 text-sm font-medium transition"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back
+      </button>
+    </div>
 
-    <h2 className="text-2xl font-bold">Verify OTP</h2>
+    <h2 className="text-2xl sm:text-3xl font-bold text-black">Verify OTP</h2>
+    <p className="text-sm text-gray-500">
+      Enter the 6-digit code sent to{" "}
+      {/* ✅ Email bhi screen ke hisaab se */}
+      <span className="font-medium text-purple-700">
+        {screen === "otp" ? form.email : loginForm.email}
+      </span>
+    </p>
 
-    <div className="flex justify-center gap-2">
+    <div className="flex justify-center gap-2 flex-wrap">
       {otp.map((d, i) => (
         <input
           key={i}
           ref={otpRefs[i]}
           maxLength={1}
-          className="w-12 h-12 border text-center"
+          className="w-12 h-12 border-2 border-gray-300 focus:border-purple-500 text-center text-lg rounded-xl text-black outline-none transition"
           value={d}
           onChange={(e) => {
             const val = e.target.value;
+            if (!/^[0-9]?$/.test(val)) return;
             const newOtp = [...otp];
             newOtp[i] = val;
             setOtp(newOtp);
+            if (val && i < 5) otpRefs[i + 1].current.focus();
           }}
+          onKeyDown={(e) => {
+            if (e.key === "Backspace" && !otp[i] && i > 0) {
+              otpRefs[i - 1].current.focus();
+            }
+          }}
+          onPaste={i === 0 ? handleOtpPaste : undefined}
         />
       ))}
     </div>
 
     <button
-      onClick={() => {
+      // ✅ Verify bhi screen ke hisaab se
+      onClick={screen === "otp" ? verifyOtp : () => {
         toast.success("OTP Verified");
         setScreen("resetPassword");
       }}
-      className="w-full bg-purple-600 text-white py-3 rounded-xl"
+      disabled={loading}
+      className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl transition disabled:opacity-60"
     >
-      Verify OTP
+      {loading ? "Verifying..." : "Verify OTP"}
     </button>
 
+    <p className="text-sm text-black">
+      {canResend ? (
+        <span onClick={resendOtp} className="text-purple-600 cursor-pointer hover:underline">
+          Resend OTP
+        </span>
+      ) : (
+        `Resend in ${timer}s`
+      )}
+    </p>
   </div>
 )}
 

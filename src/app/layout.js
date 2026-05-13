@@ -3,7 +3,7 @@ import "./globals.css";
 import  Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ClientReduxWrapper from "./redux/ClientReduxWrapper";
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "sonner";
 import { LanguageProvider } from "@/context/LanguageContext";
 
 const geistSans = Geist({
@@ -32,8 +32,8 @@ export default function RootLayout({ children }) {
         <LanguageProvider>
         <Navbar/>
         {children}
+        <Toaster richColors position="top-right" />
         <Footer/>
-        <Toaster />
         </LanguageProvider>
         </ClientReduxWrapper>
         </body>

@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { toast } from 'sonner'
 import { LogOut, Lock, User, Eye, EyeOff, ArrowLeft, Mail, ShoppingBag, ChevronDown, ChevronUp } from "lucide-react";
-import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { sendOTP, verifyOTP, updateUserProfile, forgotPassword, getOrderHistory } from "@/app/redux/features/authSlice";
@@ -286,7 +286,6 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-3 sm:p-6 text-black">
-      <Toaster position="top-center" />
 
       <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
         <div className="h-1 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-purple-700" />

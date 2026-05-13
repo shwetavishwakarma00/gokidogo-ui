@@ -1,15 +1,13 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { checkoutThunk } from "@/app/redux/features/checkoutSlice";
 import { clearCart } from "@/app/redux/features/cartSlice";
 import { getUserProfile } from "@/app/redux/features/authSlice";
 import { invoiceEmailThunk, resetInvoiceEmail } from "@/app/redux/features/invoiceEmailSlice";
-import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { Calendar, Users } from "lucide-react"; // ← NEW
-
+import { toast } from 'sonner'
 export default function CheckoutPage() {
   const dispatch = useDispatch();
   const router = useRouter();
@@ -177,7 +175,6 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-[#f4f4f8] py-10 px-4 font-sans">
-      <Toaster />
 
       <div className="max-w-5xl mx-auto">
 
