@@ -275,11 +275,12 @@ export default function ProfilePage() {
     setTimeout(() => emailOtpRefs[focusIdx]?.current?.focus(), 0);
   };
 
-  const handleLogout = () => {
-    localStorage.clear();
-    toast.success("Logged out 👋");
-    router.push("/login");
-  };
+ const handleLogout = () => {
+  localStorage.removeItem("user"); // ← clear() ki jagah sirf user hatao
+  window.dispatchEvent(new Event("userChanged"));
+  toast.success("Logged out 👋");
+  window.location.replace("/");  // ← /login nahi, / pe bhejo
+};
 
   const inputCls =
     "mt-1 w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-black focus:ring-2 focus:ring-purple-500 outline-none transition";
