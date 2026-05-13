@@ -114,20 +114,21 @@
 
   "section3": {
     "title": "Just 3 Steps: How to Order from MYMY",
-    "desc": "We want to make the ordering process as simple and stress-free as possible for you. That’s why you can order your catering from us in just three steps and look forward to culinary highlights.",
+    "desc": "We want to make the ordering process as simple and stress-free as possible for you. That’s why you can order your catering from us in just three easy steps and look forward to culinary highlights.",
 
     "step1": {
-      "label": "Choose Your Menu Option."
+      "label": "Choose your menu option.",
+      "desc": "Select the perfect catering option for your event."
     },
 
     "step2": {
-      "label": "Add Your Favorite Dishes.",
+      "label": "Add your favorite dishes.",
       "desc": "Optionally, you can also add drinks, equipment, and staff."
     },
 
-    "step3": "Fill in Your Delivery and Order Details.",
+    "step3": "Fill in your delivery and order details.",
 
-    "button": "Configure Your Own Menu"
+    "button": "Choose your menu option"
   },
 
   "section4": {
