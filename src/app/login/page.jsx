@@ -164,11 +164,11 @@ export default function AuthPage() {
 
       const user = block?.DataValue?.[0];
       localStorage.setItem("user", JSON.stringify(user));
-
+      window.dispatchEvent(new Event("userChanged"));
       // Fetch profile immediately after login — backend only needs email
       dispatch(getUserProfile({ email: user.EmailAddress }));
 
-      toast.success("Login Successful 🎉");
+      toast.success("Login Successful");
       router.push("/profile");
     } catch (err) {
       toast.error("Invalid email or password");
