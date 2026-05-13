@@ -3,19 +3,20 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useState, useRef, useEffect, useContext } from "react";
 import { motion } from "framer-motion";
-import Link from "next/link";
+import { useDispatch } from "react-redux";          // ← NEW
+import { setBooking } from "@/app/redux/features/bookingSlice"; // ← NEW
 import data from "@/data/home.json";
 
 import { LanguageContext } from "../context/LanguageContext";
 import { useTranslation } from "../hooks/useTranslation";
 
 export default function Hero() {
-
   const today = new Date().toISOString().split("T")[0];
   const [open, setOpen] = useState(false);
   const [budget, setBudget] = useState("€12");
   const [people, setPeople] = useState(12);
   const [date, setDate] = useState(today);
+  const [budgetSelected, setBudgetSelected] = useState(false); // ← track explicit selection
 
   const dropdownRef = useRef(null);
   const options = ["€12", "€25", "€50", "€100"];
@@ -23,8 +24,7 @@ export default function Hero() {
   const { lang, setLang } = useContext(LanguageContext);
   const { t } = useTranslation();
   const router = useRouter();
-
-
+  const dispatch = useDispatch(); // ← NEW
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -36,10 +36,20 @@ export default function Hero() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // ── NEW: save filters to Redux then navigate ──
+  const handleSuggestMenu = () => {
+    dispatch(setBooking({
+      date,
+      people,
+      budget: budgetSelected ? budget : "", // ← sirf tab bhejo jab explicitly choose kiya
+    }));
+    router.push("/restaurant");
+  };
+
   return (
     <section className="relative w-full pt-15 pb-20 overflow-hidden min-h-[500px]">
 
-      {/* Background image — full width/height */}
+      {/* Background image */}
       <Image
         src="/Image/hero.png"
         fill
@@ -48,7 +58,7 @@ export default function Hero() {
         className="object-cover object-center"
       />
 
-      {/* Dark overlay — change opacity to taste: /50 lighter, /75 darker */}
+      {/* Dark overlay */}
       <div className="absolute inset-0 bg-black/35" />
 
       {/* Content */}
@@ -84,16 +94,13 @@ export default function Hero() {
                     <span className="text-xs font-semibold text-gray-600">
                       {t("people") || "People"}:
                     </span>
-
                     <button
                       onClick={() => setPeople(Math.max(1, people - 1))}
                       className="px-2 bg-gray-300 rounded"
                     >
                       -
                     </button>
-
                     <span className="font-bold text-gray-900">{people}</span>
-
                     <button
                       onClick={() => setPeople(people + 1)}
                       className="px-2 bg-gray-300 rounded"
@@ -107,14 +114,13 @@ export default function Hero() {
                     <span className="text-xs font-semibold text-gray-600">
                       {t("date") || "Date"}:
                     </span>
-
                     <input
-  type="date"
-  value={date}
-  min={today}
-  onChange={(e) => setDate(e.target.value)}
-  className="outline-none text-sm text-black bg-transparent"
-/>
+                      type="date"
+                      value={date}
+                      min={today}
+                      onChange={(e) => setDate(e.target.value)}
+                      className="outline-none text-sm text-black bg-transparent"
+                    />
                   </div>
 
                   {/* BUDGET */}
@@ -125,13 +131,11 @@ export default function Hero() {
                     <span className="text-xs font-semibold text-gray-600">
                       {t("budget") || "Budget"}:
                     </span>
-
                     <button
                       onClick={() => setOpen(!open)}
                       className="flex items-center gap-1 text-sm font-bold text-gray-900"
                     >
                       {budget}
-
                       <svg
                         className={`${open ? "rotate-180" : ""}`}
                         width="14"
@@ -153,6 +157,7 @@ export default function Hero() {
                             key={i}
                             onClick={() => {
                               setBudget(item);
+                              setBudgetSelected(true); // ← user ne explicitly choose kiya
                               setOpen(false);
                             }}
                             className="px-3 py-2 hover:bg-gray-200 cursor-pointer"
@@ -167,12 +172,13 @@ export default function Hero() {
                 </div>
               </div>
 
-              {/* BUTTON */}
-              <Link href="/restaurant">
-                <button className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg mt-5">
-                  {t("Suggest Menu") || data.hero.button}
-                </button>
-              </Link>
+              {/* BUTTON — now calls handleSuggestMenu instead of Link */}
+              <button
+                onClick={handleSuggestMenu}
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg mt-5"
+              >
+                {t("Suggest Menu") || data.hero.button}
+              </button>
 
             </div>
 

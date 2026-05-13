@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
-
 import { useDispatch, useSelector } from "react-redux";
 import { fetchRestaurantMenu } from "../redux/features/restaurantSlice";
 import {
@@ -9,24 +8,35 @@ import {
   decreaseQty,
   removeFromCart,
 } from "@/app/redux/features/cartSlice";
+import { setBooking } from "@/app/redux/features/bookingSlice"; // ← NEW
 import { useMenuConfig } from "@/hooks/useMenuConfig";
 import ConfigureModal from "@/components/ConfigureModal";
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Trash2, ChevronUp, Calendar, MapPin, ShoppingBag, Users, CircleHelp } from "lucide-react";
+import { Trash2, ChevronUp, Calendar, MapPin, ShoppingBag, Users } from "lucide-react";
 import { useTranslation } from "../../hooks/useTranslation";
+
 const EURO_TO_INR = 90;
+
+// ── Helper: parse "€12" → 12 ──────────────────────────────────────────────
+const parseBudget = (budgetStr) => {
+  const num = parseFloat((budgetStr || "").replace(/[^0-9.]/g, ""));
+  return isNaN(num) ? Infinity : num;
+};
 
 export default function RestaurantMenu() {
   const { t } = useTranslation();
-
   const dispatch = useDispatch();
   const router = useRouter();
 
   const { restaurantInfo, categories, loading } = useSelector(
     (state) => state.restaurant
   );
+
+  // ── NEW: read booking filters from Redux ──
+  const booking = useSelector((state) => state.booking);
+  const budgetLimit = parseBudget(booking.budget); // numeric cap, e.g. 12
 
   const user = useSelector((state) => state.auth.user);
   const userId = user?.customerId || "guest_user";
@@ -37,12 +47,13 @@ export default function RestaurantMenu() {
   const [isSticky, setIsSticky] = useState(false);
   const [configureItem, setConfigureItem] = useState(null);
 
-  // ── UI-only: Order Overview form state ──
+  // ── Order Overview form state ──
+  // Pre-fill from booking Redux; user can still change them here
   const todayStr = new Date().toISOString().split("T")[0];
-  const [deliveryDate, setDeliveryDate] = useState("");
+  const [deliveryDate, setDeliveryDate] = useState(booking.date || "");
   const [postalCode, setPostalCode] = useState("");
-  const [portionQty, setPortionQty] = useState(15);
-  const [numPeople, setNumPeople] = useState(15);
+  const [portionQty, setPortionQty] = useState(booking.people || 15);
+  const [numPeople, setNumPeople] = useState(booking.people || 15);
 
   const sentinelRef = useRef(null);
   const mobileOrderSummaryRef = useRef(null);
@@ -53,6 +64,26 @@ export default function RestaurantMenu() {
   useEffect(() => {
     dispatch(fetchRestaurantMenu());
   }, [dispatch]);
+
+  /* ================= SYNC local state if booking changes ================= */
+  useEffect(() => {
+    if (booking.date) setDeliveryDate(booking.date);
+    if (booking.people) {
+      setPortionQty(booking.people);
+      setNumPeople(booking.people);
+    }
+  }, [booking.date, booking.people]);
+
+  /* ── Keep booking Redux in sync when user edits fields here ── */
+  const handleDeliveryDateChange = (val) => {
+    setDeliveryDate(val);
+    dispatch(setBooking({ date: val }));
+  };
+  const handleNumPeopleChange = (val) => {
+    setNumPeople(val);
+    setPortionQty(val);
+    dispatch(setBooking({ people: val }));
+  };
 
   /* ================= STICKY CATEGORY ================= */
   useEffect(() => {
@@ -75,6 +106,16 @@ export default function RestaurantMenu() {
     [categories, derivedActiveCategory]
   );
 
+  /* ================= BUDGET FILTER ──────────────────────────────────────
+     Filter products in the active category by price ≤ budgetLimit.
+     If no budget was set (Infinity), all products show.
+  ═══════════════════════════════════════════════════════════════════════*/
+  const filteredProducts = useMemo(() => {
+    const products = selectedCategory?.category_products || [];
+    if (!isFinite(budgetLimit)) return products;           // no filter
+    return products.filter((item) => Number(item.price) <= budgetLimit);
+  }, [selectedCategory, budgetLimit]);
+
   /* ================= CART MAP ================= */
   const cartMap = useMemo(() => {
     const map = {};
@@ -86,14 +127,18 @@ export default function RestaurantMenu() {
   }, [cartItems]);
 
   /* ================= TOTALS ================= */
-const { subtotal, total } = useMemo(() => {
-  const subtotal = cartItems.reduce(
-    (sum, i) => sum + Number(i.price || 0) * Number(i.qty || 1),
-    0
-  );
+  // people count — prefer numPeople (editable field), fallback to booking.people
+  const effectivePeople = Number(numPeople) || Number(booking.people) || 1;
 
-  return { subtotal, total: subtotal };
-}, [cartItems]);
+  const { subtotal, total } = useMemo(() => {
+    const subtotal = cartItems.reduce(
+      (sum, i) => sum + Number(i.price || 0) * Number(i.qty || 1),
+      0
+    );
+    // multiply by people: each dish ordered for all people
+    const total = subtotal * effectivePeople;
+    return { subtotal, total };
+  }, [cartItems, effectivePeople]);
 
   /* ================= HANDLERS ================= */
   const handleAdd = useCallback(
@@ -154,6 +199,20 @@ const { subtotal, total } = useMemo(() => {
       {/* ── Sentinel ── */}
       <div ref={sentinelRef} className="h-px" />
 
+      {/* ── Budget filter badge (shows only when budget is set from Hero) ── */}
+      {isFinite(budgetLimit) && (
+        <div className="max-w-6xl mx-auto px-4 md:px-6 pt-4">
+          <div className="inline-flex items-center gap-2 bg-[#5A35B5]/10 border border-[#5A35B5]/30 text-[#5A35B5] rounded-full px-4 py-1.5 text-sm font-semibold">
+            <span>🎯</span>
+            <span>
+              Showing items ≤ {booking.budget} per person
+              {booking.people ? ` · ${booking.people} people` : ""}
+              {booking.date ? ` · ${booking.date}` : ""}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* ================= CATEGORY BAR ================= */}
       <div className={`bg-white border-b z-40 ${isSticky ? "sticky top-0 shadow-sm" : ""}`}>
         <div className="max-w-6xl mx-auto px-6 py-3 flex gap-3 overflow-x-auto hide-scrollbar scroll-smooth">
@@ -186,9 +245,20 @@ const { subtotal, total } = useMemo(() => {
             {selectedCategory?.category || ""}
           </h2>
 
-          {/* ── Desktop list (matches screenshot layout) ── */}
+          {/* Empty state when budget filter hides everything */}
+          {filteredProducts.length === 0 && (
+            <div className="text-center py-12 text-gray-400">
+              <p className="text-4xl mb-3">🍽️</p>
+              <p className="font-semibold text-gray-600">
+                No items available within {booking.budget} budget
+              </p>
+              <p className="text-sm mt-1">Try selecting a higher budget from the home page</p>
+            </div>
+          )}
+
+          {/* ── Desktop list ── */}
           <div className="hidden lg:flex flex-col gap-3">
-            {selectedCategory?.category_products?.map((item) => {
+            {filteredProducts.map((item) => {
               const cartItem = cartMap[item.mnuid];
               const isInCart = cartItems.some(
                 (i) => (i.cartKey || i.mnuid) === item.mnuid
@@ -222,11 +292,11 @@ const { subtotal, total } = useMemo(() => {
                       <p className="text-xs text-gray-400 mt-1">{item.serving}</p>
                     )}
                     <p className="text-sm font-bold text-[#5A35B5] mt-2">
-    €{Number(item.price).toFixed(2)}
-  </p>
+                      €{Number(item.price).toFixed(2)}
+                    </p>
                   </div>
 
-                  {/* Add / qty — same logic, new look */}
+                  {/* Add / qty */}
                   <div className="flex-shrink-0 self-center">
                     {!isInCart ? (
                       configurableHeads.has(item.menu_head) ? (
@@ -257,9 +327,9 @@ const { subtotal, total } = useMemo(() => {
             })}
           </div>
 
-          {/* ── Mobile list (original style kept) ── */}
+          {/* ── Mobile list ── */}
           <div className="flex lg:hidden flex-col gap-3 pb-28">
-            {selectedCategory?.category_products?.map((item) => {
+            {filteredProducts.map((item) => {
               const cartItem = cartMap[item.mnuid];
               const isInCart = cartItems.some(
                 (i) => (i.cartKey || i.mnuid) === item.mnuid
@@ -316,6 +386,23 @@ const { subtotal, total } = useMemo(() => {
                 <h2 className="font-bold text-base text-gray-800 mb-3">
                   {t("menu.orderOverview") || "Order Overview"}
                 </h2>
+
+                {/* ── Booking info chips (mobile) ── */}
+                {(booking.date || booking.people) && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {booking.date && (
+                      <span className="flex items-center gap-1 text-xs bg-[#5A35B5]/10 text-[#5A35B5] px-2.5 py-1 rounded-full font-medium">
+                        <Calendar size={11} /> {booking.date}
+                      </span>
+                    )}
+                    {booking.people && (
+                      <span className="flex items-center gap-1 text-xs bg-[#5A35B5]/10 text-[#5A35B5] px-2.5 py-1 rounded-full font-medium">
+                        <Users size={11} /> {booking.people} people
+                      </span>
+                    )}
+                  </div>
+                )}
+
                 {cartItems.map((item) => {
                   const itemTotal = Number(item.price) * Number(item.qty);
                   const cartKey = item.cartKey || item.mnuid;
@@ -345,10 +432,19 @@ const { subtotal, total } = useMemo(() => {
                   );
                 })}
                 <div className="text-sm space-y-2 mt-3 pt-3 border-t border-gray-100 text-gray-700">
-                  <div className="flex justify-between"><span>{t("menu.subTotal") || "Sub Total"}</span><span>€{subtotal.toFixed(0)}</span></div>
+                  <div className="flex justify-between">
+                    <span>{t("menu.subTotal") || "Sub Total"} <span className="text-xs text-gray-400">(per person)</span></span>
+                    <span>€{subtotal.toFixed(2)}</span>
+                  </div>
+                  {effectivePeople > 1 && (
+                    <div className="flex justify-between text-[#5A35B5] text-xs font-medium">
+                      <span>× {effectivePeople} people</span>
+                      <span>€{total.toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between font-bold text-gray-900 pt-2 border-t border-gray-200">
                     <span>{t("menu.total") || "Total"}</span>
-  <span>€{total.toFixed(2)}</span>
+                    <span>€{total.toFixed(2)}</span>
                   </div>
                 </div>
                 <button
@@ -363,7 +459,7 @@ const { subtotal, total } = useMemo(() => {
         </div>
 
         {/* ════════════════════════════════════════
-            RIGHT — Order Overview panel (desktop only)
+            RIGHT — Order Overview panel (desktop)
         ════════════════════════════════════════ */}
         <div className="hidden lg:block w-80 flex-shrink-0">
           <div className="bg-white rounded-2xl shadow-sm p-5 sticky top-20">
@@ -384,7 +480,7 @@ const { subtotal, total } = useMemo(() => {
                     type="date"
                     min={todayStr}
                     value={deliveryDate}
-                    onChange={(e) => setDeliveryDate(e.target.value)}
+                    onChange={(e) => handleDeliveryDateChange(e.target.value)}
                     className="w-full pl-8 pr-2 py-2.5 border border-gray-200 rounded-lg text-xs text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#5A35B5]/30 focus:border-[#5A35B5] bg-white"
                   />
                 </div>
@@ -416,7 +512,7 @@ const { subtotal, total } = useMemo(() => {
                   <ShoppingBag className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#5A35B5]" />
                   <input
                     type="number"
-                    min={15}
+                    min={1}
                     value={portionQty}
                     onChange={(e) => setPortionQty(Number(e.target.value))}
                     className="w-full pl-8 pr-2 py-2.5 border border-gray-200 rounded-lg text-xs text-gray-700 font-semibold focus:outline-none focus:ring-2 focus:ring-[#5A35B5]/30 focus:border-[#5A35B5] bg-white"
@@ -431,16 +527,16 @@ const { subtotal, total } = useMemo(() => {
                   <Users className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#5A35B5]" />
                   <input
                     type="number"
-                    min={15}
+                    min={1}
                     value={numPeople}
-                    onChange={(e) => setNumPeople(Number(e.target.value))}
+                    onChange={(e) => handleNumPeopleChange(Number(e.target.value))}
                     className="w-full pl-8 pr-2 py-2.5 border border-gray-200 rounded-lg text-xs text-gray-700 font-semibold focus:outline-none focus:ring-2 focus:ring-[#5A35B5]/30 focus:border-[#5A35B5] bg-white"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Cart items list inside order panel */}
+            {/* Cart items */}
             {cartItems.map((item) => {
               const itemTotal = item.price * item.qty;
               const cartKey = item.cartKey || item.mnuid;
@@ -463,7 +559,7 @@ const { subtotal, total } = useMemo(() => {
                     <div className="flex items-center gap-1 mt-1 bg-[#5A35B5] text-white rounded-full px-2 py-0.5 w-fit">
                       <button onClick={() => handleDecrease(cartKey)} className="text-base leading-none px-0.5">−</button>
                       <span className="text-xs font-semibold min-w-[14px] text-center">{item.qty}</span>
-                      <button onClick={() => handleIncrease(cartKey)} className="text-base leading-none px-0.5">+</button>
+                      <button onClick={() => handleIncrease(cartKey)} className="text-white text-base leading-none px-0.5">+</button>
                     </div>
                   </div>
                 </div>
@@ -473,13 +569,18 @@ const { subtotal, total } = useMemo(() => {
             {/* Bill breakdown */}
             <div className="text-sm space-y-2 pt-2 border-t border-gray-100 text-gray-700">
               <div className="flex justify-between">
-                <span>{t("menu.subTotal") || "Sub Total"}</span>
-                <span>€{subtotal.toFixed(0)}</span>
+                <span>{t("menu.subTotal") || "Sub Total"} <span className="text-xs text-gray-400">(per person)</span></span>
+                <span>€{subtotal.toFixed(2)}</span>
               </div>
-             
+              {effectivePeople > 1 && (
+                <div className="flex justify-between text-[#5A35B5] text-xs font-medium">
+                  <span>× {effectivePeople} people</span>
+                  <span>€{total.toFixed(2)}</span>
+                </div>
+              )}
               <div className="flex justify-between font-bold text-gray-900 pt-2 border-t border-gray-200">
                 <span>{t("menu.total") || "Total"}</span>
-                <span>€{total.toFixed(0)}</span>
+                <span>€{total.toFixed(2)}</span>
               </div>
             </div>
 

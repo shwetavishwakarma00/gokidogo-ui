@@ -4,7 +4,7 @@ import authReducer from "./features/authSlice";
 import checkoutReducer from "./features/checkoutSlice";
 import cartReducer from "./features/cartSlice";
 import invoiceEmailReducer from "./features/invoiceEmailSlice";
-
+import bookingReducer from "./features/bookingSlice";
 export const store = configureStore({
   reducer: {
     restaurant: restaurantReducer,
@@ -12,5 +12,6 @@ export const store = configureStore({
     checkout : checkoutReducer,
     cart : cartReducer,
     invoiceEmail : invoiceEmailReducer,
+    booking: bookingReducer, 
   },
 });
