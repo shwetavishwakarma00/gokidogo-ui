@@ -100,6 +100,7 @@ export default function FingerfoodSection() {
                 className="w-36 h-36 object-contain"
               />
             </div>
+           
 
             {/* Content */}
             <div className="p-5 flex flex-col flex-1">

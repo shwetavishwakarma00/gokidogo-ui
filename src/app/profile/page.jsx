@@ -235,7 +235,7 @@ export default function ProfilePage() {
         localStorage.setItem("user", JSON.stringify(storedUser));
       }
 
-      toast.success("Email updated successfully ✅");
+      toast.success("Email updated successfully");
       setEmailChangeStep("form");
       setNewEmail("");
       setActiveTab("profile");
@@ -278,7 +278,7 @@ export default function ProfilePage() {
  const handleLogout = () => {
   localStorage.removeItem("user"); // ← clear() ki jagah sirf user hatao
   window.dispatchEvent(new Event("userChanged"));
-  toast.success("Logged out 👋");
+  toast.success("Logged out");
   window.location.replace("/");  // ← /login nahi, / pe bhejo
 };
 
