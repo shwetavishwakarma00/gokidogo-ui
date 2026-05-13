@@ -64,7 +64,7 @@ export default function Navbar() {
         <Link href="/">
           <div className="flex items-center gap-1 cursor-pointer">
             <span className="text-lg md:text-xl font-bold tracking-wide">gokidogo</span>
-            <span className="text-xs md:text-sm opacity-80 tracking-wider">EVENTS</span>
+            {/* <span className="text-xs md:text-sm opacity-80 tracking-wider">EVENTS</span> */}
           </div>
         </Link>
 
