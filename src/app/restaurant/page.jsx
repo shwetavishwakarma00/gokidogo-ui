@@ -16,6 +16,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Trash2, ChevronUp, Calendar, MapPin, ShoppingBag, Users } from "lucide-react";
 import { useTranslation } from "../../hooks/useTranslation";
+import { useSearchParams } from "next/navigation";
 
 const EURO_TO_INR = 90;
 
@@ -33,6 +34,11 @@ export default function RestaurantMenu() {
   const { restaurantInfo, categories, loading } = useSelector(
     (state) => state.restaurant
   );
+
+  const searchParams = useSearchParams();
+const groupCategories = searchParams.get("categories")
+  ? JSON.parse(decodeURIComponent(searchParams.get("categories")))
+  : null;
 
   // ── NEW: read booking filters from Redux ──
   const booking = useSelector((state) => state.booking);
@@ -96,10 +102,19 @@ export default function RestaurantMenu() {
   }, []);
 
   /* ================= ACTIVE CATEGORY ================= */
-  const derivedActiveCategory = useMemo(
-    () => activeCategory ?? categories?.[0]?.category_id,
-    [activeCategory, categories]
+  // ✅ URL se categories filter karo
+const filteredCategories = useMemo(() => {
+  if (!groupCategories || !categories) return categories;
+  return categories.filter((cat) =>
+    groupCategories.includes(cat.category_id)
   );
+}, [categories, groupCategories]);
+
+// ✅ Yeh line update karo
+const derivedActiveCategory = useMemo(
+  () => activeCategory ?? filteredCategories?.[0]?.category_id,
+  [activeCategory, filteredCategories]  // categories → filteredCategories
+);
 
   const selectedCategory = useMemo(
     () => categories?.find((cat) => cat.category_id === derivedActiveCategory),
@@ -216,19 +231,20 @@ export default function RestaurantMenu() {
       {/* ================= CATEGORY BAR ================= */}
       <div className={`bg-white border-b z-40 ${isSticky ? "sticky top-0 shadow-sm" : ""}`}>
         <div className="max-w-6xl mx-auto px-6 py-3 flex gap-3 overflow-x-auto hide-scrollbar scroll-smooth">
-          {categories?.map((cat) => (
-            <button
-              key={cat.category_id}
-              onClick={() => setActiveCategory(cat.category_id)}
-              className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-all duration-200 font-medium ${
-                derivedActiveCategory === cat.category_id
-                  ? "bg-[#5A35B5] text-white shadow"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              {cat.category}
-            </button>
-          ))}
+          {/* Category Bar mein yeh change karo */}
+{filteredCategories?.map((cat) => (   // ← bas yahi change hai
+  <button
+    key={cat.category_id}
+    onClick={() => setActiveCategory(cat.category_id)}
+    className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-all duration-200 font-medium ${
+      derivedActiveCategory === cat.category_id
+        ? "bg-[#5A35B5] text-white shadow"
+        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+    }`}
+  >
+    {cat.category}
+  </button>
+))}
         </div>
       </div>
 

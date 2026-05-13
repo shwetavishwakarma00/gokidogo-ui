@@ -1,5 +1,6 @@
 "use client";
 import { useTranslation } from "../hooks/useTranslation";
+import { useRouter } from "next/navigation";
 
 const FingerfoodIcon = [
   "/Image/finger_food-Basic.png",
@@ -19,14 +20,41 @@ const CheckIcon = () => (
   </svg>
 );
 
-const plans = [
-  { key: "basic", bestseller: false },
-  { key: "classic", bestseller: true },
-  { key: "premium", bestseller: false },
+const menuGroups = [
+  {
+    key: "starters",
+    icon: 0,
+    bestseller: false,
+    categories: ["Warme Vorspeisen", "Salate", "Suppen", "Beilagen", "Brote"],
+  },
+  {
+    key: "maincourse",
+    icon: 1,
+    bestseller: true,
+    categories: [
+      "Spezialitäten vom Huhn",
+      "Spezialitäten vom Lamm",
+      "Fisch- und Garnelen Spezialitäten",
+      "Vegetarische Spezialitäten",
+      "Biryani Reis",
+    ],
+  },
+  {
+    key: "specials",
+    icon: 2,
+    bestseller: false,
+    categories: ["Tandoori Khajana", "Ganesha Special Thali ", "Beliebt", "Dumplings "],
+  },
 ];
 
 export default function FingerfoodSection() {
   const { t } = useTranslation();
+  const router = useRouter();
+
+  const handleSelectFood = (group) => {
+    const encoded = encodeURIComponent(JSON.stringify(group.categories));
+    router.push(`/restaurant?group=${group.key}&categories=${encoded}`);
+  };
 
   return (
     <section className="w-full bg-[#f6f4fb] py-14 px-4 md:px-10 lg:px-16">
@@ -40,37 +68,35 @@ export default function FingerfoodSection() {
         </p>
       </div>
 
-      {/* Choose text */}
       <p className="text-center font-semibold text-gray-800 text-sm md:text-base mb-2">
         {t("fingerfood.choose")}
       </p>
 
-      {/* Delivery text */}
       <p className="text-center text-gray-500 text-sm md:text-base max-w-2xl mx-auto mb-12">
         {t("fingerfood.delivery")}
       </p>
 
-      {/* Cards */}
+      {/* 3 Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-        {plans.map(({ key, bestseller }, index) => (
+        {menuGroups.map(({ key, icon, bestseller, categories }) => (
           <div
             key={key}
             className="relative bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 overflow-hidden flex flex-col"
           >
-            {/* Bestseller Badge — only on Classic (index 1) */}
+            {/* Bestseller Badge */}
             {bestseller && (
               <div className="absolute top-3 right-3 z-10">
                 <span className="bg-[#E8533A] text-white text-xs font-semibold px-3 py-1 rounded-md">
-                  Bestseller
+                  {t("fingerfood.bestseller")}
                 </span>
               </div>
             )}
 
-            {/* Icon Area — mint green bg same as screenshot for all cards */}
+            {/* Icon */}
             <div className="bg-[#f1f0fa] flex items-center justify-center py-8">
               <img
-                src={FingerfoodIcon[index]}
-                alt={key}
+                src={FingerfoodIcon[icon]}
+                alt={t(`fingerfood.${key}.title`)}
                 className="w-36 h-36 object-contain"
               />
             </div>
@@ -90,30 +116,26 @@ export default function FingerfoodSection() {
                 <div className="flex items-start gap-2">
                   <CheckIcon />
                   <span className="text-sm text-gray-700">
-                    {t(`fingerfood.${key}.items`)}
+                    {t(`fingerfood.${key}.feature1`)}
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckIcon />
                   <span className="text-sm text-gray-700">
-                    {t(`fingerfood.${key}.dishes`)}
+                    {t(`fingerfood.${key}.feature2`)}
                   </span>
                 </div>
               </div>
 
-              {/* Pricing */}
               <div className="mt-auto">
-                <p className="text-xl font-bold text-gray-900">
-                  {t(`fingerfood.${key}.price`)}
-                </p>
-                <p className="text-xs text-gray-400 mb-1">
-                  {t("fingerfood.exclVat")}
-                </p>
                 <p className="text-sm text-gray-500 mb-4">
-                  {t("fingerfood.minimum")}
+                  {categories.length} {t("fingerfood.categoriesAvailable")}
                 </p>
 
-                <button className="w-full bg-[#5A35B5] hover:bg-[#7e5dd1] text-white font-semibold py-3 rounded-xl transition-colors duration-200 text-sm">
+                <button
+                  onClick={() => handleSelectFood({ key, categories })}
+                  className="w-full bg-[#5A35B5] hover:bg-[#7e5dd1] text-white font-semibold py-3 rounded-xl transition-colors duration-200 text-sm"
+                >
                   {t("fingerfood.button")}
                 </button>
               </div>

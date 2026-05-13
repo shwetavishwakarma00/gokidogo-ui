@@ -137,38 +137,35 @@
   },
   
   "fingerfood": {
-    "title": "Fingerfood Menüs",
-    "subtitle": "Kalte Fingerfood-Häppchen, serviert auf Einwegplatten aus nachhaltigem Material.",
-    "choose": "Wählen Sie vier, fünf oder sechs Häppchen pro Person.",
-    "delivery": "Lieferung, Aufbau, Reinigung und Abholung kostenlos deutschlandweit! Getränke, Equipment und Personal optional.",
-    "exclVat": "zzgl. MwSt.",
-    "minimum": "Mindestens 15 Personen",
-    "button": "Essen auswählen",
+  "title": "Fingerfood Menüs",
+  "subtitle": "Kalte Fingerfood-Häppchen, serviert auf Einwegplatten aus nachhaltigem Material.",
+  "choose": "Wählen Sie vier, fünf oder sechs Häppchen pro Person.",
+  "delivery": "Lieferung, Aufbau, Reinigung und Abholung kostenlos deutschlandweit!",
+  "exclVat": "zzgl. MwSt.",
+  "minimum": "Mindestens 15 Personen",
+  "button": "Essen auswählen",
+  "bestseller": "Bestseller",
+  "categoriesAvailable": "Kategorien verfügbar",
 
-    "basic": {
-      "title": "Fingerfood Basic",
-      "desc": "Einfach, schnell & günstig – Wählen Sie aus einer Basis-Auswahl von 4 Fingerfood-Favoriten",
-      "items": "4 Fingerfood",
-      "dishes": "23 Gerichte verfügbar",
-      "price": "Ab €16,90 / Person"
-    },
-
-    "classic": {
-      "title": "Fingerfood Classic",
-      "desc": "Ausgewogen & beliebt – Wählen Sie aus einer klassischen Auswahl von 5 Fingerfood-Favoriten",
-      "items": "5 Fingerfood",
-      "dishes": "42 Gerichte verfügbar",
-      "price": "Ab €21,90 / Person"
-    },
-
-    "premium": {
-      "title": "Fingerfood Premium",
-      "desc": "Vielfältig & exklusiv – Wählen Sie aus einer Premium-Auswahl von 6 Fingerfood-Favoriten",
-      "items": "6 Fingerfood",
-      "dishes": "53 Gerichte verfügbar",
-      "price": "Ab €28,90 / Person"
-    }
+  "starters": {
+    "title": "Vorspeisen & Beilagen",
+    "desc": "Suppen, Salate, Brote & leichte Gerichte",
+    "feature1": "Suppen, Salate, Brote",
+    "feature2": "Pakoras & Beilagen"
   },
+  "maincourse": {
+    "title": "Hauptgerichte",
+    "desc": "Hähnchen, Lamm, Meeresfrüchte & Veggie Currys",
+    "feature1": "Hähnchen, Lamm, Fisch, Veggie",
+    "feature2": "Biryani inklusive"
+  },
+  "specials": {
+    "title": "Chef's Specials",
+    "desc": "Tandoori, Thali & Signature-Gerichte",
+    "feature1": "Tandoori & Thali",
+    "feature2": "Signature-Gerichte"
+  }
+},
   "menu": {
   "loading": "Laden...",
   "moreInfo": "Mehr Informationen",

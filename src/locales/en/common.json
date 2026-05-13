@@ -143,38 +143,35 @@
   },
 
   "fingerfood": {
-    "title": "Fingerfood Menus",
-    "subtitle": "Cold fingerfood bites, served on disposable platters made from sustainable material.",
-    "choose": "Select four, five or six bites per person.",
-    "delivery": "Delivery, setup, cleaning and collection free of charge, nationwide! Drinks, equipment and staff optional.",
-    "exclVat": "Excl. VAT",
-    "minimum": "15 Person Minimum",
-    "button": "Select Food",
+  "title": "Fingerfood Menus",
+  "subtitle": "Cold fingerfood bites, served on disposable platters made from sustainable material.",
+  "choose": "Select four, five or six bites per person.",
+  "delivery": "Delivery, setup, cleaning and collection free of charge, nationwide! Drinks, equipment and staff optional.",
+  "exclVat": "Excl. VAT",
+  "minimum": "15 Person Minimum",
+  "button": "Select Food",
+  "bestseller": "Bestseller",
+  "categoriesAvailable": "categories available",
 
-    "basic": {
-      "title": "Fingerfood Basic",
-      "desc": "Simple, fast & inexpensive – Choose from basic selection 4 finger food favorites",
-      "items": "4 Fingerfood",
-      "dishes": "23 dishes available",
-      "price": "From €16.90 / person"
-    },
-
-    "classic": {
-      "title": "Fingerfood Classic",
-      "desc": "Balanced & familiar – Choose from a classic selection 5 finger food favorites",
-      "items": "5 Fingerfood",
-      "dishes": "42 dishes available",
-      "price": "From €21.90 / person"
-    },
-
-    "premium": {
-      "title": "Fingerfood Premium",
-      "desc": "Varied & broad – Choose from premium selection of 6 finger food favorites",
-      "items": "6 Fingerfood",
-      "dishes": "53 dishes available",
-      "price": "From €28.90 / person"
-    }
+  "starters": {
+    "title": "Starters & Sides",
+    "desc": "Soups, salads, breads & light bites",
+    "feature1": "Soups, Salads, Breads",
+    "feature2": "Pakoras & Sides"
   },
+  "maincourse": {
+    "title": "Main Course",
+    "desc": "Chicken, Lamb, Seafood & Veg curries",
+    "feature1": "Chicken, Lamb, Fish, Veg",
+    "feature2": "Biryani included"
+  },
+  "specials": {
+    "title": "Chef's Specials",
+    "desc": "Tandoori, Thali & signature dishes",
+    "feature1": "Tandoori & Thali",
+    "feature2": "Signature dishes"
+  }
+},
   "menu": {
   "loading": "Loading...",
   "moreInfo": "More information",
