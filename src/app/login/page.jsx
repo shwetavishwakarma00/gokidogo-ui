@@ -11,9 +11,8 @@ import {
   getUserProfile,
   forgotPassword,
 } from "@/app/redux/features/authSlice";
-
+import { toast } from 'sonner'
 import { motion, AnimatePresence } from "framer-motion";
-import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 
@@ -241,7 +240,6 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-200 via-white to-purple-300 px-4 text-black">
-      <Toaster />
 
       <div className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl bg-white rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10">
         <AnimatePresence mode="wait">
